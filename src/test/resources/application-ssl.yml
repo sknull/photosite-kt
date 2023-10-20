@@ -1,0 +1,10 @@
+security:
+  require-ssl: true
+
+server:
+  port: 443
+  ssl:
+    key-store: file:E:/Programmierung/Web/Raspberrypi/website/keystore.p12
+    keyStoreType: PKCS12
+    keyAlias: springboot
+    key-store-password: foodlyboo

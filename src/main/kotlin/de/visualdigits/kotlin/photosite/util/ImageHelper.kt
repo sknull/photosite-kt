@@ -1,0 +1,42 @@
+package de.visualdigits.kotlin.photosite.util
+
+import de.visualdigits.kotlin.photosite.model.common.ImageFile
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import net.coobird.thumbnailator.Thumbnails
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
+import java.io.File
+import java.io.IOException
+import java.nio.file.Paths
+
+@Component
+class ImageHelper {
+
+    private val log = LoggerFactory.getLogger(ImageHelper::class.java)
+
+    fun getThumbnail(siteConfig: SiteConfigHolder, image: ImageFile): String? {
+        val site = siteConfig.getSite()
+        val pagetreePath = site.rootFolder?.let { Paths.get(it, site.resourcesRoot, "pagetree") }
+        val imageFile: File = image.file
+        val sourceImageFilePath = Paths.get(imageFile.absolutePath)
+        val relativePath = pagetreePath?.relativize(sourceImageFilePath).toString()
+        val thumbnailFile = site.thumbnailCacheFolder?.let  { Paths.get(it, relativePath).toFile() }
+        val thumbnailFolder = thumbnailFile?.getParentFile()
+        if (thumbnailFolder?.exists() != true) {
+            if (thumbnailFolder?.mkdirs() != true) {
+                log.error("Could not create thumbnail folder '$thumbnailFolder'")
+            }
+        }
+        if (thumbnailFile?.exists() != true) {
+            try {
+                Thumbnails.of(imageFile)
+                    .size(128, 128)
+                    .keepAspectRatio(true)
+                    .toFile(thumbnailFile)
+            } catch (e: IOException) {
+                log.error("Could note create thumbnail for image '" + imageFile.absolutePath + "'", e)
+            }
+        }
+        return thumbnailFile?.let { siteConfig.getRelativeResourcePath(it) }
+    }
+}
