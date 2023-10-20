@@ -10,3 +10,5 @@ build/
 .project
 .settings
 **/dependency-reduced-pom.xml
+**/*.log
+
