@@ -18,7 +18,7 @@ object ImageHelper {
         val imageFile: File = image.file
         val sourceImageFilePath = Paths.get(imageFile.absolutePath)
         val relativePath = pagetreePath?.relativize(sourceImageFilePath).toString()
-        val thumbnailFile = site.thumbnailCacheFolder?.let  { Paths.get(it, relativePath).toFile() }
+        val thumbnailFile = site.thumbnailCacheFolder?.let  { Paths.get(File(it).canonicalPath, relativePath).toFile() }
         val thumbnailFolder = thumbnailFile?.getParentFile()
         if (thumbnailFolder?.exists() != true) {
             if (thumbnailFolder?.mkdirs() != true) {

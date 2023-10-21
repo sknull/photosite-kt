@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--$:comments-->
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="keywords" th:content="${metaKeywords}"/>
+    <meta name="description" th:content="${metaDescription}"/>
+    <meta property="og:site_name" th:content="${title}" />
+    <meta property="og:title" th:content="${title}" />
+    <meta property="og:description" th:content="${metaDescription}" />
+    <meta property="og:url" th:content="${siteUrl}+'/'" />
+    <meta property="og:image" th:content="'/resources/theme/'+${theme}+'/images/bg_hamburg.jpg'" />
+    <link rel="shortcut icon" href="/resources/favicon.ico" type="image/x-icon" />
+    <title th:text="${title}"></title>
+    <link rel="alternate" type="application/rss+xml" th:title="${title}+' Fotofeed'" th:href="${siteUrl}+'/rss.xml'" />
+    <span th:utext="${head}" th:remove="tag"></span>
+    <link th:href="'/resources/theme/'+${theme}+'/css/style_screen.css'" type="text/css" rel="stylesheet"/>
+  </head>
+  <body>
+    <div id="main">
+      <header id="header" th:class="'header_'+${language}" itemscope="itemscope" itemtype="http://schema.org/WPHeader">
+        <section id="header_top"><a th:href="'/?lang='+${language}" title="Home"></a></section><!-- header_top -->
+        <section id="breadcrumb">
+          <nav th:utext="${breadcrumb}">
+          </nav>
+        </section><!-- breadcrumb -->
+        <section id="language">
+          <nav role="navigation" itemscope="itemscope" itemtype="http://schema.org/availableLanguage" th:utext="${languageSelector}">
+          </nav>
+        </section><!-- language_selector -->
+        <section id="rss_feed"><a href="/rss.xml" target="_blank">news-feed</a></section><!-- rss_feed -->
+      </header><!-- header -->
+      <section id="sidebar" class="scrollable" itemscope="itemscope" itemtype="http://schema.org/WPSideBar">
+        <section id="navi_main" class="navi">
+          <nav role="navigation" itemscope="itemscope" itemtype="http://schema.org/SiteNavigationElement">
+            <span th:utext="${naviMain}" th:remove="tag"/>
+          </nav>
+        </section><!-- navi_main -->
+        <section id="navi_sub" class="navi" th:utext="${naviSub}">
+        </section><!-- navi_sub -->
+        <section id="site_links" th:utext="${naviStatic}">
+        </section><!-- site_links -->
+      </section><!-- sidebar -->
+      <main id="content" class="scrollable" th:utext="${content}">
+      </main>
+    </div><!-- main -->
+  </body>
+</html>

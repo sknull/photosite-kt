@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<page>
+    <i18n>
+        <lang lang="de" name="Impressum" title="Impressum"/>
+        <lang lang="en" name="Imprint" title="Imprint"/>
+    </i18n>
+</page>

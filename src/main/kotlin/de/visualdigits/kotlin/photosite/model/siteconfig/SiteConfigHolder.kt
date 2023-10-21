@@ -34,7 +34,7 @@ class SiteConfigHolder {
 
     @PostConstruct
     fun postConstruct() {
-        val rootFolder = rootDirectory.substring("file:".length)
+        val rootFolder = File(rootDirectory.substring("file:".length)).canonicalPath
         siteConfig = SiteConfig.load(Paths.get(rootFolder, "resources", "config.xml").toFile())
         siteConfig?.site?.rootFolder = rootFolder
 
@@ -55,6 +55,7 @@ class SiteConfigHolder {
         log.info("#### initializing page tree...")
         pageTree = PageTree(
             pageDirectory = pageDirectory,
+            nameFilter = { name -> "pagetree" == name || (!name.startsWith("#") && !name.startsWith("-")) },
             dump = true
         )
         log.info("#### initialized page tree")

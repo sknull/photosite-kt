@@ -24,7 +24,7 @@ abstract class AbstractXmlBaseController : AbstractBaseController() {
 
     protected fun determinePageTree(): PageTree {
         return PageTree(
-            siteConfigHolder.siteConfig?.site?.rootFolder?.let { rf -> Paths.get(rf, "resources", "pagetree").toFile() }
+            pageDirectory = siteConfigHolder.siteConfig?.site?.rootFolder?.let { rf -> Paths.get(rf, "resources", "pagetree").toFile() }
         )
     }
 

@@ -38,9 +38,9 @@ class PageController : AbstractBaseController() {
             model.addAttribute("naviMain", PageHelper.createMainNavigation(siteConfig, pageTree, currentPage, language))
             model.addAttribute("naviSub", PageHelper.createSubNavigation(siteConfig, pageTree, language))
             val fullPageTreeStatic = PageTree(
-                siteConfigHolder.pageDirectory,
-                { name -> "pagetree" == name || name.startsWith("-") },
-                false
+                pageDirectory = siteConfigHolder.pageDirectory,
+                nameFilter = { name -> "pagetree" == name || name.startsWith("-") },
+                dump = false
             )
             val naviStatic = PageHelper.createStaticNavigation(siteConfig, fullPageTreeStatic, language)
             model.addAttribute("naviStatic", naviStatic)

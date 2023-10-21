@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<siteconfig>
+    <site
+        theme="dark"
+        siteTitle="My Photo Blog"
+        siteSubTitle="A Spring Boot Demo"
+		    protocol="https://"
+        domain="my.little.domain"
+        resourcesRoot="resources"
+        rootFolder="./.."
+        languages="de, en"
+        languageDefault="de"
+		thumbnailCacheFolder="./src/test/resources/website/thumbnails">
+        <naviMainName>
+			<label>
+				<lang lang="de" name="S E I T E N"/>
+				<lang lang="en" name="P A G E S"/>
+			</label>
+        </naviMainName>
+        <naviSub>
+            <naviName rootFolder="Photos" numberOfEntries="20">
+                <label>
+                    <lang lang="de" name="N E U E   F O T O S"/>
+                    <lang lang="en" name="N E W   P H O T O S"/>
+                </label>
+            </naviName>
+            <naviName rootFolder="Arts" numberOfEntries="5">
+                <label>
+                    <lang lang="de" name="N E U E   G R A F I K"/>
+                    <lang lang="en" name="N E W   A R T S"/>
+                </label>
+            </naviName>
+        </naviSub>
+    </site>
+    <sitelinks>
+        <link href="/Impressum">
+            <label>
+                <lang lang="de" name="Impressum"/>
+                <lang lang="en" name="Imprint"/>
+            </label>
+        </link>
+        <link href="/Datenschutz">
+            <label>
+                <lang lang="de" name="Datenschutz"/>
+                <lang lang="en" name="Data-Protection"/>
+            </label>
+        </link>
+        <link href="/Links">
+            <label>
+                <lang lang="de" name="Links"/>
+                <lang lang="en" name="Links"/>
+            </label>
+        </link>
+        <link href="/sitemap-index.xml">
+            <label>
+                <lang lang="de" name="Sitemap"/>
+                <lang lang="en" name="Sitemap"/>
+            </label>
+        </link>
+    </sitelinks>
+    <!--googleApiKeys
+            mapsJavascript="AIzaSyD9iTRgTG5StCJJUbYOQont5e1LbNaZBaU" /-->
+    <plugins>
+        <plugin
+            name="Rotator"
+            package="photosite.plugin.gallery.Rotator" />
+        <!-- https://lokeshdhakar.com/projects/lightbox2/ -->
+        <plugin
+            name="LightBox"
+            package="photosite.plugin.gallery.LightBox"
+
+            resizeDuration="600"
+            fadeDuration="600"
+            imageFadeDuration="1200"
+            wrapAround="true" />
+        <!-- https://sachinchoolur.github.io/lightgallery.js/ -->
+        <plugin
+            name="LightGallery"
+            package="photosite.plugin.gallery.LightGallery"
+
+            mode="'lg-fade'"
+            speed="2000"
+            pause="5000"
+            showThumbByDefault="false"
+            animateThumb="true"
+            progressBar="false"
+            download="false" />
+        <plugin
+            name="PhotoStory"
+            package="photosite.plugin.gallery.PhotoStory"
+
+            mode="'lg-fade'"
+            speed="2000"
+            pause="5000"
+            animateThumb="false"
+            showThumbByDefault="false"
+            progressBar="false"
+            download="false" />
+        <plugin
+            name="Enlite"
+            package="photosite.plugin.lighting.Enlite" />
+    </plugins>
+</siteconfig>

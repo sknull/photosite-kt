@@ -94,7 +94,8 @@ object PageHelper {
         siteConfig
             .site
             .naviSub
-            ?.forEach { ns -> sb.append(createSubNavigationHtml(siteConfig, pageTree, ns, language)) }
+            ?.forEach { ns ->
+                sb.append(createSubNavigationHtml(siteConfig, pageTree, ns, language)) }
         sb.append("        ")
         return sb.toString()
     }
@@ -120,8 +121,8 @@ object PageHelper {
         naviSub: NaviName,
         language: String
     ): String {
-        val rootPath = naviSub.rootFolder
-        val pages = pageTree.lastModifiedPages(naviSub.numberOfEntries)
+        val rootPath = naviSub.rootFolder!!
+        val pages = pageTree.lastModifiedPages(rootPath, naviSub.numberOfEntries)
         val sb = StringBuilder()
         val label = naviSub.label
         val title = label?.getTitle(language)

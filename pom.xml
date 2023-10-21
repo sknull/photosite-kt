@@ -127,18 +127,6 @@
       <version>${version.jackson}</version>
     </dependency>
 
-    <!-- logging -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-reload4j</artifactId>
-      <version>${version.slf4j}</version>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${version.log4j}</version>
-    </dependency>
-
     <!-- exif and iptc data -->
     <dependency> <!-- https://github.com/drewnoakes/metadata-extractor -->
       <groupId>com.drewnoakes</groupId>

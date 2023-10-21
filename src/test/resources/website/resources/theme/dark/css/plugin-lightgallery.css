@@ -1,0 +1,143 @@
+/*
+ * Overrides for the lightgallery script.
+ */
+
+#lightgallery {
+	margin-top: 20px;
+}
+
+#lightgallery a {
+	position: relative;
+	overflow: hidden;
+	display: inline-block;
+	width: 145px;
+	height: 145px;
+	margin: 4px 2px;
+
+	border-top: 2px solid #444;
+	border-left: 2px solid #444;
+	border-right: 2px solid #222;
+	border-bottom: 2px solid #222;
+	border-radius: 6px;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+#lightgallery img.thumb {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+	border-top: 2px solid #222;
+	border-left: 2px solid #222;
+	border-right: 2px solid #444;
+	border-bottom: 2px solid #444;
+	border-radius: 3px;
+}
+
+#lightgallery a:active,
+#lightgallery a:hover,
+#lightgallery a:active img.thumb,
+#lightgallery a:hover img.thumb {
+	border: 2px solid #63a0eb;
+}
+
+#lightgallery a:active,
+#lightgallery a:hover {
+	background-color: rgba(30, 73, 126, 0.5);
+	box-shadow: 0 0 10px #63a0eb;
+}
+
+.lg-outer .lg-thumb-item.active,
+.lg-outer .lg-thumb-item:hover {
+  border-color: #63a0eb;
+}
+
+.lg-progress-bar .lg-progress {
+  background-color: #63a0eb;
+}
+
+.lg-backdrop {
+    background-color: #000;
+}
+
+.lightgallery-caption {
+	height: 100px;
+}
+
+.lightgallery-teaser {
+}
+
+.lightgallery-teaser p {
+	margin: 0px 0px 10px 0px;
+}
+
+.lightgallery-teaser a {
+}
+
+.lg-sub-html {
+	padding: 5px;
+}
+
+.lg-outer .lg-image {
+	border: 2px solid #666;
+	object-fit: contain;
+}
+
+.lg-sub-html .camera-infos-grid {
+	display: grid;
+	grid-template-columns: 1fr 2fr 2fr;
+	grid-template-rows: 1fr;
+	grid-template-areas:
+		"camera-infos-caption camera-infos-exposure camera-infos-lens";
+	grid-column-gap: 5px;
+	grid-row-gap: 5px;
+	width: 80%;
+	margin: 0px auto 0px auto;
+}
+
+.lg-sub-html .camera-infos-1row {
+	display: inline-block;
+	width: 1024px;
+	margin: 0px auto 0px auto;
+}
+
+.info-box {
+	padding: 5px 10px;
+
+	color: #000000;
+	font-size: 12pt;
+}
+
+.lg-sub-html {
+	visibility: hidden;
+}
+
+@media (min-height: 850px) {
+	.lg-sub-html {
+		visibility: visible;
+	}
+}
+
+.lg-sub-html .camera-infos #camera-infos-caption {
+	grid-area: camera-infos-caption;
+
+	background: #efece1; /* Old browsers */
+}
+
+.lg-sub-html .camera-infos #camera-infos-exposure {
+	grid-area: camera-infos-exposure;
+
+	background: #d9d5b9; /* Old browsers */
+}
+
+.lg-sub-html .camera-infos #camera-infos-lens {
+	grid-area: camera-infos-lens;
+
+	background: #bacdd8; /* Old browsers */
+}
