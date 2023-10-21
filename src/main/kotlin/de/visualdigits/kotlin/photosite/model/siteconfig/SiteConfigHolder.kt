@@ -2,11 +2,11 @@ package de.visualdigits.kotlin.photosite.model.siteconfig
 
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
 import de.visualdigits.kotlin.photosite.util.DomainCertificatesHelper
-import de.visualdigits.kotlin.photosite.util.ProfileHelper
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.file.Paths
@@ -25,7 +25,7 @@ class SiteConfigHolder {
     lateinit var certbotUri: String
 
     @Autowired
-    lateinit var profileHelper: ProfileHelper
+    lateinit var envvironment: Environment
 
     var siteConfig: SiteConfig? = null
     var site: Site? = null
@@ -42,11 +42,15 @@ class SiteConfigHolder {
         site = siteConfig?.site
         siteUrl = site?.protocol + site?.domain
         pageDirectory = site?.rootFolder?.let { Paths.get(it, "resources", "pagetree").toFile() }
-        if (!profileHelper.isProfileActive("checkCerts")) {
+        if (!isProfileActive("checkCerts")) {
             reloadPageTree()
         } else {
             log.info("#### checkCerts profile is active - omitting pagetree initialization")
         }
+    }
+
+    fun isProfileActive(profile: String): Boolean {
+        return envvironment.activeProfiles.contains(profile)
     }
 
     fun reloadPageTree() {
