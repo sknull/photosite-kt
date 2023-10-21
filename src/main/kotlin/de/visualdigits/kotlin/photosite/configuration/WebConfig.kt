@@ -44,7 +44,7 @@ open class WebConfig : WebMvcConfigurer {
             rootDirectory.replace("file:", ""),
             "resources",
             "theme",
-            siteConfig.getSite().theme,
+            siteConfig.site?.theme,
             "templates"
         ).toString().replace("\\", "/") + "/"
         templateResolver.isCacheable = false

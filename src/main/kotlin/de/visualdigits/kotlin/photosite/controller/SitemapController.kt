@@ -20,9 +20,9 @@ class SitemapController : AbstractXmlBaseController() {
     @GetMapping(value = ["/sitemap-index.xml"])
     @ResponseBody
     fun sitemapIndex(response: HttpServletResponse) {
-        val site: Site = pageTreeHolder.siteConfig.getSite()
+        val site = siteConfigHolder.siteConfig?.site
         val pageTree =
-            PageTree(pageFactory, Paths.get(site.rootFolder!!, site.resourcesRoot, "pagetree").toFile())
+            PageTree(Paths.get(site?.rootFolder!!, site.resourcesRoot, "pagetree").toFile())
         val lastModified = isoDate(pageTree.lastModified())
         val siteUrl: String = site.protocol + site.domain
         var body = "  <sitemap>\n"
@@ -49,8 +49,8 @@ class SitemapController : AbstractXmlBaseController() {
     @GetMapping(value = ["/sitemap-site.xml"])
     @ResponseBody
     fun sitemapSite(response: HttpServletResponse) {
-        val site: Site = pageTreeHolder.siteConfig.getSite()
-        val pageTree = PageTree(pageFactory, Paths.get(site.rootFolder!!, "resources", "pagetree").toFile())
+        val site = siteConfigHolder.siteConfig?.site
+        val pageTree = PageTree(Paths.get(site?.rootFolder!!, "resources", "pagetree").toFile())
         val lastModified = isoDate(pageTree.lastModified())
         val siteUrl: String = site.protocol + site.domain
         var body = "  <url>\n"
@@ -72,8 +72,8 @@ class SitemapController : AbstractXmlBaseController() {
     @ResponseBody
     fun sitemapPage(response: HttpServletResponse) {
         log.info("Rendering page site map...")
-        val site: Site = pageTreeHolder.siteConfig.getSite()
-        val siteUrl: String = site.protocol + site.domain
+        val site = siteConfigHolder.siteConfig?.site
+        val siteUrl: String = site?.protocol + site?.domain
         val sb = StringBuilder()
         determinePages().forEach { page ->
             sb
@@ -103,9 +103,9 @@ class SitemapController : AbstractXmlBaseController() {
     @ResponseBody
     fun sitemapPost(response: HttpServletResponse) {
         log.info("Rendering post site map...")
-        val site = pageTreeHolder.siteConfig.getSite()
-        val siteUrl = site.protocol + site.domain
-        val lang = site.languageDefault!!
+        val site = siteConfigHolder.siteConfig?.site
+        val siteUrl = site?.protocol + site?.domain
+        val lang = site?.languageDefault!!
         val sb = StringBuilder()
         determinePages().forEach { page ->
             sb
@@ -117,7 +117,7 @@ class SitemapController : AbstractXmlBaseController() {
                 .append(isoDate(page.lastModifiedTimestamp))
                 .append("</lastmod>\n")
             for (imageFile in page.images) {
-                val imagePath = pageTreeHolder.siteConfig.getRelativeResourcePath(imageFile.file)
+                val imagePath = siteConfigHolder.siteConfig?.getRelativeResourcePath(imageFile.file)
                 sb
                     .append("    <image:image>\n")
                     .append("      <image:loc>")
@@ -150,10 +150,10 @@ class SitemapController : AbstractXmlBaseController() {
 
     @GetMapping(value = ["/sitemap.xsl"], produces = ["text/xsl"])
     fun sitemapXsl(@RequestParam(name = "page") page: String, model: Model): String {
-        val site: Site = pageTreeHolder.siteConfig.getSite()
-        val language = site.languageDefault
-        val theme: String = site.theme!!
-        val siteUrl: String = site.protocol + site.domain
+        val site = siteConfigHolder.siteConfig?.site
+        val language = site?.languageDefault
+        val theme = site?.theme!!
+        val siteUrl = site.protocol + site.domain
         model.addAttribute("theme", theme)
         model.addAttribute("siteUrl", siteUrl)
         model.addAttribute("language", language)

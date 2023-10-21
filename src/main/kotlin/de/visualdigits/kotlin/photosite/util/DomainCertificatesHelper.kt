@@ -352,7 +352,7 @@ class DomainCertificatesHelper {
         // Find a single http-01 challenge
         val challenge = auth.findChallenge(Http01Challenge::class.java)
             ?: throw IllegalStateException("Found no " + Http01Challenge.TYPE + " challenge, don't know what to do...")
-        val siteRootDirectory: String = siteConfig.getSite().rootFolder?.replace("file:", "")?:""
+        val siteRootDirectory: String = siteConfig.site?.rootFolder?.replace("file:", "")?:""
         val challengeDirectory = Paths.get(siteRootDirectory, ".well-known", "acme-challenge").toFile()
         check(!(!challengeDirectory.exists() && !challengeDirectory.mkdirs())) { "Could not create challenge directory: $challengeDirectory" }
         val challengeFile = File(challengeDirectory, challenge.token)

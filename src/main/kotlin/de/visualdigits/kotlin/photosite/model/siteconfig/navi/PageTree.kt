@@ -2,7 +2,6 @@ package de.visualdigits.kotlin.photosite.model.siteconfig.navi
 
 import de.visualdigits.kotlin.photosite.model.page.Page
 import de.visualdigits.kotlin.photosite.model.page.PageByDateComparator
-import de.visualdigits.kotlin.photosite.model.page.PageFactory
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.OffsetDateTime
@@ -10,7 +9,6 @@ import java.util.*
 import kotlin.math.min
 
 class PageTree(
-    pageFactory: PageFactory,
     pageDirectory: File? = null,
     nameFilter: ((s: String) -> Boolean)? = null,
     dump: Boolean = false
@@ -19,7 +17,7 @@ class PageTree(
 
     val pages: MutableMap<String, Page> = mutableMapOf()
 
-    var rootPage: Page? = readTree(pageFactory, pageDirectory, nameFilter, dump)
+    var rootPage: Page? = readTree(pageDirectory, nameFilter, dump)
 
     fun clear() {
         pages.clear()
@@ -85,16 +83,14 @@ class PageTree(
     }
 
     private fun readTree(
-        pageFactory: PageFactory,
         pageDirectory: File?,
         nameFilter: ((s: String) -> Boolean)? = null,
         dump: Boolean = false
     ): Page? {
-        return readTree(pageFactory, pageDirectory, LinkedList(), nameFilter, dump)
+        return readTree(pageDirectory, LinkedList(), nameFilter, dump)
     }
 
     private fun readTree(
-        pageFactory: PageFactory,
         pageDirectory: File?,
         path: LinkedList<String>,
         nameFilter: ((s: String) -> Boolean)? = null,
@@ -106,7 +102,7 @@ class PageTree(
         var page: Page? = null
         if (nameFilter == null || name?.let { n -> nameFilter(n) } == true) {
             if (descriptorFile.exists()) {
-                page = pageFactory.load(pageDirectory, descriptorFile)
+                page = Page.load(descriptorFile)
             } else if ("thumbs" != name) {
                 page = Page()
                 page.name = name
@@ -123,7 +119,7 @@ class PageTree(
             pageDirectory
                 ?.listFiles { obj: File -> obj.isDirectory() }
                 ?.forEach { directory ->
-                    val child = readTree(pageFactory, directory, path, nameFilter, dump)
+                    val child = readTree(directory, path, nameFilter, dump)
                     path.removeLast()
                     if (child != null) {
                         child.parent = page

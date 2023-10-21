@@ -1,7 +1,6 @@
 package de.visualdigits.kotlin.photosite.controller
 
-import de.visualdigits.kotlin.photosite.model.page.PageFactory
-import de.visualdigits.kotlin.photosite.model.page.PageTreeHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -22,10 +21,7 @@ abstract class AbstractBaseController {
     private val log = LoggerFactory.getLogger(AbstractBaseController::class.java)
 
     @Autowired
-    protected lateinit var pageFactory: PageFactory
-
-    @Autowired
-    protected lateinit var pageTreeHolder: PageTreeHolder
+    protected lateinit var siteConfigHolder: SiteConfigHolder
 
 
     companion object {
@@ -90,7 +86,7 @@ abstract class AbstractBaseController {
     }
 
     protected fun getResource(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         response: HttpServletResponse,
         resourceFolder: String,
         src: String
@@ -110,12 +106,12 @@ abstract class AbstractBaseController {
         }
     }
 
-    protected fun resourceFileExists(siteConfig: SiteConfigHolder, resourceFolder: String, src: String): Boolean {
+    protected fun resourceFileExists(siteConfig: SiteConfig, resourceFolder: String, src: String): Boolean {
         val file = getResourceFile(siteConfig, resourceFolder, src)
         return file?.isFile() == true && file.exists()
     }
 
-    protected fun getResourceFile(siteConfig: SiteConfigHolder, resourceFolder: String, src: String): File? {
+    protected fun getResourceFile(siteConfig: SiteConfig, resourceFolder: String, src: String): File? {
         return siteConfig.getAbsoluteResource(resourceFolder, src)
     }
 

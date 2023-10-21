@@ -1,7 +1,6 @@
 package de.visualdigits.kotlin.photosite.model.page
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
@@ -13,7 +12,7 @@ import de.visualdigits.kotlin.photosite.model.common.ImageFile
 import de.visualdigits.kotlin.photosite.model.common.Language
 import de.visualdigits.kotlin.photosite.model.common.sort.Sort
 import de.visualdigits.kotlin.photosite.model.common.sort.SortDir
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -22,7 +21,6 @@ import java.time.ZoneOffset
 import java.util.*
 import java.util.function.Consumer
 import java.util.regex.Pattern
-import java.util.stream.Collectors
 
 @JsonIgnoreProperties(
     "log",
@@ -62,6 +60,23 @@ class Page(
             .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
             .build()
+
+        fun load(descriptorFile: File): Page? {
+            val directory = descriptorFile.parentFile
+            return try {
+                val page = MAPPER.readValue(
+                    descriptorFile,
+                    Page::class.java
+                )
+                page.file = descriptorFile
+                page.name = directory.getName()
+                page.loadExternalContent(directory)
+                page.loadImages(directory)
+                page
+            } catch (e: IOException) {
+                throw IllegalArgumentException("Could not parse page file: $descriptorFile", e)
+            }
+        }
 
         private fun obfuscateText(html: String): String {
             var h = html
@@ -148,23 +163,6 @@ class Page(
             script += "</script>\n"
             return script
         }
-
-        fun load(pageFile: File): Page? {
-            val directory = pageFile.parentFile
-            return try {
-                val page = MAPPER.readValue(
-                    pageFile,
-                    Page::class.java
-                )
-                page.file = pageFile
-                page.name = directory.getName()
-                page.loadExternalContent(directory)
-                page.loadImages(directory)
-                page
-            } catch (e: IOException) {
-                throw IllegalArgumentException("Could not parse page file: $pageFile", e)
-            }
-        }
     }
 
     override fun toString(): String {
@@ -222,7 +220,7 @@ class Page(
         childs.clear()
     }
 
-    override fun getHead(siteConfig: SiteConfigHolder): String {
+    override fun getHead(siteConfig: SiteConfig): String {
         var head: String = ""
         if (content != null) {
             head = content.getHead(siteConfig)
@@ -231,7 +229,7 @@ class Page(
     }
 
     override fun getHtml(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         page: Page,
         language: String
     ): String {

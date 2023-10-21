@@ -3,13 +3,9 @@ package de.visualdigits.kotlin.photosite.controller
 import de.visualdigits.kotlin.photosite.model.page.Page
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
 import java.nio.file.Paths
-import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.stream.Collectors
 
 
 abstract class AbstractXmlBaseController : AbstractBaseController() {
@@ -28,8 +24,7 @@ abstract class AbstractXmlBaseController : AbstractBaseController() {
 
     protected fun determinePageTree(): PageTree {
         return PageTree(
-            pageFactory,
-            pageTreeHolder.siteConfig.getSite().rootFolder?.let { rf -> Paths.get(rf, "resources", "pagetree").toFile() }
+            siteConfigHolder.siteConfig?.site?.rootFolder?.let { rf -> Paths.get(rf, "resources", "pagetree").toFile() }
         )
     }
 

@@ -4,7 +4,7 @@ import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import de.visualdigits.kotlin.photosite.model.page.Page
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import de.visualdigits.kotlin.photosite.util.ImageHelper
 import java.io.File
 import java.text.SimpleDateFormat
@@ -24,8 +24,8 @@ class LightGallery(
 
     private val imageHelper: ImageHelper = ImageHelper()
 
-    override fun getHead(siteConfig: SiteConfigHolder): String {
-        val theme = siteConfig.getSite().theme
+    override fun getHead(siteConfig: SiteConfig): String {
+        val theme = siteConfig.site.theme
         return """<link href="/resources/theme/$theme/plugins/lightgallery/css/lightgallery.min.css" rel="stylesheet" type="text/css"/>
     <link href="/resources/theme/$theme/css/plugin-photostory.css" rel="stylesheet" type="text/css"/>
     <link href="/resources/theme/$theme/css/plugin-lightgallery.css" rel="stylesheet" type="text/css"/>
@@ -35,7 +35,7 @@ class LightGallery(
     <script src="/resources/theme/$theme/plugins/lightgallery/js/lg-autoplay.min.js" type="text/javascript"></script>"""
     }
 
-    override fun getHtml(siteConfig: SiteConfigHolder, page: Page, language: String): String {
+    override fun getHtml(siteConfig: SiteConfig, page: Page, language: String): String {
         val sb =
             StringBuilder("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
         page.images

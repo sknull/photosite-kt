@@ -4,8 +4,7 @@ import de.visualdigits.kotlin.photosite.model.common.Label
 import de.visualdigits.kotlin.photosite.model.common.Language
 import de.visualdigits.kotlin.photosite.model.page.Page
 import de.visualdigits.kotlin.photosite.model.page.PageByNameComparator
-import de.visualdigits.kotlin.photosite.model.page.PageFactory
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.NaviName
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
 import org.apache.commons.text.StringEscapeUtils
@@ -20,11 +19,11 @@ class PageHelper {
         private val PAGE_BY_NAME_COMPARATOR = PageByNameComparator()
     }
 
-    fun createPagetreeStatic(pageFactory: PageFactory, fullPageTreeStatic: PageTree): PageTree {
+    fun createPagetreeStatic(fullPageTreeStatic: PageTree): PageTree {
         val rootPage = Page()
         rootPage.name = "pagetree"
         rootPage.path = "pagetree"
-        val pageTreeStatic = PageTree(pageFactory)
+        val pageTreeStatic = PageTree()
         pageTreeStatic.add(rootPage)
         fullPageTreeStatic
             .rootPage
@@ -43,7 +42,7 @@ class PageHelper {
     }
 
     fun createMainNavigation(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         pageTree: PageTree,
         currentPage: String,
         language: String
@@ -51,7 +50,7 @@ class PageHelper {
         var pages = pageTree.rootPage?.childs?: listOf()
         pages = pages.filter { p: Page -> p.childs.isNotEmpty() }
         pages = pages.sortedWith(PAGE_BY_NAME_COMPARATOR)
-        val label = siteConfig.getSite().naviMain?.label?.getTitle(language)
+        val label = siteConfig.site.naviMain?.label?.getTitle(language)
         val html = StringBuilder()
         html.append("          <nav role=\"navigation\" itemscope=\"itemscope\" itemtype=\"http://schema.org/SiteNavigationElement\">\n")
         html.append("            <span class=\"sidebar-title\">").append(label).append("</span>\n")
@@ -65,7 +64,7 @@ class PageHelper {
     }
 
     private fun appendPage(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         currentPage: String,
         language: String,
         html: StringBuilder,
@@ -84,7 +83,7 @@ class PageHelper {
     }
 
     private fun appendChildPages(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         currentPage: String,
         page: Page,
         language: String,
@@ -107,11 +106,11 @@ class PageHelper {
         }
     }
 
-    fun createSubNavigation(siteConfig: SiteConfigHolder, pageTree: PageTree, language: String): String {
+    fun createSubNavigation(siteConfig: SiteConfig, pageTree: PageTree, language: String): String {
         val sb = StringBuilder()
             .append("\n")
         siteConfig
-            .getSite()
+            .site
             .naviSub
             ?.forEach { ns -> sb.append(createSubNavigationHtml(siteConfig, pageTree, ns, language)) }
         sb.append("        ")
@@ -119,7 +118,7 @@ class PageHelper {
     }
 
     private fun createSubNavigationHtml(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         pageTree: PageTree,
         naviSub: NaviName,
         language: String
@@ -151,7 +150,7 @@ class PageHelper {
         return sb.toString()
     }
 
-    fun createStaticNavigation(siteConfig: SiteConfigHolder, pageTreeStatic: PageTree, language: String): String {
+    fun createStaticNavigation(siteConfig: SiteConfig, pageTreeStatic: PageTree, language: String): String {
         val i18n: MutableList<Language> = ArrayList<Language>()
         i18n.add(Language("de", "", "S I T E L I N K S", ""))
         i18n.add(Language("en", "", "S I T E L I N K S", ""))
@@ -168,7 +167,7 @@ ${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}      
     }
 
     fun createContent(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         page: String?,
         model: Model,
         language: String,
@@ -193,7 +192,7 @@ ${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}      
     }
 
     private fun createPageLink(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         page: Page,
         language: String?,
         level: Int,
@@ -215,7 +214,7 @@ ${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}      
             .append(" itemprop=\"name\">")
         page.icon?.let { i ->
             html.append("<div class=\"nav-icon\"><img src=\"/resources/theme/")
-                .append(siteConfig.getSite().theme)
+                .append(siteConfig.site.theme)
                 .append("/images/icons/")
                 .append(i)
                 .append(".png\"/></div>")

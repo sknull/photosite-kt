@@ -3,7 +3,7 @@ package de.visualdigits.kotlin.photosite.model.page.teaser
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import de.visualdigits.kotlin.photosite.model.common.HtmlSnippet
 import de.visualdigits.kotlin.photosite.model.page.Page
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 
 
 class Teaser(
@@ -21,7 +21,7 @@ class Teaser(
         }
     }
 
-    override fun getHtml(siteConfig: SiteConfigHolder, page: Page, language: String): String {
+    override fun getHtml(siteConfig: SiteConfig, page: Page, language: String): String {
         val sb = StringBuilder()
         if (googleMaps != null) {
             sb.append(googleMaps.getHtml(siteConfig, page, language))

@@ -27,15 +27,15 @@ class MaintenanceController : AbstractBaseController() {
     fun checkCerts(
         @RequestParam(value = "forceUpdate", required = false, defaultValue = "false") forceUpdate: Boolean
     ) {
-        val expiryDate: LocalDateTime = pageTreeHolder.siteConfig.maintainServerCertificate(forceUpdate)
+        val expiryDate: LocalDateTime = siteConfigHolder.maintainServerCertificate(forceUpdate)
         log.info("#### new certificate is expiring $expiryDate - restartig serer now")
         Application.restart("ssl")
     }
 
     @GetMapping(value = ["/maintenance/createThumbnails"])
     fun createThumbnails(httpResponse: HttpServletResponse) {
-        val site: Site = pageTreeHolder.siteConfig.getSite()
-        site.rootFolder
+        val site = siteConfigHolder.siteConfig?.site
+        site?.rootFolder
             ?.let { rf ->
                 createThumbnails(Paths.get(rf, site.resourcesRoot, "pagetree").toFile())
             }
@@ -44,7 +44,7 @@ class MaintenanceController : AbstractBaseController() {
 
     @GetMapping(value = ["/maintenance/reloadPageTree"])
     fun reloadPageTree(httpResponse: HttpServletResponse) {
-        pageTreeHolder.reloadPageTree()
+        siteConfigHolder.reloadPageTree()
         httpResponse.sendRedirect("/")
     }
 
@@ -53,7 +53,7 @@ class MaintenanceController : AbstractBaseController() {
         rootFolder.listFiles { file: File ->
             file.isFile() && file.getName().lowercase(Locale.getDefault()).endsWith(".jpg")
         }?.forEach { imageFile ->
-                imageHelper.getThumbnail(pageTreeHolder.siteConfig, ImageFile(imageFile))
+                imageHelper.getThumbnail(siteConfigHolder.siteConfig!!, ImageFile(imageFile))
             }
 
         // recurse into sub folders

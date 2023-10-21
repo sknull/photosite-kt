@@ -1,8 +1,10 @@
 package de.visualdigits.kotlin.photosite.model.siteconfig
 
 import de.visualdigits.kotlin.photosite.model.common.Link
+import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
 import de.visualdigits.kotlin.photosite.model.siteconfig.plugin.Plugin
 import de.visualdigits.kotlin.photosite.util.DomainCertificatesHelper
+import de.visualdigits.kotlin.photosite.util.ProfileHelper
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,19 +29,44 @@ class SiteConfigHolder {
     @Autowired
     lateinit var domainCertificatesHelper: DomainCertificatesHelper
 
+    @Autowired
+    lateinit var profileHelper: ProfileHelper
+
     var siteConfig: SiteConfig? = null
+    var site: Site? = null
+    var siteUrl: String? = null
+    var pageDirectory: File? = null
+    var pageTree: PageTree? = null
 
     @PostConstruct
     fun postConstruct() {
         val rootFolder = rootDirectory.substring("file:".length)
         siteConfig = SiteConfig.load(Paths.get(rootFolder, "resources", "config.xml").toFile())
         siteConfig?.site?.rootFolder = rootFolder
+
+        site = siteConfig?.site
+        siteUrl = site?.protocol + site?.domain
+        pageDirectory = site?.rootFolder?.let { Paths.get(it, "resources", "pagetree").toFile() }
+        if (!profileHelper.isProfileActive("checkCerts")) {
+            reloadPageTree()
+        } else {
+            log.info("#### checkCerts profile is active - omitting pagetree initialization")
+        }
+    }
+
+    fun reloadPageTree() {
+        log.info("#### initializing page tree...")
+        pageTree = PageTree(
+            pageDirectory = pageDirectory,
+            dump = true
+        )
+        log.info("#### initialized page tree")
     }
 
     fun maintainServerCertificate(forceUpdate: Boolean): LocalDateTime {
         val alias = "springboot"
         val password = "foodlyboo"
-        val rootFolder = getSite().rootFolder?.let { File(it) }
+        val rootFolder = site?.rootFolder?.let { File(it) }
         val targetKeystore = File(rootFolder, "keystore.p12")
         var expiryDate: LocalDateTime = domainCertificatesHelper.determineExpiryDate(targetKeystore, alias, password)
         val updateDate = expiryDate.minus(30, ChronoUnit.DAYS)
@@ -60,52 +87,5 @@ class SiteConfigHolder {
             log.info("Server certificate is valid until $expiryDate")
         }
         return expiryDate
-    }
-
-    fun setSite(site: Site) {
-        siteConfig?.site = site
-    }
-
-    fun setSiteLinks(siteLinks: List<Link>) {
-        siteConfig?.siteLinks?.clear()
-        siteConfig?.siteLinks?.addAll(siteLinks)
-    }
-
-    fun setPlugins(plugins: List<Plugin>) {
-        siteConfig?.plugins?.clear()
-        siteConfig?.plugins?.addAll(plugins)
-    }
-
-    fun setPluginsMap(pluginsMap: Map<String, Plugin>) {
-        siteConfig?.pluginsMap?.clear()
-        siteConfig?.pluginsMap?.putAll(pluginsMap)
-    }
-
-    fun getSite(): Site {
-        return siteConfig?.site!!
-    }
-
-    fun getSiteLinks(): List<Link> {
-        return siteConfig?.siteLinks?:listOf()
-    }
-
-    fun getPlugins(): List<Plugin> {
-        return siteConfig?.plugins?:listOf()
-    }
-
-    fun getPluginsMap(): Map<String, Plugin> {
-        return siteConfig?.pluginsMap?:mapOf()
-    }
-
-    fun getPluginConfig(pluginName: String): Plugin? {
-        return siteConfig?.getPluginConfig(pluginName)
-    }
-
-    fun getRelativeResourcePath(absoluteResource: File): String? {
-        return siteConfig?.getRelativeResourcePath(absoluteResource)
-    }
-
-    fun getAbsoluteResource(resourceFolder: String, relativeResourePath: String): File? {
-        return siteConfig?.getAbsoluteResource(resourceFolder, relativeResourePath)
     }
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import de.visualdigits.kotlin.photosite.model.common.HtmlSnippet
 import de.visualdigits.kotlin.photosite.model.common.sort.Sort
 import de.visualdigits.kotlin.photosite.model.page.teaser.Teaser
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 
 class Content(
     @JacksonXmlProperty(isAttribute = true) var plugin: String? = null,
@@ -25,7 +25,7 @@ class Content(
     val paragraphs: List<Paragraph>? = null
 ) : HtmlSnippet {
 
-    override fun getHead(siteConfig: SiteConfigHolder): String {
+    override fun getHead(siteConfig: SiteConfig): String {
         return plugin?.let {
             siteConfig.getPluginConfig(it)
                 ?.getHead(siteConfig)
@@ -33,7 +33,7 @@ class Content(
         }?:""
     }
 
-    override fun getHtml(siteConfig: SiteConfigHolder, page: Page, language: String): String {
+    override fun getHtml(siteConfig: SiteConfig, page: Page, language: String): String {
         return plugin?.let {
             siteConfig.getPluginConfig(it)
                 ?.getHtml(siteConfig, page, language)

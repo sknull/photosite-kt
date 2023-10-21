@@ -25,16 +25,16 @@ class RssController : AbstractXmlBaseController() {
     fun rssFeed(
         @RequestParam(name = "lang", required = false, defaultValue = "") lang: String, response: HttpServletResponse
     ): String {
-        val site = pageTreeHolder.siteConfig.getSite()
+        val site = siteConfigHolder.siteConfig?.site
         val items = mutableListOf<Item>()
         val pageTree = determinePageTree()
         val lastModified = pageTree.lastModified()
         val feed = Rss(
             channels = listOf(Channel(
-                title = site.siteTitle,
-                generator = site.siteTitle,
-                link = site.protocol + site.domain,
-                description = site.siteSubTitle,
+                title = site?.siteTitle,
+                generator = site?.siteTitle,
+                link = site?.protocol + site?.domain,
+                description = site?.siteSubTitle,
                 language = "de",
                 copyright = "Stephan Knull",
                 items = items,
@@ -54,12 +54,12 @@ class RssController : AbstractXmlBaseController() {
                         imageName = image.name
                     }
                     val thumbUrl =
-                        site.protocol + site.domain + "/" + imageHelper.getThumbnail(pageTreeHolder.siteConfig, image)
+                        site?.protocol + site?.domain + "/" + imageHelper.getThumbnail(siteConfigHolder.siteConfig!!, image)
                     val teaser = page.content?.teaser
                     var description =
                         "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"
                     if (teaser != null) {
-                        val text: String = teaser.getHtml(pageTreeHolder.siteConfig, page, lang)
+                        val text: String = teaser.getHtml(siteConfigHolder.siteConfig!!, page, lang)
                         if (StringUtils.isNotBlank(text)) {
                             description += text.trim { it <= ' ' } + "<br/>\n"
                         }
@@ -70,7 +70,7 @@ class RssController : AbstractXmlBaseController() {
                     title = page.name,
                     author = "Stephan Knull",
                     category = pagePath,
-                    link = "${site.protocol + site.domain}/$pagePath?mode=rss&amp;lang=$lang",
+                    link = "${site?.protocol + site?.domain}/$pagePath?mode=rss&amp;lang=$lang",
                     pubDate = page.lastModifiedTimestamp,
                     description = description
                 ))

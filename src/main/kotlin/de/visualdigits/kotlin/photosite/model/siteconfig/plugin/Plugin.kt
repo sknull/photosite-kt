@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import de.visualdigits.kotlin.photosite.model.common.HtmlSnippet
 import de.visualdigits.kotlin.photosite.model.page.Page
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "package")
 @JsonSubTypes(
@@ -21,7 +21,7 @@ open class Plugin(
     @JacksonXmlProperty(localName = "package") val clazz: String
 ) : HtmlSnippet {
 
-    override fun getHtml(siteConfig: SiteConfigHolder, page: Page, language: String): String {
+    override fun getHtml(siteConfig: SiteConfig, page: Page, language: String): String {
         val mdContent: String? = page.mdContent
         val htmlContent: String? = page.htmlContent
         return if (mdContent?.isNotBlank() == true) {

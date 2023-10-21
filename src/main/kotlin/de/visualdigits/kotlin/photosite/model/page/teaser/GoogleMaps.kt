@@ -3,7 +3,7 @@ package de.visualdigits.kotlin.photosite.model.page.teaser
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import de.visualdigits.kotlin.photosite.model.common.HtmlSnippet
 import de.visualdigits.kotlin.photosite.model.page.Page
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import org.apache.commons.text.StringEscapeUtils
 
 
@@ -30,7 +30,7 @@ class GoogleMaps(
     val zoom: String? = null
 ) : HtmlSnippet {
 
-    override fun getHtml(siteConfig: SiteConfigHolder, page: Page, language: String): String {
+    override fun getHtml(siteConfig: SiteConfig, page: Page, language: String): String {
         val sb = StringBuilder()
         val url = "https://www.google.com/maps/embed?pb=" +
                 "!1m18!1m12!1m3" +

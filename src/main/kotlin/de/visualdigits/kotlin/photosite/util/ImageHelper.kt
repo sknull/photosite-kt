@@ -1,6 +1,7 @@
 package de.visualdigits.kotlin.photosite.util
 
 import de.visualdigits.kotlin.photosite.model.common.ImageFile
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
 import net.coobird.thumbnailator.Thumbnails
 import org.slf4j.LoggerFactory
@@ -14,8 +15,8 @@ class ImageHelper {
 
     private val log = LoggerFactory.getLogger(ImageHelper::class.java)
 
-    fun getThumbnail(siteConfig: SiteConfigHolder, image: ImageFile): String? {
-        val site = siteConfig.getSite()
+    fun getThumbnail(siteConfig: SiteConfig, image: ImageFile): String? {
+        val site = siteConfig.site
         val pagetreePath = site.rootFolder?.let { Paths.get(it, site.resourcesRoot, "pagetree") }
         val imageFile: File = image.file
         val sourceImageFilePath = Paths.get(imageFile.absolutePath)

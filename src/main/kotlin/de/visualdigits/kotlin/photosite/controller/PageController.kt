@@ -25,30 +25,29 @@ class PageController : AbstractBaseController() {
         request: HttpServletRequest,
         response: HttpServletResponse
     ): String? {
-        val currentPage: String = pageHelper.determinePage(getRequestUri(request))
+        val currentPage = pageHelper.determinePage(getRequestUri(request))
         val requestUri = getRequestUri(request)
-        val siteConfig: SiteConfigHolder = pageTreeHolder.siteConfig
+        val siteConfig = siteConfigHolder.siteConfig!!
         return if (resourceFileExists(siteConfig, "", requestUri)) {
             getResource(siteConfig, response, "", requestUri)
             null
         } else {
-            val site = pageTreeHolder.site!!
-            val pageTree = pageTreeHolder.pageTree!!
+            val site = siteConfigHolder.site!!
+            val pageTree = siteConfigHolder.pageTree!!
             val language = lang?:site.languageDefault!!
             val theme = site.theme!!
             model.addAttribute("theme", theme)
-            model.addAttribute("siteUrl", pageTreeHolder.siteUrl)
+            model.addAttribute("siteUrl", siteConfigHolder.siteUrl)
             model.addAttribute("language", language)
             model.addAttribute("title", site.siteTitle)
             model.addAttribute("naviMain", pageHelper.createMainNavigation(siteConfig, pageTree, currentPage, language))
             model.addAttribute("naviSub", pageHelper.createSubNavigation(siteConfig, pageTree, language))
             val fullPageTreeStatic = PageTree(
-                pageFactory,
-                pageTreeHolder.pageDirectory,
+                siteConfigHolder.pageDirectory,
                 { name -> "pagetree" == name || name.startsWith("-") },
                 false
             )
-            val pageTreeStatic = pageHelper.createPagetreeStatic(pageFactory, fullPageTreeStatic)
+            val pageTreeStatic = pageHelper.createPagetreeStatic(fullPageTreeStatic)
             val naviStatic = pageHelper.createStaticNavigation(siteConfig, pageTreeStatic, language)
             model.addAttribute("naviStatic", naviStatic)
             pageHelper.createContent(siteConfig, currentPage, model, language, pageTree, fullPageTreeStatic)
