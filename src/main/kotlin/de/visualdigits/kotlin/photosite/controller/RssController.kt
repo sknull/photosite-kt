@@ -17,9 +17,6 @@ import java.io.File
 @Controller
 class RssController : AbstractXmlBaseController() {
 
-    @Autowired
-    private lateinit var imageHelper: ImageHelper
-
     @GetMapping(value = ["/rss.xml"], produces = ["application/xml"])
     @ResponseBody
     fun rssFeed(
@@ -54,7 +51,7 @@ class RssController : AbstractXmlBaseController() {
                         imageName = image.name
                     }
                     val thumbUrl =
-                        site?.protocol + site?.domain + "/" + imageHelper.getThumbnail(siteConfigHolder.siteConfig!!, image)
+                        site?.protocol + site?.domain + "/" + ImageHelper.getThumbnail(siteConfigHolder.siteConfig!!, image)
                     val teaser = page.content?.teaser
                     var description =
                         "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"

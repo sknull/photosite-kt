@@ -2,16 +2,13 @@ package de.visualdigits.kotlin.photosite.util
 
 import de.visualdigits.kotlin.photosite.model.common.ImageFile
 import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
 import net.coobird.thumbnailator.Thumbnails
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 import java.io.File
 import java.io.IOException
 import java.nio.file.Paths
 
-@Component
-class ImageHelper {
+object ImageHelper {
 
     private val log = LoggerFactory.getLogger(ImageHelper::class.java)
 

@@ -22,8 +22,6 @@ class LightGallery(
     clazz = "de.visualdigits.kotlin.photosite.model.siteconfig.plugin.LightGallery"
 ) {
 
-    private val imageHelper: ImageHelper = ImageHelper()
-
     override fun getHead(siteConfig: SiteConfig): String {
         val theme = siteConfig.site.theme
         return """<link href="/resources/theme/$theme/plugins/lightgallery/css/lightgallery.min.css" rel="stylesheet" type="text/css"/>
@@ -39,11 +37,11 @@ class LightGallery(
         val sb =
             StringBuilder("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
         page.images
-            ?.forEach { imageFile ->
+            .forEach { imageFile ->
                 val image: File = imageFile.file
                 val metadata = imageFile.metadata
                 val imagePath = siteConfig.getRelativeResourcePath(image)
-                val thumbPath = imageHelper.getThumbnail(siteConfig, imageFile)
+                val thumbPath = ImageHelper.getThumbnail(siteConfig, imageFile)
                 val exifDir =
                     metadata?.getFirstDirectoryOfType(ExifIFD0Directory::class.java)
                 val exifSubDir =

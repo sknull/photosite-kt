@@ -12,12 +12,9 @@ import org.springframework.stereotype.Component
 import org.springframework.ui.Model
 import java.util.*
 
-@Component
-class PageHelper {
+object PageHelper {
 
-    companion object {
-        private val PAGE_BY_NAME_COMPARATOR = PageByNameComparator()
-    }
+    private val PAGE_BY_NAME_COMPARATOR = PageByNameComparator()
 
     fun createPagetreeStatic(fullPageTreeStatic: PageTree): PageTree {
         val rootPage = Page()

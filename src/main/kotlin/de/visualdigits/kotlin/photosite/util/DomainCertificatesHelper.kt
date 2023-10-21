@@ -32,20 +32,17 @@ import java.time.temporal.ChronoUnit
 /**
  * Helper class to obtain PEM key pairs for the given domains and convert them into a java compatible PKCS12 keystore.
  */
-@Component
-class DomainCertificatesHelper {
+object DomainCertificatesHelper {
 
     private val log = LoggerFactory.getLogger(DomainCertificatesHelper::class.java)
 
-    companion object {
-        const val SERVER_URI_STAGE = "https://acme-staging-v02.api.letsencrypt.org/directory"
-        const val SERVER_URI_PRODUCTION = "https://acme-v02.api.letsencrypt.org/directory"
-        const val FILE_DOMAIN_KEY = "domain.key"
-        const val FILE_DOMAIN_CHAIN_CRT = "domain-chain.crt"
-        private const val FILE_DOMAIN_CSR = "domain.csr"
-        private const val FILE_USER_KEY = "user.key"
-        private const val RETRY_ATTEMPTS = 3
-    }
+    const val SERVER_URI_STAGE = "https://acme-staging-v02.api.letsencrypt.org/directory"
+    const val SERVER_URI_PRODUCTION = "https://acme-v02.api.letsencrypt.org/directory"
+    const val FILE_DOMAIN_KEY = "domain.key"
+    const val FILE_DOMAIN_CHAIN_CRT = "domain-chain.crt"
+    private const val FILE_DOMAIN_CSR = "domain.csr"
+    private const val FILE_USER_KEY = "user.key"
+    private const val RETRY_ATTEMPTS = 3
 
     fun determineExpiryDate(keystoreFile: File?, alias: String?, password: String): LocalDateTime {
         val expiryDate: LocalDateTime

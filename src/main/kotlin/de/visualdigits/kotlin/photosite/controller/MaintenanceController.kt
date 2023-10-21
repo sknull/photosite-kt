@@ -2,11 +2,9 @@ package de.visualdigits.kotlin.photosite.controller
 
 import de.visualdigits.kotlin.photosite.Application
 import de.visualdigits.kotlin.photosite.model.common.ImageFile
-import de.visualdigits.kotlin.photosite.model.siteconfig.Site
 import de.visualdigits.kotlin.photosite.util.ImageHelper
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -19,9 +17,6 @@ import java.util.*
 class MaintenanceController : AbstractBaseController() {
 
     private val log = LoggerFactory.getLogger(MaintenanceController::class.java)
-
-    @Autowired
-    private lateinit var imageHelper: ImageHelper
 
     @GetMapping(value = ["/maintenance/checkCerts"])
     fun checkCerts(
@@ -53,8 +48,8 @@ class MaintenanceController : AbstractBaseController() {
         rootFolder.listFiles { file: File ->
             file.isFile() && file.getName().lowercase(Locale.getDefault()).endsWith(".jpg")
         }?.forEach { imageFile ->
-                imageHelper.getThumbnail(siteConfigHolder.siteConfig!!, ImageFile(imageFile))
-            }
+            ImageHelper.getThumbnail(siteConfigHolder.siteConfig!!, ImageFile(imageFile))
+        }
 
         // recurse into sub folders
         rootFolder

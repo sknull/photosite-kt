@@ -1,8 +1,6 @@
 package de.visualdigits.kotlin.photosite.model.siteconfig
 
-import de.visualdigits.kotlin.photosite.model.common.Link
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
-import de.visualdigits.kotlin.photosite.model.siteconfig.plugin.Plugin
 import de.visualdigits.kotlin.photosite.util.DomainCertificatesHelper
 import de.visualdigits.kotlin.photosite.util.ProfileHelper
 import jakarta.annotation.PostConstruct
@@ -25,9 +23,6 @@ class SiteConfigHolder {
 
     @Value("\${certbot.uri}")
     lateinit var certbotUri: String
-
-    @Autowired
-    lateinit var domainCertificatesHelper: DomainCertificatesHelper
 
     @Autowired
     lateinit var profileHelper: ProfileHelper
@@ -68,11 +63,11 @@ class SiteConfigHolder {
         val password = "foodlyboo"
         val rootFolder = site?.rootFolder?.let { File(it) }
         val targetKeystore = File(rootFolder, "keystore.p12")
-        var expiryDate: LocalDateTime = domainCertificatesHelper.determineExpiryDate(targetKeystore, alias, password)
+        var expiryDate: LocalDateTime = DomainCertificatesHelper.determineExpiryDate(targetKeystore, alias, password)
         val updateDate = expiryDate.minus(30, ChronoUnit.DAYS)
         if (forceUpdate || LocalDateTime.now().isAfter(updateDate)) {
             log.info("Server certificate will expire at $expiryDate days - updating now...")
-            domainCertificatesHelper.createCertificates(
+            DomainCertificatesHelper.createCertificates(
                 this,
                 certbotUri,
                 2048,
@@ -81,7 +76,7 @@ class SiteConfigHolder {
                 password,
                 targetKeystore
             )
-            expiryDate = domainCertificatesHelper.determineExpiryDate(targetKeystore, alias, password)
+            expiryDate = DomainCertificatesHelper.determineExpiryDate(targetKeystore, alias, password)
             log.info("Successfully updated server certificate, new certificate will be valid until $expiryDate")
         } else {
             log.info("Server certificate is valid until $expiryDate")
