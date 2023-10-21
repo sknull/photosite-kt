@@ -8,7 +8,6 @@ import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.NaviName
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
 import org.apache.commons.text.StringEscapeUtils
-import org.springframework.stereotype.Component
 import org.springframework.ui.Model
 import java.util.*
 

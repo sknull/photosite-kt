@@ -1,6 +1,6 @@
 package de.visualdigits.kotlin.photosite.util
 
-import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import org.apache.commons.io.IOUtils
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -15,7 +15,6 @@ import org.shredzone.acme4j.exception.AcmeException
 import org.shredzone.acme4j.util.CSRBuilder
 import org.shredzone.acme4j.util.KeyPairUtils
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -76,7 +75,7 @@ object DomainCertificatesHelper {
     }
 
     fun createCertificates(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         serverUri: String?,
         keySize: Int,
         rootDirectory: File?,
@@ -101,7 +100,7 @@ object DomainCertificatesHelper {
      * Domains to get a common certificate for
      */
     fun fetchCertificate(
-        siteConfig: SiteConfigHolder,
+        siteConfig: SiteConfig,
         serverUri: String?,
         domains: Collection<String?>?,
         rootDirectory: File?,
@@ -281,7 +280,7 @@ object DomainCertificatesHelper {
      * @param auth
      * [Authorization] to perform
      */
-    private fun authorize(siteConfig: SiteConfigHolder, auth: Authorization) {
+    private fun authorize(siteConfig: SiteConfig, auth: Authorization) {
         log.info("Authorization for domain {}", auth.identifier.getDomain())
 
         // The authorization is already valid. No need to process a challenge.
@@ -291,7 +290,6 @@ object DomainCertificatesHelper {
 
         // Find the desired challenge and prepare it.
         val challenge = httpChallenge(siteConfig, auth)
-            ?: throw IllegalStateException("No challenge found")
 
         // If the challenge is already verified, there's no need to execute it again.
         if (challenge.status == Status.VALID) {
@@ -345,11 +343,11 @@ object DomainCertificatesHelper {
      * [Authorization] to find the challenge in
      * @return [Challenge] to verify
      */
-    fun httpChallenge(siteConfig: SiteConfigHolder, auth: Authorization): Challenge {
+    fun httpChallenge(siteConfig: SiteConfig, auth: Authorization): Challenge {
         // Find a single http-01 challenge
         val challenge = auth.findChallenge(Http01Challenge::class.java)
             ?: throw IllegalStateException("Found no " + Http01Challenge.TYPE + " challenge, don't know what to do...")
-        val siteRootDirectory: String = siteConfig.site?.rootFolder?.replace("file:", "")?:""
+        val siteRootDirectory: String = siteConfig.site.rootFolder?.replace("file:", "")?:""
         val challengeDirectory = Paths.get(siteRootDirectory, ".well-known", "acme-challenge").toFile()
         check(!(!challengeDirectory.exists() && !challengeDirectory.mkdirs())) { "Could not create challenge directory: $challengeDirectory" }
         val challengeFile = File(challengeDirectory, challenge.token)

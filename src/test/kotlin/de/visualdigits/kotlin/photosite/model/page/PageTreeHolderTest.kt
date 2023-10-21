@@ -10,9 +10,8 @@ class PageTreeHolderTest {
     fun testPageTree() {
         val siteConfigHolder = SiteConfigHolder()
         siteConfigHolder.rootDirectory = "file:E:/Programmierung/www/webserver/www/website"
-        siteConfigHolder.site = siteConfigHolder.site
-        siteConfigHolder.siteUrl = siteConfigHolder.site?.protocol + siteConfigHolder.site?.domain
-        siteConfigHolder.pageDirectory = siteConfigHolder.site?.rootFolder?.let { Paths.get(it, "resources", "pagetree").toFile() }
+        siteConfigHolder.siteUrl = siteConfigHolder.siteConfig?.site?.protocol + siteConfigHolder.siteConfig?.site?.domain
+        siteConfigHolder.pageDirectory = siteConfigHolder.siteConfig?.site?.rootFolder?.let { Paths.get(it, "resources", "pagetree").toFile() }
 
         siteConfigHolder.reloadPageTree()
 

@@ -1,8 +1,6 @@
 package de.visualdigits.kotlin.photosite.model.common
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 
 @JsonIgnoreProperties("i18nMap")

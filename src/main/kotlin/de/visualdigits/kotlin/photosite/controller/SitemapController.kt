@@ -1,6 +1,5 @@
 package de.visualdigits.kotlin.photosite.controller
 
-import de.visualdigits.kotlin.photosite.model.siteconfig.Site
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.text.StringEscapeUtils

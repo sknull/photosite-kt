@@ -301,25 +301,27 @@ class Page(
         val sort = determineSort()
         if (sort.by == "manual") {
             val map = mutableMapOf<String, ImageFile>()
-            images?.forEach(Consumer { p: ImageFile -> map[p.file.getName()] = p })
+            images.forEach(Consumer { p: ImageFile -> map[p.file.getName()] = p })
             val sortedPages: MutableList<ImageFile> = ArrayList()
             sort.orderList.forEach { p ->
                 val imageFile = map[p]
                 if (imageFile != null) {
                     sortedPages.add(imageFile)
-                    images?.remove(imageFile)
+                    images.remove(imageFile)
                 }
             }
-            images?.let { sortedPages.addAll(it) }
-            images?.clear()
-            images?.addAll(sortedPages)
+            images.let { sortedPages.addAll(it) }
+            images.clear()
+            images.addAll(sortedPages)
         } else {
             when (sort.by) {
-                "name" -> images?.sortBy { it.name }
-                "mtime" -> images?.sortBy { it.date }
+                "name" -> images.sortBy { it.name }
+                "mtime" -> images.sortBy { it.date }
                 else -> {}
             }
-            if (sort.dir == SortDir.desc) { images?.reverse() }
+            if (sort.dir == SortDir.desc) {
+                images.reverse()
+            }
         }
     }
 

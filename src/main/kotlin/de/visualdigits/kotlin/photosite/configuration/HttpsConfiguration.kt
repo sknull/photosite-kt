@@ -30,7 +30,7 @@ open class HttpsConfiguration {
         return tomcat
     }
 
-    private fun redirectConnector(): Connector? {
+    private fun redirectConnector(): Connector {
         val connector = Connector("org.apache.coyote.http11.Http11NioProtocol")
         connector.scheme = "http"
         connector.port = 80

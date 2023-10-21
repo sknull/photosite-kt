@@ -10,7 +10,7 @@ class Rotator : Plugin(
 ) {
     override fun getHtml(siteConfig: SiteConfig, page: Page, language: String): String {
         val sb = StringBuilder()
-        val images: List<ImageFile> = page.images?: listOf()
+        val images: List<ImageFile> = page.images
         val n = (images.size * Math.random()).toInt()
         if (images.size > n) {
             siteConfig

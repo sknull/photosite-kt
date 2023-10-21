@@ -9,8 +9,8 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
-import java.util.function.Function
 import java.util.function.BiFunction
+import java.util.function.Function
 
 class Rfc1123Deserializer : InstantDeserializer<OffsetDateTime>(
     OffsetDateTime::class.java,

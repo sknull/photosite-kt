@@ -2,8 +2,6 @@ package de.visualdigits.kotlin.photosite.model.common.sort
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import java.util.*
-import java.util.stream.Collectors
 
 
 @JsonIgnoreProperties("orderList")

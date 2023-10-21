@@ -40,7 +40,7 @@ abstract class AbstractBaseController {
         return uri
     }
 
-    protected fun encodeUrl(response: HttpServletResponse, pagePath: String): String? {
+    protected fun encodeUrl(response: HttpServletResponse, pagePath: String): String {
         var pp = pagePath
         val url = pp
         try {

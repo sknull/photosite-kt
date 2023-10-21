@@ -22,7 +22,7 @@ open class WebConfig : WebMvcConfigurer {
     private lateinit var rootDirectory: String
 
     @Autowired
-    private lateinit var siteConfig: SiteConfigHolder
+    private lateinit var siteConfigHolder: SiteConfigHolder
 
     //    @Bean
     //    @Description("Thymeleaf template resolver serving HTML 5")
@@ -44,7 +44,7 @@ open class WebConfig : WebMvcConfigurer {
             rootDirectory.replace("file:", ""),
             "resources",
             "theme",
-            siteConfig.site?.theme,
+            siteConfigHolder.siteConfig?.site?.theme,
             "templates"
         ).toString().replace("\\", "/") + "/"
         templateResolver.isCacheable = false
@@ -66,8 +66,8 @@ open class WebConfig : WebMvcConfigurer {
     @Description("Thymeleaf view resolver")
     open fun viewResolver(): ViewResolver {
         val viewResolver = ThymeleafViewResolver()
-        viewResolver.setTemplateEngine(templateEngine())
-        viewResolver.setCharacterEncoding("UTF-8")
+        viewResolver.templateEngine = templateEngine()
+        viewResolver.characterEncoding = "UTF-8"
         return viewResolver
     }
 

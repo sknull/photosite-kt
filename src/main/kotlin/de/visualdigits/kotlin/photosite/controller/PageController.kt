@@ -27,7 +27,7 @@ class PageController : AbstractBaseController() {
             getResource(siteConfig, response, "", requestUri)
             null
         } else {
-            val site = siteConfigHolder.site!!
+            val site = siteConfigHolder.siteConfig?.site!!
             val pageTree = siteConfigHolder.pageTree!!
             val language = lang?:site.languageDefault!!
             val theme = site.theme!!

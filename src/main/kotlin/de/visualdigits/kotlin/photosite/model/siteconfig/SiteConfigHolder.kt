@@ -28,7 +28,6 @@ class SiteConfigHolder {
     lateinit var envvironment: Environment
 
     var siteConfig: SiteConfig? = null
-    var site: Site? = null
     var siteUrl: String? = null
     var pageDirectory: File? = null
     var pageTree: PageTree? = null
@@ -39,9 +38,8 @@ class SiteConfigHolder {
         siteConfig = SiteConfig.load(Paths.get(rootFolder, "resources", "config.xml").toFile())
         siteConfig?.site?.rootFolder = rootFolder
 
-        site = siteConfig?.site
-        siteUrl = site?.protocol + site?.domain
-        pageDirectory = site?.rootFolder?.let { Paths.get(it, "resources", "pagetree").toFile() }
+        siteUrl = siteConfig?.site?.protocol + siteConfig?.site?.domain
+        pageDirectory = siteConfig?.site?.rootFolder?.let { Paths.get(it, "resources", "pagetree").toFile() }
         if (!isProfileActive("checkCerts")) {
             reloadPageTree()
         } else {
@@ -65,14 +63,14 @@ class SiteConfigHolder {
     fun maintainServerCertificate(forceUpdate: Boolean): LocalDateTime {
         val alias = "springboot"
         val password = "foodlyboo"
-        val rootFolder = site?.rootFolder?.let { File(it) }
+        val rootFolder = siteConfig?.site?.rootFolder?.let { File(it) }
         val targetKeystore = File(rootFolder, "keystore.p12")
         var expiryDate: LocalDateTime = DomainCertificatesHelper.determineExpiryDate(targetKeystore, alias, password)
         val updateDate = expiryDate.minus(30, ChronoUnit.DAYS)
         if (forceUpdate || LocalDateTime.now().isAfter(updateDate)) {
             log.info("Server certificate will expire at $expiryDate days - updating now...")
             DomainCertificatesHelper.createCertificates(
-                this,
+                siteConfig!!,
                 certbotUri,
                 2048,
                 rootFolder, listOf(siteConfig?.site?.domain),

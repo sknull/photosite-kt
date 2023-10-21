@@ -3,7 +3,6 @@ package de.visualdigits.kotlin.photosite.model.rss
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
@@ -41,7 +40,7 @@ data class Rss(
     fun unmarshall(rssFile: File): Rss? {
         var rssFeed: Rss? = null
         rssFeed = try {
-            Rss.xmlMapper.readValue(
+            xmlMapper.readValue(
                 rssFile,
                 Rss::class.java
             )
@@ -53,7 +52,7 @@ data class Rss(
 
     fun marshall(rssFile: File) {
         try {
-            Rss.xmlMapper.writeValue(rssFile, this)
+            xmlMapper.writeValue(rssFile, this)
         } catch (e: IOException) {
             throw IllegalStateException("Could not marshall to file: $rssFile", e)
         }
@@ -61,7 +60,7 @@ data class Rss(
 
     fun marshall(): String {
         return try {
-            Rss.xmlMapper.writeValueAsString(this)
+            xmlMapper.writeValueAsString(this)
         } catch (e: IOException) {
             throw IllegalStateException("Could not marshall to string", e)
         }
