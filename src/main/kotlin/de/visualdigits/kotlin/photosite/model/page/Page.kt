@@ -177,12 +177,10 @@ class Page(
     fun loadExternalContent(directory: File) {
         log.debug("Loading external content for directory: {}", directory)
         if (mdContent == null) {
-            val mdFile = File(directory, "page.md")
-            mdContent = readFile(mdFile)
+            mdContent = readFile(File(directory, "page.md"))
         }
         if (htmlContent == null) {
-            val htmlFile = File(directory, "page.html")
-            htmlContent = readFile(htmlFile)
+            htmlContent = readFile(File(directory, "page.html"))
         }
     }
 
@@ -338,30 +336,25 @@ class Page(
     }
 
     private fun readFile(file: File): String {
-        var contents = ""
-        if (file.exists()) {
-            contents = try {
+        return if (file.exists()) {
+            try {
                 file.readText()
             } catch (e: IOException) {
                 throw IllegalStateException("Could not read file contents: ", e)
             }
-        }
-        return contents
+        } else ""
     }
 
-    fun getNormalizedPath(): String {
-        var pagePath = path!!
-        val parts = pagePath.split("/").dropLastWhile { it.isEmpty() }
-        if (parts.size > 0 && "pagetree" == parts[0]) {
-            val lparts = parts.map { p: String ->
-                var s = p
+    fun normalizedPath(): String {
+        val parts = path
+            ?.split("/")
+            ?.dropLastWhile { it.isEmpty() }
+        return if ("pagetree" == parts?.firstOrNull()) {
+            parts.map { p ->
                 if (p.startsWith("-")) {
-                    s = p.substring(1)
-                }
-                s
-            }
-            pagePath = lparts.subList(1, lparts.size).joinToString("/")
-        }
-        return pagePath
+                    p.substring(1)
+                } else p
+            }.drop(1).joinToString("/")
+        } else path!!
     }
 }

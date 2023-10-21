@@ -39,7 +39,7 @@ class RssController : AbstractXmlBaseController() {
         )
         val pages = determinePages(pageTree, 10)
         pages.forEach { page ->
-            val pagePath = page.getNormalizedPath()
+            val pagePath = page.normalizedPath()
             if (StringUtils.isNotEmpty(pagePath)) {
                 val images: List<ImageFile> = page.images
                 val description = if (images.isNotEmpty()) {

@@ -15,20 +15,6 @@ object PageHelper {
 
     private val PAGE_BY_NAME_COMPARATOR = PageByNameComparator()
 
-    fun createPagetreeStatic(fullPageTreeStatic: PageTree): PageTree {
-        val rootPage = Page()
-        rootPage.name = "pagetree"
-        rootPage.path = "pagetree"
-        val pageTreeStatic = PageTree()
-        pageTreeStatic.add(rootPage)
-        fullPageTreeStatic
-            .rootPage
-            ?.childs
-            ?.filter { p -> p.name?.startsWith("-") == true }
-            ?.forEach(rootPage::addChild)
-        return pageTreeStatic
-    }
-
     fun determinePage(page: String): String {
         var p = page
         if (p.startsWith("/")) {
@@ -113,6 +99,21 @@ object PageHelper {
         return sb.toString()
     }
 
+    fun createStaticNavigation(siteConfig: SiteConfig, pageTreeStatic: PageTree, language: String): String {
+        val i18n: MutableList<Language> = ArrayList<Language>()
+        i18n.add(Language("de", "", "S I T E L I N K S", ""))
+        i18n.add(Language("en", "", "S I T E L I N K S", ""))
+        val label = Label()
+        label.i18n = i18n
+        label.initialize()
+        val naviName = NaviName(
+            "pagetree",
+            10,
+            label
+        )
+        return "${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}        "
+    }
+
     private fun createSubNavigationHtml(
         siteConfig: SiteConfig,
         pageTree: PageTree,
@@ -120,7 +121,7 @@ object PageHelper {
         language: String
     ): String {
         val rootPath = naviSub.rootFolder
-        val pages = pageTree.getLastModifiedPages(rootPath, naviSub.numberOfEntries)
+        val pages = pageTree.lastModifiedPages(naviSub.numberOfEntries)
         val sb = StringBuilder()
         val label = naviSub.label
         val title = label?.getTitle(language)
@@ -146,25 +147,9 @@ object PageHelper {
         return sb.toString()
     }
 
-    fun createStaticNavigation(siteConfig: SiteConfig, pageTreeStatic: PageTree, language: String): String {
-        val i18n: MutableList<Language> = ArrayList<Language>()
-        i18n.add(Language("de", "", "S I T E L I N K S", ""))
-        i18n.add(Language("en", "", "S I T E L I N K S", ""))
-        val label = Label()
-        label.i18n = i18n
-        label.initialize()
-        val naviName = NaviName(
-            "pagetree",
-            10,
-            label
-        )
-        return """
-${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}        """
-    }
-
     fun createContent(
         siteConfig: SiteConfig,
-        page: String?,
+        page: String,
         model: Model,
         language: String,
         vararg pageTrees: PageTree
@@ -174,7 +159,7 @@ ${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}      
             .find { obj: Any? -> Objects.nonNull(obj) }
             ?.let { pageDescriptor ->
                 val keywords = pageDescriptor.getKeywords().toMutableList()
-                val normalizedPath: String = pageDescriptor.getNormalizedPath()
+                val normalizedPath: String = pageDescriptor.normalizedPath()
                 keywords.addAll(normalizedPath.split("/").dropLastWhile { it.isEmpty() }
                     .map { s: String -> s.trim { it <= ' ' }.lowercase(Locale.getDefault())
                 })
@@ -225,7 +210,7 @@ ${createSubNavigationHtml(siteConfig, pageTreeStatic, naviName, language)}      
     }
 
     private fun determineStyleClass(page: Page, currentPage: String): String {
-        val pagePath: String = page.getNormalizedPath()
+        val pagePath: String = page.normalizedPath()
         val isFolder: Boolean = page.childs.isNotEmpty()
         val isCurrent = pagePath == "pagetree/$currentPage"
         val inCurrentPath = currentPage.contains(pagePath)

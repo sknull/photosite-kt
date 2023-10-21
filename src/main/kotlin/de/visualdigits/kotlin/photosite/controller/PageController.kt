@@ -42,8 +42,7 @@ class PageController : AbstractBaseController() {
                 { name -> "pagetree" == name || name.startsWith("-") },
                 false
             )
-            val pageTreeStatic = PageHelper.createPagetreeStatic(fullPageTreeStatic)
-            val naviStatic = PageHelper.createStaticNavigation(siteConfig, pageTreeStatic, language)
+            val naviStatic = PageHelper.createStaticNavigation(siteConfig, fullPageTreeStatic, language)
             model.addAttribute("naviStatic", naviStatic)
             PageHelper.createContent(siteConfig, currentPage, model, language, pageTree, fullPageTreeStatic)
             "pagetemplate"

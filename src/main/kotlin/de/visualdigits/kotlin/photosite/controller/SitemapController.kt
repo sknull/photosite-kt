@@ -80,7 +80,7 @@ class SitemapController : AbstractXmlBaseController() {
                 .append("    <loc>")
                 .append(siteUrl)
                 .append("/")
-                .append(StringEscapeUtils.escapeXml11(page.getNormalizedPath()))
+                .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
                 .append(isoDate(page.lastModifiedTimestamp))
@@ -110,7 +110,7 @@ class SitemapController : AbstractXmlBaseController() {
             sb
                 .append("  <url>\n").append("    <loc>")
                 .append(siteUrl).append("/")
-                .append(StringEscapeUtils.escapeXml11(page.getNormalizedPath()))
+                .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
                 .append(isoDate(page.lastModifiedTimestamp))

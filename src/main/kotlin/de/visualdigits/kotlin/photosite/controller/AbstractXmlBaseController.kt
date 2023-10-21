@@ -33,7 +33,7 @@ abstract class AbstractXmlBaseController : AbstractBaseController() {
     }
 
     protected fun determinePages(pageTree: PageTree, count: Int): List<Page> {
-        return pageTree.getLastModifiedPages(count)
+        return pageTree.lastModifiedPages(count)
             .filter { p -> p.images.isNotEmpty() && p.lastModifiedTimestamp > OffsetDateTime.MIN }
     }
 }

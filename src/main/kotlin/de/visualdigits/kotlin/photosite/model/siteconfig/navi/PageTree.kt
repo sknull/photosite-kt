@@ -5,7 +5,6 @@ import de.visualdigits.kotlin.photosite.model.page.PageByDateComparator
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.OffsetDateTime
-import java.util.*
 import kotlin.math.min
 
 class PageTree(
@@ -15,37 +14,59 @@ class PageTree(
 ) {
     private val log = LoggerFactory.getLogger(PageTree::class.java)
 
-    val pages: MutableMap<String, Page> = mutableMapOf()
+    private val pages: MutableMap<String, Page> = mutableMapOf()
 
-    var rootPage: Page? = readTree(pageDirectory, nameFilter, dump)
+    var rootPage: Page? = pageDirectory?.let { pd -> readTree(pd, nameFilter, dump) }
 
-    fun clear() {
-        pages.clear()
-    }
-
-    fun add(page: Page) {
-        pages[page.path!!] = page
-    }
-
-    fun remove(path: String): Page? {
-        val page = getPage(path)
+    private fun readTree(
+        pageDirectory: File,
+        nameFilter: ((s: String) -> Boolean)? = null,
+        dump: Boolean = false,
+        path: List<String> = listOf()
+    ): Page? {
+        val name = pageDirectory.name
+        val descriptorFile = File(pageDirectory, "page.xml")
+        var page: Page? = null
+        if (nameFilter == null || nameFilter(name)) {
+            if (descriptorFile.exists()) {
+                page = Page.load(descriptorFile)
+            } else if ("thumbs" != name) {
+                page = Page()
+                page.name = name
+                page.loadExternalContent(pageDirectory)
+            }
+        }
         if (page != null) {
-            page.childs.forEach { c -> c.parent = null }
-            pages.remove(path)
+            val pagePath = path + name
+            page.path = pagePath.joinToString("/")
+            addPage(page)
+            if (dump) {
+                log.info("### added page '$pagePath'")
+            }
+            pageDirectory
+                .listFiles { obj: File -> obj.isDirectory() }
+                ?.forEach { directory ->
+                    readTree(directory, nameFilter, dump, pagePath)?.let { child ->
+                        child.parent = page
+                        page.addChild(child)
+                    }
+                }
         }
         return page
     }
 
-    fun getPage(path: String?): Page? {
-        var p = path
-        p = if (p?.isEmpty() == true) {
+    fun addPage(page: Page) {
+        pages[page.path!!] = page
+    }
+
+    fun getPage(path: String): Page? {
+        val p = if (path.isEmpty()) {
             "pagetree"
         } else {
-            val lpath = p
-                ?.split("/")
-                ?.dropLastWhile { it.isEmpty() }
-                ?.toMutableList()
-                ?: mutableListOf()
+            val lpath = path
+                .split("/")
+                .dropLastWhile { it.isEmpty() }
+                .toMutableList()
             if ("pagetree" != lpath.first()) {
                 lpath.add(0, "pagetree")
             }
@@ -55,78 +76,29 @@ class PageTree(
     }
 
     fun lastModified(): OffsetDateTime {
-        return lastModified(rootPage?.path)
+        return lastModifiedPages(rootPage?.path!!, 1)
+            .firstOrNull()
+            ?.lastModifiedTimestamp
+            ?: OffsetDateTime.MIN
     }
 
-    fun getLastModifiedPages(count: Int): List<Page> {
-        return getLastModifiedPages(rootPage?.path, count)
+    fun lastModifiedPages(count: Int = 0): List<Page> {
+        return lastModifiedPages(rootPage?.path!!, count)
     }
 
-    protected fun lastModified(path: String?): OffsetDateTime {
-        val pages = getLastModifiedPages(path, 1)
-        return pages[0].lastModifiedTimestamp
-    }
-
-    fun getLastModifiedPages(path: String?, count: Int): List<Page> {
-        var pages = path?.let { getPages(getPage(it)) }
-        pages = pages?.sortedWith(PageByDateComparator())
+    fun lastModifiedPages(path: String, count: Int = 0): List<Page> {
+        var pages = path.let { getSubTree(it) }
+        pages = pages.sortedWith(PageByDateComparator())
         if (count > 0) {
-            pages = pages?.subList(0, min(count.toDouble(), pages.size.toDouble()).toInt())
+            pages = pages.take(min(count.toDouble(), pages.size.toDouble()).toInt())
         }
-        return pages?:listOf()
-    }
-
-    private fun getPages(page: Page?, pages: MutableList<Page> = mutableListOf()): List<Page> {
-        page?.childs?.forEach { c -> getPages(c, pages) }
-        page?.let { if (!pages.contains(it)) pages.add(it) }
         return pages
     }
 
-    private fun readTree(
-        pageDirectory: File?,
-        nameFilter: ((s: String) -> Boolean)? = null,
-        dump: Boolean = false
-    ): Page? {
-        return readTree(pageDirectory, LinkedList(), nameFilter, dump)
-    }
-
-    private fun readTree(
-        pageDirectory: File?,
-        path: LinkedList<String>,
-        nameFilter: ((s: String) -> Boolean)? = null,
-        dump: Boolean
-    ): Page? {
-        val name = pageDirectory?.name
-        name?.let { path.add(it) }
-        val descriptorFile = File(pageDirectory, "page.xml")
-        var page: Page? = null
-        if (nameFilter == null || name?.let { n -> nameFilter(n) } == true) {
-            if (descriptorFile.exists()) {
-                page = Page.load(descriptorFile)
-            } else if ("thumbs" != name) {
-                page = Page()
-                page.name = name
-                pageDirectory?.let { pd -> page.loadExternalContent(pd) }
-            }
-        }
-        if (page != null) {
-            val pagePath: String = path.joinToString("/")
-            page.path = pagePath
-            add(page)
-            if (dump) {
-                log.info("### added page '$pagePath'")
-            }
-            pageDirectory
-                ?.listFiles { obj: File -> obj.isDirectory() }
-                ?.forEach { directory ->
-                    val child = readTree(directory, path, nameFilter, dump)
-                    path.removeLast()
-                    if (child != null) {
-                        child.parent = page
-                        page.addChild(child)
-                    }
-                }
-        }
-        return page
+    fun getSubTree(rootPath: String, pages: MutableList<Page> = mutableListOf()): List<Page> {
+        val rootPage = getPage(rootPath)
+        rootPage?.childs?.forEach { c -> getSubTree(c.path!!, pages) }
+        rootPage?.let { if (!pages.contains(it)) pages.add(it) }
+        return pages
     }
 }
