@@ -6,7 +6,6 @@ import de.visualdigits.kotlin.photosite.model.rss.Item
 import de.visualdigits.kotlin.photosite.model.rss.Rss
 import de.visualdigits.kotlin.photosite.util.ImageHelper
 import jakarta.servlet.http.HttpServletResponse
-import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -40,7 +39,7 @@ class RssController : AbstractXmlBaseController() {
         val pages = determinePages(pageTree, 10)
         pages.forEach { page ->
             val pagePath = page.normalizedPath()
-            if (StringUtils.isNotEmpty(pagePath)) {
+            if (pagePath.isNotEmpty()) {
                 val images: List<ImageFile> = page.images
                 val description = if (images.isNotEmpty()) {
                     val image: ImageFile = images[0]
@@ -56,7 +55,7 @@ class RssController : AbstractXmlBaseController() {
                         "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"
                     if (teaser != null) {
                         val text: String = teaser.getHtml(siteConfigHolder.siteConfig!!, page, lang)
-                        if (StringUtils.isNotBlank(text)) {
+                        if (text.isNotBlank()) {
                             description += text.trim { it <= ' ' } + "<br/>\n"
                         }
                     }
