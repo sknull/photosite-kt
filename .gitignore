@@ -1,6 +1,7 @@
 Thumbs.db
 .DS_Store
 .gradle
+application-local.yml
 build/
 **/target/
 .idea
@@ -11,4 +12,3 @@ build/
 .settings
 **/dependency-reduced-pom.xml
 **/*.log
-
