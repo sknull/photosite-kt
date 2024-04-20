@@ -29,8 +29,8 @@ object PageHelper {
         currentPage: String,
         language: String
     ): String {
-        var pages = pageTree.rootPage?.childs?: listOf()
-        pages = pages.filter { p: Page -> p.childs.isNotEmpty() }
+        var pages = pageTree.rootPage?.children?: listOf()
+        pages = pages.filter { p: Page -> p.children.isNotEmpty() }
         pages = pages.sortedWith(PAGE_BY_NAME_COMPARATOR)
         val label = siteConfig.site.naviMain?.label?.getTitle(language)
         val html = StringBuilder()
@@ -57,8 +57,8 @@ object PageHelper {
         val html1 = StringBuilder("                <li class=\"$clazz\">\n")
             .append(createPageLink(siteConfig, child, language, 0, "                ", pagePath))
             .append("                ").append("  <ul>\n")
-        appendChildPages(siteConfig, currentPage, child, language, 0, "                ", html1) { p: Page -> p.childs.isNotEmpty() }
-        appendChildPages(siteConfig, currentPage, child, language, 0, "                ", html1) { p: Page -> p.childs.isEmpty() }
+        appendChildPages(siteConfig, currentPage, child, language, 0, "                ", html1) { p: Page -> p.children.isNotEmpty() }
+        appendChildPages(siteConfig, currentPage, child, language, 0, "                ", html1) { p: Page -> p.children.isEmpty() }
         html1.append("                ").append("  </ul>\n")
             .append("                ").append("</li>\n")
         html.append(html1)
@@ -74,15 +74,15 @@ object PageHelper {
         html: StringBuilder,
         predicate: (p: Page) -> Boolean
     ) {
-        val pages: List<Page> = page.childs.filter(predicate).sortedWith(PAGE_BY_NAME_COMPARATOR)
+        val pages: List<Page> = page.children.filter(predicate).sortedWith(PAGE_BY_NAME_COMPARATOR)
         for (child in pages) {
             val pagePath = child.path
             val clazz = determineStyleClass(child, currentPage)
             val html1 = StringBuilder("$indent    <li class=\"$clazz\">\n")
                 .append(createPageLink(siteConfig, child, language, level + 1, "$indent    ", pagePath)).append(indent)
                 .append("    ").append("  <ul>\n")
-            appendChildPages(siteConfig, currentPage, child, language, level + 1, "$indent    ", html1) { p: Page -> p.childs.isNotEmpty() }
-            appendChildPages(siteConfig, currentPage, child, language, level + 1, "$indent    ", html1) { p: Page -> p.childs.isEmpty() }
+            appendChildPages(siteConfig, currentPage, child, language, level + 1, "$indent    ", html1) { p: Page -> p.children.isNotEmpty() }
+            appendChildPages(siteConfig, currentPage, child, language, level + 1, "$indent    ", html1) { p: Page -> p.children.isEmpty() }
             html1.append(indent).append("    ").append("  </ul>\n").append(indent).append("    ").append("</li>\n")
             html.append(html1.toString())
         }
@@ -212,7 +212,7 @@ object PageHelper {
 
     private fun determineStyleClass(page: Page, currentPage: String): String {
         val pagePath: String = page.normalizedPath()
-        val isFolder: Boolean = page.childs.isNotEmpty()
+        val isFolder: Boolean = page.children.isNotEmpty()
         val isCurrent = pagePath == "pagetree/$currentPage"
         val inCurrentPath = currentPage.contains(pagePath)
         var clazz = if (isFolder) "folder" else "page"

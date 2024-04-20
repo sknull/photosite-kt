@@ -1,10 +1,12 @@
 package de.visualdigits.kotlin.photosite.model.siteconfig
 
+import de.visualdigits.kotlin.photosite.model.page.Page
 import de.visualdigits.kotlin.photosite.model.siteconfig.navi.PageTree
+import de.visualdigits.kotlin.photosite.persistence.repository.PageRepository
+import de.visualdigits.kotlin.photosite.persistence.service.PageService
 import de.visualdigits.kotlin.photosite.util.DomainCertificatesHelper
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
@@ -12,9 +14,13 @@ import java.io.File
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import de.visualdigits.kotlin.photosite.persistence.model.Page as DbPage
 
 @Component
-class SiteConfigHolder {
+class SiteConfigHolder(
+    val envvironment: Environment,
+    val pages: PageService
+) {
 
     private val log = LoggerFactory.getLogger(SiteConfigHolder::class.java)
 
@@ -23,9 +29,6 @@ class SiteConfigHolder {
 
     @Value("\${certbot.uri}")
     lateinit var certbotUri: String
-
-    @Autowired
-    lateinit var envvironment: Environment
 
     var siteConfig: SiteConfig? = null
     var siteUrl: String? = null
@@ -58,7 +61,25 @@ class SiteConfigHolder {
             nameFilter = { name -> "pagetree" == name || (!name.startsWith("#") && !name.startsWith("-")) },
             dump = true
         )
+        val dbPageTree = pageTree?.let { convertPageTree(it.rootPage) }
+        pages.deleteAll()
+        dbPageTree?.let { pages.saveIfNotExists(it) }
         log.info("#### initialized page tree")
+    }
+
+    private fun convertPageTree(page: Page?): DbPage? {
+        val dbChildren = page?.children?.mapNotNull {
+            convertPageTree(it)
+        }?:listOf()
+        return if (page != null) {
+            val dbPage = DbPage(
+                name = page.name,
+                path = page.path,
+                icon = page.icon
+            )
+            dbChildren.forEach { dbPage.withChild(it) }
+            dbPage
+        } else null
     }
 
     fun maintainServerCertificate(forceUpdate: Boolean): LocalDateTime {

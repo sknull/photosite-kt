@@ -97,7 +97,7 @@ class PageTree(
 
     fun getSubTree(rootPath: String, pages: MutableList<Page> = mutableListOf()): List<Page> {
         val rootPage = getPage(rootPath)
-        rootPage?.childs?.forEach { c -> getSubTree(c.path!!, pages) }
+        rootPage?.children?.forEach { c -> getSubTree(c.path!!, pages) }
         rootPage?.let { if (!pages.contains(it)) pages.add(it) }
         return pages
     }

@@ -36,7 +36,6 @@ import java.util.regex.Pattern
 )
 class Page(
     @JacksonXmlProperty(isAttribute = true) val icon: String? = null,
-    @JacksonXmlProperty(localName = "tocname") val tocName: String? = null,
     i18n: List<Language> = listOf(),
     val content: Content? = null,
 ) : I18nProvider(i18n), HtmlSnippet {
@@ -49,8 +48,9 @@ class Page(
     var mdContent: String? = null
     var htmlContent: String? = null
     var images: MutableList<ImageFile> = mutableListOf()
+
     var parent: Page? = null
-    var childs: MutableList<Page> = mutableListOf()
+    var children: MutableList<Page> = mutableListOf()
     var lastModifiedTimestamp: OffsetDateTime = OffsetDateTime.MIN
 
     companion object {
@@ -215,7 +215,7 @@ class Page(
     }
 
     fun clear() {
-        childs.clear()
+        children.clear()
     }
 
     override fun getHead(siteConfig: SiteConfig): String {
@@ -282,7 +282,7 @@ class Page(
                 )
             }
         }
-        childs.forEach { c -> c.getKeywords(keywords) }
+        children.forEach { c -> c.getKeywords(keywords) }
     }
 
     fun determineLastModifiedTimestamp() {
@@ -328,10 +328,10 @@ class Page(
     }
 
     fun addChild(child: Page) {
-        if (!childs.contains(child)) {
+        if (!children.contains(child)) {
             child.parent = this
             child.path = path + "/" + child.name
-            childs.add(child)
+            children.add(child)
         }
     }
 

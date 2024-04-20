@@ -35,10 +35,8 @@ object DomainCertificatesHelper {
 
     private val log = LoggerFactory.getLogger(DomainCertificatesHelper::class.java)
 
-    const val SERVER_URI_STAGE = "https://acme-staging-v02.api.letsencrypt.org/directory"
-    const val SERVER_URI_PRODUCTION = "https://acme-v02.api.letsencrypt.org/directory"
-    const val FILE_DOMAIN_KEY = "domain.key"
-    const val FILE_DOMAIN_CHAIN_CRT = "domain-chain.crt"
+    private const val FILE_DOMAIN_KEY = "domain.key"
+    private const val FILE_DOMAIN_CHAIN_CRT = "domain-chain.crt"
     private const val FILE_DOMAIN_CSR = "domain.csr"
     private const val FILE_USER_KEY = "user.key"
     private const val RETRY_ATTEMPTS = 3
@@ -99,7 +97,7 @@ object DomainCertificatesHelper {
      * @param domains
      * Domains to get a common certificate for
      */
-    fun fetchCertificate(
+    private fun fetchCertificate(
         siteConfig: SiteConfig,
         serverUri: String?,
         domains: Collection<String?>?,
@@ -260,8 +258,7 @@ object DomainCertificatesHelper {
      * @return [Account]
      */
     private fun findOrRegisterAccount(session: Session, accountKey: KeyPair): Account {
-        val account: Account
-        account = try {
+        val account: Account = try {
             AccountBuilder()
                 .agreeToTermsOfService()
                 .useKeyPair(accountKey)
@@ -343,7 +340,7 @@ object DomainCertificatesHelper {
      * [Authorization] to find the challenge in
      * @return [Challenge] to verify
      */
-    fun httpChallenge(siteConfig: SiteConfig, auth: Authorization): Challenge {
+    private fun httpChallenge(siteConfig: SiteConfig, auth: Authorization): Challenge {
         // Find a single http-01 challenge
         val challenge = auth.findChallenge(Http01Challenge::class.java)
             ?: throw IllegalStateException("Found no " + Http01Challenge.TYPE + " challenge, don't know what to do...")
@@ -365,7 +362,7 @@ object DomainCertificatesHelper {
         return challenge
     }
 
-    fun convertPEMToPKCS12(keyFile: File, cerFile: File, password: String, alias: String?): ByteArray {
+    private fun convertPEMToPKCS12(keyFile: File, cerFile: File, password: String, alias: String?): ByteArray {
         log.info("Converting keyfile into pkcs12 keystore")
         // Get the private key
         val certHolder = readCertFile(cerFile)
@@ -378,9 +375,8 @@ object DomainCertificatesHelper {
         alias: String?,
         certHolder: X509CertificateHolder
     ): ByteArray {
-        val pkcs12: ByteArray
-        pkcs12 = try {
-            val X509Certificate: Certificate = JcaX509CertificateConverter()
+        val pkcs12: ByteArray = try {
+            val certificate: Certificate = JcaX509CertificateConverter()
                 .setProvider(BouncyCastleProvider())
                 .getCertificate(certHolder)
 
@@ -389,7 +385,7 @@ object DomainCertificatesHelper {
             val ks = KeyStore.getInstance("PKCS12")
             ks.load(null)
             val key = readKeyFile(keyFile)
-            ks.setKeyEntry(alias, key, password.toCharArray(), arrayOf(X509Certificate))
+            ks.setKeyEntry(alias, key, password.toCharArray(), arrayOf(certificate))
             ks.store(bos, password.toCharArray())
             bos.close()
             bos.toByteArray()
