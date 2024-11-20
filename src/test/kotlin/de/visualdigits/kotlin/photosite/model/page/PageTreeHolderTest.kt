@@ -2,14 +2,20 @@ package de.visualdigits.kotlin.photosite.model.page
 
 import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfigHolder
+import de.visualdigits.kotlin.photosite.persistence.service.PageService
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.nio.file.Paths
 
-class PageTreeHolderTest {
+@SpringBootTest
+class PageTreeHolderTest @Autowired constructor(
+    private val siteConfigHolder: SiteConfigHolder
+) {
 
     @Test
     fun testPageTree() {
-        val siteConfigHolder = SiteConfigHolder()
+
         val rootFolder = "E:/Programmierung/www/webserver/www/website"
         siteConfigHolder.rootDirectory = "file:$rootFolder"
         siteConfigHolder.siteConfig = SiteConfig.load(Paths.get(rootFolder, "resources", "config.xml").toFile())

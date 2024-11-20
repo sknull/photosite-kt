@@ -20,5 +20,5 @@ spring:
 #    static-locations: file:E:/Programmierung/www/webserver/www/website
 
 certbot:
-  uri: https://acme-staging-v02.api.letsencrypt.org/directory
-#  uri: https://acme-v02.api.letsencrypt.org/directory
+#  uri: https://acme-staging-v02.api.letsencrypt.org/directory
+  uri: https://acme-v02.api.letsencrypt.org/directory
