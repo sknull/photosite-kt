@@ -96,15 +96,6 @@ class Page(
             return h
         }
 
-        private fun obfuscateLink(html: String): String {
-            var h = html
-            val matcher = Pattern.compile("<a href=\"(.*?)\">(.*?)</a>").matcher(h)
-            while (matcher.find()) {
-                h = h.replace(matcher.group(0), obfuscate(matcher.group(1), matcher.group(2), ObfuscateType.LINK))
-            }
-            return h
-        }
-
         private fun obfuscate(text: String, linktext: String?, obfuscateType: ObfuscateType): String {
             var lt = linktext
             val unmixedkey = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-() "
@@ -167,11 +158,6 @@ class Page(
 
     override fun toString(): String {
         return path?:"UNSET"
-//        return try {
-//            MAPPER.writeValueAsString(this)
-//        } catch (e: JsonProcessingException) {
-//            throw IllegalStateException("Could not render page descriptor", e)
-//        }
     }
 
     fun loadExternalContent(directory: File) {
@@ -239,17 +225,21 @@ class Page(
             .append("          <h1>")
             .append(page.getTitle(language))
             .append("</h1>\n")
-        if (content != null) {
-            val teaser = content.teaser
-            if (teaser != null) {
-                sb.append(teaser.getHtml(siteConfig, page, language))
+        when {
+            content != null -> {
+                val teaser = content.teaser
+                if (teaser != null) {
+                    sb.append(teaser.getHtml(siteConfig, page, language))
+                }
+                sb.append(content.getHtml(siteConfig, page, language))
             }
-            sb.append(content.getHtml(siteConfig, page, language))
-        } else if (htmlContent?.isNotEmpty() == true) {
-            sb.append(htmlContent)
-        } else if (mdContent?.isNotEmpty() == true) {
-            val html = Processor.process(mdContent)
-            sb.append(html)
+            htmlContent?.isNotEmpty() == true -> {
+                sb.append(htmlContent)
+            }
+            mdContent?.isNotEmpty() == true -> {
+                val html = Processor.process(mdContent)
+                sb.append(html)
+            }
         }
         sb.append("        </div><!-- ")
             .append(page.name)
@@ -315,7 +305,6 @@ class Page(
             when (sort.by) {
                 "name" -> images.sortBy { it.name }
                 "mtime" -> images.sortBy { it.date }
-                else -> {}
             }
             if (sort.dir == SortDir.desc) {
                 images.reverse()

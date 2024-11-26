@@ -8,20 +8,28 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
-import org.shredzone.acme4j.*
+import org.shredzone.acme4j.Account
+import org.shredzone.acme4j.AccountBuilder
+import org.shredzone.acme4j.Authorization
+import org.shredzone.acme4j.Session
+import org.shredzone.acme4j.Status
 import org.shredzone.acme4j.challenge.Challenge
 import org.shredzone.acme4j.challenge.Http01Challenge
 import org.shredzone.acme4j.exception.AcmeException
 import org.shredzone.acme4j.util.CSRBuilder
 import org.shredzone.acme4j.util.KeyPairUtils
 import org.slf4j.LoggerFactory
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.security.*
-import java.security.cert.Certificate
-import java.security.cert.CertificateException
+import java.security.KeyPair
+import java.security.KeyStore
+import java.security.PrivateKey
 import java.security.cert.X509Certificate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -44,32 +52,24 @@ object DomainCertificatesHelper {
     private const val RETRY_ATTEMPTS = 3
 
     fun determineExpiryDate(keystoreFile: File?, alias: String?, password: String): LocalDateTime {
-        val expiryDate: LocalDateTime
-        if (keystoreFile != null && keystoreFile.exists()) {
-            try {
+        val expiryDate = if (keystoreFile?.exists() == true) {
+            runCatching {
                 Files.newInputStream(keystoreFile.toPath()).use { ins ->
                     val keystore = KeyStore.getInstance("PKCS12")
                     keystore.load(ins, password.toCharArray())
                     val cert =
                         keystore.getCertificate(alias) as X509Certificate
-                    expiryDate = cert.notAfter
+                    cert.notAfter
                         .toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime()
                 }
-            } catch (e: IOException) {
+            }.onFailure { e ->
                 throw IllegalStateException("Could not determine expiry date from keystore: $keystoreFile", e)
-            } catch (e: KeyStoreException) {
-                throw IllegalStateException("Could not determine expiry date from keystore: $keystoreFile", e)
-            } catch (e: NoSuchAlgorithmException) {
-                throw IllegalStateException("Could not determine expiry date from keystore: $keystoreFile", e)
-            } catch (e: CertificateException) {
-                throw IllegalStateException("Could not determine expiry date from keystore: $keystoreFile", e)
-            }
+            }.getOrThrow()
         } else {
             // force update when file not found
-            expiryDate = LocalDateTime.now()
-                .minus(31, ChronoUnit.DAYS)
+            LocalDateTime.now().minus(31, ChronoUnit.DAYS)
         }
         return expiryDate
     }
@@ -122,7 +122,7 @@ object DomainCertificatesHelper {
         // Load or create a key pair for the domains. This should not be the userKeyPair!
         log.info("#### loadOrCreateDomainKeyPair")
         val domainKeyPair = loadOrCreateDomainKeyPair(rootDirectory, keySize)
-        try {
+        runCatching {
             log.info("#### Create new order")
             // Order the certificate
             val order = account.newOrder().domains(domains).create()
@@ -141,9 +141,9 @@ object DomainCertificatesHelper {
             // Write the CSR to a file, for later use.
             val domainCsrFile = File(rootDirectory, FILE_DOMAIN_CSR)
             log.info("#### Creating CSR file '$domainCsrFile'")
-            try {
+            runCatching {
                 FileWriter(domainCsrFile).use { out -> csrb.write(out) }
-            } catch (e: IOException) {
+            }.onFailure { e ->
                 throw IllegalStateException("Could not write csr file", e)
             }
 
@@ -151,7 +151,7 @@ object DomainCertificatesHelper {
             order.execute(csrb.encoded)
 
             // Wait for the order to complete
-            try {
+            runCatching {
                 var attempts = RETRY_ATTEMPTS
                 while (order.status != Status.VALID && attempts-- > 0) {
                     log.info("#### Try " + (RETRY_ATTEMPTS - attempts + 1) + "/" + RETRY_ATTEMPTS + " to update order...")
@@ -164,7 +164,7 @@ object DomainCertificatesHelper {
                     // Then update the status
                     order.update()
                 }
-            } catch (ex: InterruptedException) {
+            }.onFailure { ex ->
                 log.error("interrupted", ex)
                 Thread.currentThread().interrupt()
             }
@@ -178,10 +178,7 @@ object DomainCertificatesHelper {
             val domainChainFile = File(rootDirectory, FILE_DOMAIN_CHAIN_CRT)
             log.info("#### Creating domain chin file '$domainChainFile'")
             FileWriter(domainChainFile).use { fw -> certificate.writeCertificate(fw) }
-        } catch (e: IOException) {
-            log.error("Could not fetch certificates", e)
-            throw IllegalStateException("Could not fetch certificates", e)
-        } catch (e: AcmeException) {
+        }.onFailure { e ->
             log.error("Could not fetch certificates", e)
             throw IllegalStateException("Could not fetch certificates", e)
         }
@@ -378,31 +375,23 @@ object DomainCertificatesHelper {
         alias: String?,
         certHolder: X509CertificateHolder
     ): ByteArray {
-        val pkcs12: ByteArray
-        pkcs12 = try {
-            val X509Certificate: Certificate = JcaX509CertificateConverter()
-                .setProvider(BouncyCastleProvider())
-                .getCertificate(certHolder)
-
+        return runCatching {
             // Put them into a PKCS12 keystore and write it to a byte[]
-            val bos = ByteArrayOutputStream()
-            val ks = KeyStore.getInstance("PKCS12")
-            ks.load(null)
-            val key = readKeyFile(keyFile)
-            ks.setKeyEntry(alias, key, password.toCharArray(), arrayOf(X509Certificate))
-            ks.store(bos, password.toCharArray())
-            bos.close()
-            bos.toByteArray()
-        } catch (e: IOException) {
+            ByteArrayOutputStream().use { bos ->
+                val ks = KeyStore.getInstance("PKCS12")
+                ks.load(null)
+                val key = readKeyFile(keyFile)
+                ks.setKeyEntry(alias, key, password.toCharArray(), arrayOf(
+                    JcaX509CertificateConverter()
+                        .setProvider(BouncyCastleProvider())
+                        .getCertificate(certHolder)
+                ))
+                ks.store(bos, password.toCharArray())
+                bos.toByteArray()
+            }
+        }.onFailure { e ->
             throw IllegalStateException("Could not convert PEM to PKCS12", e)
-        } catch (e: CertificateException) {
-            throw IllegalStateException("Could not convert PEM to PKCS12", e)
-        } catch (e: NoSuchAlgorithmException) {
-            throw IllegalStateException("Could not convert PEM to PKCS12", e)
-        } catch (e: KeyStoreException) {
-            throw IllegalStateException("Could not convert PEM to PKCS12", e)
-        }
-        return pkcs12
+        }.getOrThrow()
     }
 
     private fun readCertFile(cerFile: File): X509CertificateHolder {

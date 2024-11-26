@@ -2,6 +2,7 @@ package de.visualdigits.kotlin.photosite.model.rss
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeFeature
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import java.io.IOException
 import java.time.Instant
@@ -19,7 +20,9 @@ class Rfc1123Deserializer : InstantDeserializer<OffsetDateTime>(
     Function { a: FromIntegerArguments -> OffsetDateTime.ofInstant(Instant.ofEpochMilli(a.value), a.zoneId) },
     Function { a: FromDecimalArguments -> OffsetDateTime.ofInstant(Instant.ofEpochSecond(a.integer, a.fraction.toLong()), a.zoneId) },
     BiFunction { d: OffsetDateTime, z: ZoneId -> if (d.isEqual(OffsetDateTime.MIN) || d.isEqual(OffsetDateTime.MAX)) d else d.withOffsetSameInstant(z.rules.getOffset(d.toLocalDateTime())) },
-    true
+    true,
+    JavaTimeFeature.NORMALIZE_DESERIALIZED_ZONE_ID.enabledByDefault(),
+    JavaTimeFeature.ALWAYS_ALLOW_STRINGIFIED_DATE_TIMESTAMPS.enabledByDefault()
 ) {
 
     private val formatter = DateTimeFormatter.RFC_1123_DATE_TIME

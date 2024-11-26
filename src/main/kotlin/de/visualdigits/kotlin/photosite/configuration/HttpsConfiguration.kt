@@ -34,7 +34,7 @@ open class HttpsConfiguration {
         val connector = Connector("org.apache.coyote.http11.Http11NioProtocol")
         connector.scheme = "http"
         connector.port = 80
-        connector.secure = false // todo make this configurable
+        connector.secure = false
         connector.redirectPort = 443
         return connector
     }

@@ -5,7 +5,6 @@ import de.visualdigits.kotlin.photosite.model.siteconfig.SiteConfig
 import net.coobird.thumbnailator.Thumbnails
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
 import java.nio.file.Paths
 
 object ImageHelper {
@@ -20,18 +19,16 @@ object ImageHelper {
         val relativePath = pagetreePath?.relativize(sourceImageFilePath).toString()
         val thumbnailFile = site.thumbnailCacheFolder?.let  { Paths.get(File(it).canonicalPath, relativePath).toFile() }
         val thumbnailFolder = thumbnailFile?.getParentFile()
-        if (thumbnailFolder?.exists() != true) {
-            if (thumbnailFolder?.mkdirs() != true) {
-                log.error("Could not create thumbnail folder '$thumbnailFolder'")
-            }
+        if (thumbnailFolder?.exists() != true && thumbnailFolder?.mkdirs() != true) {
+            log.error("Could not create thumbnail folder '$thumbnailFolder'")
         }
         if (thumbnailFile?.exists() != true) {
-            try {
+            runCatching {
                 Thumbnails.of(imageFile)
                     .size(128, 128)
                     .keepAspectRatio(true)
                     .toFile(thumbnailFile)
-            } catch (e: IOException) {
+            }.onFailure { e ->
                 log.error("Could note create thumbnail for image '" + imageFile.absolutePath + "'", e)
             }
         }

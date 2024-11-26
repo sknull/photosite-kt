@@ -38,16 +38,14 @@ data class Rss(
     }
 
     fun unmarshall(rssFile: File): Rss? {
-        var rssFeed: Rss? = null
-        rssFeed = try {
+        return runCatching {
             xmlMapper.readValue(
                 rssFile,
                 Rss::class.java
             )
-        } catch (e: IOException) {
+        }.onFailure { e ->
             throw IllegalStateException("Could not parse rss file: $rssFile", e)
-        }
-        return rssFeed
+        }.getOrThrow()
     }
 
     fun marshall(rssFile: File) {

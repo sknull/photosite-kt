@@ -42,7 +42,6 @@ abstract class AbstractBaseController {
 
     protected fun encodeUrl(response: HttpServletResponse, pagePath: String): String {
         var pp = pagePath
-        val url = pp
         try {
             pp = URLEncoder.encode(pp, response.characterEncoding)
         } catch (e: UnsupportedEncodingException) {

@@ -11,6 +11,8 @@ import org.apache.commons.text.StringEscapeUtils
 import org.springframework.ui.Model
 import java.util.*
 
+private const val indent = "                "
+
 object PageHelper {
 
     private val PAGE_BY_NAME_COMPARATOR = PageByNameComparator()
@@ -55,12 +57,12 @@ object PageHelper {
         val pagePath = child.path
         val clazz = determineStyleClass(child, currentPage)
         val html1 = StringBuilder("                <li class=\"$clazz\">\n")
-            .append(createPageLink(siteConfig, child, language, 0, "                ", pagePath))
-            .append("                ").append("  <ul>\n")
-        appendChildPages(siteConfig, currentPage, child, language, 0, "                ", html1) { p: Page -> p.childs.isNotEmpty() }
-        appendChildPages(siteConfig, currentPage, child, language, 0, "                ", html1) { p: Page -> p.childs.isEmpty() }
-        html1.append("                ").append("  </ul>\n")
-            .append("                ").append("</li>\n")
+            .append(createPageLink(siteConfig, child, language, 0, indent, pagePath))
+            .append(indent).append("  <ul>\n")
+        appendChildPages(siteConfig, currentPage, child, language, 0, indent, html1) { p: Page -> p.childs.isNotEmpty() }
+        appendChildPages(siteConfig, currentPage, child, language, 0, indent, html1) { p: Page -> p.childs.isEmpty() }
+        html1.append(indent).append("  </ul>\n")
+            .append(indent).append("</li>\n")
         html.append(html1)
     }
 

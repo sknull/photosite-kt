@@ -1,9 +1,11 @@
 package de.visualdigits.kotlin.photosite.controller
 
 import de.visualdigits.kotlin.photosite.model.common.ImageFile
+import de.visualdigits.kotlin.photosite.model.page.Page
 import de.visualdigits.kotlin.photosite.model.rss.Channel
 import de.visualdigits.kotlin.photosite.model.rss.Item
 import de.visualdigits.kotlin.photosite.model.rss.Rss
+import de.visualdigits.kotlin.photosite.model.siteconfig.Site
 import de.visualdigits.kotlin.photosite.util.ImageHelper
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Controller
@@ -25,21 +27,36 @@ class RssController : AbstractXmlBaseController() {
         val pageTree = determinePageTree()
         val lastModified = pageTree.lastModified()
         val feed = Rss(
-            channels = listOf(Channel(
-                title = site?.siteTitle,
-                generator = site?.siteTitle,
-                link = site?.protocol + site?.domain,
-                description = site?.siteSubTitle,
-                language = "de",
-                copyright = "Stephan Knull",
-                items = items,
-                lastBuildDate = fullDate(lastModified)
-            ))
+            channels = listOf(
+                Channel(
+                    title = site?.siteTitle,
+                    generator = site?.siteTitle,
+                    link = site?.protocol + site?.domain,
+                    description = site?.siteSubTitle,
+                    language = "de",
+                    copyright = "Stephan Knull",
+                    items = items,
+                    lastBuildDate = fullDate(lastModified)
+                )
+            )
         )
         val pages = determinePages(pageTree, 10)
         pages.forEach { page ->
-            val pagePath = page.normalizedPath()
-            if (pagePath.isNotEmpty()) {
+            processPage(page, site, lang, items)
+        }
+
+        return feed.marshall()
+    }
+
+    private fun processPage(
+        page: Page,
+        site: Site?,
+        lang: String,
+        items: MutableList<Item>
+    ) {
+        val pagePath = page.normalizedPath()
+        when {
+            pagePath.isNotEmpty() -> {
                 val images: List<ImageFile> = page.images
                 val description = if (images.isNotEmpty()) {
                     val image: ImageFile = images[0]
@@ -49,7 +66,10 @@ class RssController : AbstractXmlBaseController() {
                         imageName = image.name
                     }
                     val thumbUrl =
-                        site?.protocol + site?.domain + "/" + ImageHelper.getThumbnail(siteConfigHolder.siteConfig!!, image)
+                        site?.protocol + site?.domain + "/" + ImageHelper.getThumbnail(
+                            siteConfigHolder.siteConfig!!,
+                            image
+                        )
                     val teaser = page.content?.teaser
                     var description =
                         "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"
@@ -60,20 +80,22 @@ class RssController : AbstractXmlBaseController() {
                         }
                     }
                     description
-                } else null
-                items.add(Item(
-                    title = page.name,
-                    author = "Stephan Knull",
-                    category = pagePath,
-                    link = "${site?.protocol + site?.domain}/$pagePath?mode=rss&amp;lang=$lang",
-                    pubDate = page.lastModifiedTimestamp,
-                    description = description
-                ))
+                } else {
+                    null
+                }
+
+                items.add(
+                    Item(
+                        title = page.name,
+                        author = "Stephan Knull",
+                        category = pagePath,
+                        link = "${site?.protocol + site?.domain}/$pagePath?mode=rss&amp;lang=$lang",
+                        pubDate = page.lastModifiedTimestamp,
+                        description = description
+                    )
+                )
             }
         }
-
-//        sendContent(content = feed.marshall(), mimeType = MIMETYPE_XML, response = response)
-        return feed.marshall()
     }
 }
 

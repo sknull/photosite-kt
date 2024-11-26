@@ -124,7 +124,7 @@ class SitemapController : AbstractXmlBaseController() {
                     .append(StringEscapeUtils.escapeXml11(imagePath))
                     .append("</image:loc>\n")
                 val caption = page.content?.captionsMap?.get(imageFile.name)
-                caption?.let { c ->
+                caption?.also { c ->
                     c.getI18n(lang)?.let { l ->
                         l.alt?:l.title?.let { captionText ->
                             sb
