@@ -11,13 +11,11 @@ import de.visualdigits.photosite.model.pagemodern.ImageFile
 import de.visualdigits.photosite.model.pagemodern.Page
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class PageTest {
-
-    private val xmlMapper = XmlMapper.builder()
-        .addModule(kotlinModule())
-        .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-        .build()
 
     private val jsonMapper = jacksonMapperBuilder()
         .addModule(kotlinModule())
@@ -28,43 +26,11 @@ class PageTest {
 
     @Test
     fun testConvertDescriptor() {
-        val tree = readPageTree(File("W:/"))
-
-        println(tree)
+//        val tree = Page.readValue(File("W:/"))
+        val tree = Page.readValue(File("C:/Users/sknul/.photosite/resources/pagetree"))
+        val mainTree = tree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
+        val staticTree = tree.clone { p -> p.name.startsWith("-") }
+        println(staticTree)
     }
 
-    private fun readPageTree(directory: File, level: Int = 0): Page {
-//        println("${"  ".repeat(level)}${directory.canonicalPath}")
-        val files = directory.listFiles()?:arrayOf()
-        val descriptorFile = File(directory, "page.xml")
-        val page = if (descriptorFile.exists()) {
-            xmlMapper.readValue(descriptorFile, Page::class.java)
-        } else {
-            Page()
-        }
-        page.level = level
-        page.name = directory.name
-        val mdFile = File(directory, "page.md")
-        if (mdFile.exists()) {
-            page.content.contentType = ContentType.Markdown
-            page.content.mdContent = mdFile.readText()
-        }
-        val htmlFile = File(directory, "page.html")
-        if (htmlFile.exists()) {
-            page.content.contentType = ContentType.Html
-            page.content.htmlContent = htmlFile.readText()
-        }
-        page.content.images = files
-            .filter { f -> f.isFile && f.extension == "jpg" }
-            .map { f -> ImageFile(f)}
-        page.children = files
-            .filter { f -> f.isDirectory }
-            .map { d ->
-                val c = readPageTree(d, level + 1)
-                c.parent = page
-                c
-            }
-
-        return page
-    }
 }

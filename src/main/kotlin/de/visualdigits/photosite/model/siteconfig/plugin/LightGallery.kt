@@ -4,12 +4,13 @@ import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import de.visualdigits.photosite.model.page.Page
+import de.visualdigits.photosite.model.pagemodern.ContentType
 import de.visualdigits.photosite.model.siteconfig.Photosite
 import de.visualdigits.photosite.util.ImageHelper
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import java.io.File
-import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.lightgallery")
@@ -22,7 +23,7 @@ class LightGallery(
     var progressBar: Boolean = false,
     var download: Boolean = false
 ) : Plugin(
-    name = "LightGallery"
+    contentType = ContentType.LightGallery
 ) {
 
     override fun getHead(theme: String): String {
@@ -55,10 +56,7 @@ class LightGallery(
                     .append(imagePath)
                     .append("\"")
                 if (exifDir != null && exifSubDir != null) {
-                    val date = imageFile.date
-                    if (date != null) {
-                        imageName += "&nbsp;(" + SimpleDateFormat("yyy-MM-dd HH:mm:ss").format(date) + ")"
-                    }
+                    imageName += "&nbsp;(" + DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss").format(imageFile.lastModified()) + ")"
                     sb.append(" data-sub-html=\"")
                         .append("<div class='camera-infos camera-infos-grid'>")
                         .append("<div id='camera-infos-caption' class='info-box'>")

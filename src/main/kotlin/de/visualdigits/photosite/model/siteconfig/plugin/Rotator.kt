@@ -2,6 +2,7 @@ package de.visualdigits.photosite.model.siteconfig.plugin
 
 import de.visualdigits.photosite.model.common.ImageFile
 import de.visualdigits.photosite.model.page.Page
+import de.visualdigits.photosite.model.pagemodern.ContentType
 import de.visualdigits.photosite.model.siteconfig.Photosite
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.rotator")
 class Rotator : Plugin(
-    name = "Rotator"
+    contentType = ContentType.Rotator
 ) {
     override fun getHtml(page: Page, language: String): String {
         val sb = StringBuilder()

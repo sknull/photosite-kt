@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.model.siteconfig.plugin
 
+import de.visualdigits.photosite.model.pagemodern.ContentType
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
@@ -14,5 +15,5 @@ class PhotoStory(
     var progressBar: Boolean = false,
     var download: Boolean = false
 ) : Plugin(
-    name = "PhotoStory"
+    contentType = ContentType.PhotoStory
 )

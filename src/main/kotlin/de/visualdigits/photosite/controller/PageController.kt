@@ -102,7 +102,7 @@ class PageController(
                     model.addAttribute("breadcrumb", normalizedPath)
                     model.addAttribute("metaKeywords", keywords.joinToString(", "))
                     model.addAttribute("metaDescription", keywords.joinToString(" "))
-                    val pluginConfig = photosite.getPluginConfig(pageDescriptor.content?.contentType ?: "")
+                    val pluginConfig = photosite.pluginsMap[pageDescriptor.content.contentType]
                     model.addAttribute("head", pluginConfig?.getHead(photosite.theme))
                     model.addAttribute("content", pluginConfig?.getHtml(pageDescriptor, language))
                 }

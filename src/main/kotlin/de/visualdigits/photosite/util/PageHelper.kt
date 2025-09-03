@@ -8,9 +8,6 @@ import de.visualdigits.photosite.model.siteconfig.Photosite
 import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import de.visualdigits.photosite.model.siteconfig.navi.PageTree
 import org.apache.commons.text.StringEscapeUtils
-import org.springframework.ui.Model
-import java.util.Locale
-import java.util.Objects
 
 private const val indent = "                "
 

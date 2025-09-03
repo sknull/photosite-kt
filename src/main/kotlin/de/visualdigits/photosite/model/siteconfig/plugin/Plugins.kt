@@ -1,17 +1,21 @@
 package de.visualdigits.photosite.model.siteconfig.plugin
 
 class Plugins(
-    val rotator: Rotator = Rotator(),
+    val enlite: Enlite = Enlite(),
+    val html: HtmlContent = HtmlContent(),
     val lightbox: LightBox = LightBox(),
     val lightgallery: LightGallery = LightGallery(),
+    val markdown: MarkdownContent = MarkdownContent(),
     val photostory: PhotoStory = PhotoStory(),
-    val enlite: Enlite = Enlite(),
+    val rotator: Rotator = Rotator(),
 ) {
     fun plugins(): List<Plugin> = listOf(
-        rotator,
+        enlite,
+        html,
         lightbox,
         lightgallery,
-        photostory,
-        enlite
+        markdown,
+        rotator,
+        photostory
     )
 }

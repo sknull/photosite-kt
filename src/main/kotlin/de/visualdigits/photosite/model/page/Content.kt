@@ -5,17 +5,17 @@ import de.visualdigits.photosite.model.common.ImageFile
 import de.visualdigits.photosite.model.common.sort.Sort
 import de.visualdigits.photosite.model.common.sort.SortDir
 import de.visualdigits.photosite.model.page.teaser.Teaser
+import de.visualdigits.photosite.model.pagemodern.ContentType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.Locale
 import java.util.function.Consumer
 
 
 class Content(
-    @JacksonXmlProperty(isAttribute = true, localName = "plugin") var contentType: String? = null,
+    @JacksonXmlProperty(isAttribute = true, localName = "plugin") var contentType: ContentType = ContentType.None,
     @JacksonXmlProperty(isAttribute = true) val mode: String? = null,
     @JacksonXmlProperty(isAttribute = true) val speed: Long = 0L,
     @JacksonXmlProperty(isAttribute = true) val pause: Long = 0L,
@@ -34,19 +34,24 @@ class Content(
     var mdContent: String? = null
     var htmlContent: String? = null
     var images: MutableList<ImageFile> = mutableListOf()
-    var lastModifiedTimestamp: OffsetDateTime = OffsetDateTime.MIN
+
+    private var lastModifiedTimestamp: OffsetDateTime? = null
 
     init {
         captionsMap = captions.associate { c -> Pair(c.name!!, c) }
     }
 
-    fun loadExternalContent(directory: File) {
+    fun loadContent(directory: File) {
         log.debug("Loading external content for directory: {}", directory)
-        if (mdContent == null) {
-            mdContent = readFile(File(directory, "page.md"))
+        val mdFile = File(directory, "page.md")
+        if (mdFile.exists()) {
+            contentType = ContentType.Markdown
+            mdContent = readFile(mdFile)
         }
-        if (htmlContent == null) {
-            htmlContent = readFile(File(directory, "page.html"))
+        val htmlFile = File(directory, "page.html")
+        if (htmlFile.exists()) {
+            contentType = ContentType.Html
+            htmlContent = readFile(htmlFile)
         }
     }
 
@@ -60,7 +65,7 @@ class Content(
                 }?.toMutableList()
                 ?.let { images.addAll(it) }
             sortImages()
-            determineLastModifiedTimestamp()
+            lastModified()
         }
     }
 
@@ -74,18 +79,17 @@ class Content(
         } else ""
     }
 
-    fun determineLastModifiedTimestamp() {
-        lastModifiedTimestamp = OffsetDateTime.MIN
-        images.forEach { image ->
-            val time = image.date?.toInstant()?.atOffset(ZoneOffset.UTC)?:OffsetDateTime.MIN
-            if (time > lastModifiedTimestamp) {
-                lastModifiedTimestamp = time
-            }
+    fun lastModified(): OffsetDateTime {
+        if (lastModifiedTimestamp == null) {
+            lastModifiedTimestamp = images
+                .maxOfOrNull { i -> i.lastModified() }
         }
+
+        return lastModifiedTimestamp ?: OffsetDateTime.MIN
     }
 
     private fun sortImages() {
-        val sort = determineSort()
+        val sort = sort ?: Sort(by = "name", dir = SortDir.asc)
         if (sort.by == "manual") {
             val map = mutableMapOf<String, ImageFile>()
             images.forEach(Consumer { p: ImageFile -> map[p.file.getName()] = p })
@@ -103,7 +107,7 @@ class Content(
         } else {
             when (sort.by) {
                 "name" -> images.sortBy { it.name }
-                "mtime" -> images.sortBy { it.date }
+                "mtime" -> images.sortBy { it.lastModified() }
             }
             if (sort.dir == SortDir.desc) {
                 images.reverse()
@@ -111,7 +115,4 @@ class Content(
         }
     }
 
-    private fun determineSort(): Sort {
-        return sort?:Sort(by = "name", dir = SortDir.asc)
-    }
 }

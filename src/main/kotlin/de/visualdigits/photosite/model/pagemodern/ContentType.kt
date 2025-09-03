@@ -7,6 +7,6 @@ enum class ContentType {
     LightGallery,
     Markdown,
     PhotoStory,
-    Rotator
-
+    Rotator,
+    None
 }

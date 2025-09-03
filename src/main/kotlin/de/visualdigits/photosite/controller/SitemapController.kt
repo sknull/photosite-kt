@@ -90,7 +90,7 @@ class SitemapController(
                 .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.content.lastModifiedTimestamp))
+                .append(isoDate(page.content.lastModified()))
                 .append("</lastmod>\n")
                 //                        .append("    <changefreq>" + self.changefreq + "</changefreq>\n")
                 //                        .append("    <priority>" + self.priority + "</priority>\n")
@@ -119,7 +119,7 @@ class SitemapController(
                 .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.content.lastModifiedTimestamp))
+                .append(isoDate(page.content.lastModified()))
                 .append("</lastmod>\n")
             for (imageFile in page.content.images) {
                 val imagePath = Photosite.getRelativeResourcePath(imageFile.file)

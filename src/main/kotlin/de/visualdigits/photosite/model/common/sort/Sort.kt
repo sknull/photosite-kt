@@ -16,7 +16,7 @@ data class Sort(
     val order: String? = null
 ) {
 
-    val orderList: MutableList<String> = ArrayList()
+    val orderList: MutableList<String> = mutableListOf()
 
     init {
         if (order != null) {

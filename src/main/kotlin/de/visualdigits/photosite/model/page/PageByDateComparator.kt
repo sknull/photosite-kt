@@ -17,8 +17,8 @@ internal class PageByDateComparator : Comparator<Page?> {
                 return -1
             }
             else -> {
-                val l1: OffsetDateTime = p1.content.lastModifiedTimestamp
-                val l2: OffsetDateTime = p2.content.lastModifiedTimestamp
+                val l1: OffsetDateTime = p1.content.lastModified()
+                val l2: OffsetDateTime = p2.content.lastModified()
                 if (l1 < l2) {
                     c = 1
                 } else if (l1 > l2) {

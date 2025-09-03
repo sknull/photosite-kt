@@ -89,7 +89,7 @@ class RssController(
                         author = "Stephan Knull",
                         category = pagePath,
                         link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
-                        pubDate = page.content.lastModifiedTimestamp,
+                        pubDate = page.content.lastModified(),
                         description = description
                     )
                 )

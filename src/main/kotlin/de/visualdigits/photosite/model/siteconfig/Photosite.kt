@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.model.siteconfig
 
+import de.visualdigits.photosite.model.pagemodern.ContentType
 import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import de.visualdigits.photosite.model.siteconfig.navi.PageTree
 import de.visualdigits.photosite.model.siteconfig.plugin.Plugin
@@ -51,7 +52,7 @@ class Photosite(
         }
     }
 
-    private val pluginsMap: MutableMap<String, Plugin> = mutableMapOf()
+    val pluginsMap: MutableMap<ContentType, Plugin> = mutableMapOf()
 
     @Autowired
     private lateinit var envvironment: Environment
@@ -61,7 +62,7 @@ class Photosite(
 
     @PostConstruct
     fun initialize() {
-        plugins?.plugins()?.forEach { p -> pluginsMap[p.name] = p }
+        plugins?.plugins()?.forEach { p -> pluginsMap[p.contentType] = p }
         siteUrl = protocol + domain
         if (!isProfileActive("checkCerts")) {
             reloadPageTree()
@@ -82,10 +83,6 @@ class Photosite(
             dump = true
         )
         log.info("initialized page tree")
-    }
-
-    fun getPluginConfig(pluginName: String): Plugin? {
-        return pluginsMap[pluginName]
     }
 }
 

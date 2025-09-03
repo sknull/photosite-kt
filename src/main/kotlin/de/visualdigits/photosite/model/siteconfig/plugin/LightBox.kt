@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.model.siteconfig.plugin
 
+import de.visualdigits.photosite.model.pagemodern.ContentType
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
@@ -11,5 +12,5 @@ class LightBox(
     var imageFadeDuration: Long = 0,
     var wrapAround: Boolean = false
 ) : Plugin(
-    name = "LightBox"
+    contentType = ContentType.LightBox
 )

@@ -1,9 +1,10 @@
 package de.visualdigits.photosite.model.siteconfig.plugin
 
 import de.visualdigits.photosite.model.page.Page
+import de.visualdigits.photosite.model.pagemodern.ContentType
 
 abstract class Plugin(
-    val name: String = ""
+    val contentType: ContentType
 ) {
 
     open fun getHead(theme: String): String = ""

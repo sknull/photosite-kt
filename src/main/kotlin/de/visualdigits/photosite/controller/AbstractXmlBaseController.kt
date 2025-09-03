@@ -25,6 +25,6 @@ abstract class AbstractXmlBaseController(
 
     protected fun determinePages(count: Int = 0): List<Page> {
         return photosite.pageTree.lastModifiedPages(count)
-            .filter { p -> p.content.images.isNotEmpty() && p.content.lastModifiedTimestamp > OffsetDateTime.MIN }
+            .filter { p -> p.content.images.isNotEmpty() && p.content.lastModified() > OffsetDateTime.MIN }
     }
 }

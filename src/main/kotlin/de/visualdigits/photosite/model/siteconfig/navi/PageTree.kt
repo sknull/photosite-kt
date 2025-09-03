@@ -33,7 +33,7 @@ class PageTree(
             } else if ("thumbs" != name) {
                 page = Page()
                 page.name = name
-                page.content.loadExternalContent(pageDirectory)
+                page.content.loadContent(pageDirectory)
             }
         }
         if (page != null) {
@@ -78,7 +78,8 @@ class PageTree(
     fun lastModified(): OffsetDateTime {
         return lastModifiedPages(rootPage?.path!!, 1)
             .firstOrNull()
-            ?.content?.lastModifiedTimestamp
+            ?.content
+            ?.lastModified()
             ?: OffsetDateTime.MIN
     }
 
