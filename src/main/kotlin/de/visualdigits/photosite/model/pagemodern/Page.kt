@@ -16,8 +16,6 @@ class Page(
     var parent: Page? = null
     var children: List<Page> = listOf()
 
-    var lastModifiedTimestamp: OffsetDateTime = OffsetDateTime.MIN
-
     override fun toString(): String {
         return "${"  ".repeat(level)}$name\n${children.joinToString("") { it.toString() }}"
     }

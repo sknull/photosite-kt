@@ -5,7 +5,6 @@ import de.visualdigits.photosite.model.common.ImageFile
 import de.visualdigits.photosite.model.common.sort.Sort
 import de.visualdigits.photosite.model.common.sort.SortDir
 import de.visualdigits.photosite.model.page.teaser.Teaser
-import de.visualdigits.photosite.model.siteconfig.Photosite
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -39,15 +38,6 @@ class Content(
 
     init {
         captionsMap = captions.associate { c -> Pair(c.name!!, c) }
-    }
-
-    fun getHtml(page: Page, language: String): String {
-//        return plugin?.let {
-//            photosite.getPluginConfig(it)
-//                ?.getHtml(photosite, page, language)
-//                ?:""
-//        }?:""
-        return ""
     }
 
     fun loadExternalContent(directory: File) {

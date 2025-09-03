@@ -1,6 +1,7 @@
 package de.visualdigits.photosite.model.pagemodern
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import java.time.OffsetDateTime
 
 
 class Content(
@@ -18,6 +19,7 @@ class Content(
     var mdContent: String? = null
     var htmlContent: String? = null
     var images: List<ImageFile> = listOf()
+    var lastModifiedTimestamp: OffsetDateTime = OffsetDateTime.MIN
 
     lateinit var captionsMap: Map<String, Caption>
 
