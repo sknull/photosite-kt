@@ -11,12 +11,12 @@ object ImageHelper {
 
     private val log = LoggerFactory.getLogger(ImageHelper::class.java)
 
-    fun getThumbnail(photosite: Photosite, image: ImageFile): String? {
-        val pagetreePath = Paths.get(photosite.rootDirectory.canonicalPath, "resources", "pagetree")
+    fun getThumbnail(image: ImageFile): String? {
+        val pagetreePath = Paths.get(Photosite.rootDirectory.canonicalPath, "resources", "pagetree")
         val imageFile: File = image.file
         val sourceImageFilePath = Paths.get(imageFile.absolutePath)
         val relativePath = pagetreePath.relativize(sourceImageFilePath).toString()
-        val thumbnailFile = Paths.get(photosite.thumbnailCacheFolder.canonicalPath, relativePath).toFile()
+        val thumbnailFile = Paths.get(Photosite.thumbnailCacheFolder.canonicalPath, relativePath).toFile()
         val thumbnailFolder = thumbnailFile.parentFile
         if (thumbnailFolder?.exists() != true && thumbnailFolder?.mkdirs() != true) {
             log.error("Could not create thumbnail folder '$thumbnailFolder'")
@@ -31,6 +31,6 @@ object ImageHelper {
                 log.error("Could note create thumbnail for image '" + imageFile.absolutePath + "'", e)
             }
         }
-        return photosite.getRelativeResourcePath(thumbnailFile)
+        return Photosite.getRelativeResourcePath(thumbnailFile)
     }
 }

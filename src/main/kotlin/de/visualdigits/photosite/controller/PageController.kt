@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.nio.file.Paths
 import java.time.LocalDateTime
+import java.util.Locale
+import java.util.Objects.nonNull
 
 
 @Controller("PageController")
@@ -44,9 +46,17 @@ class PageController(
 
     private lateinit var expiryDate: LocalDateTime
 
+    private lateinit var fullPageTreeStatic: PageTree
+
     @PostConstruct
     fun initialize() {
         expiryDate = determineExpiryDate(photosite, certbotAlias, certbotPassword)
+
+        fullPageTreeStatic = PageTree(
+            pageDirectory = Paths.get(Photosite.rootDirectory.canonicalPath, "resources", "pagetree").toFile(),
+            nameFilter = { name -> "pagetree" == name || name.startsWith("-") },
+            dump = false
+        )
     }
 
     @GetMapping(value = ["/**"], produces = ["application/xhtml+xml"])
@@ -56,18 +66,7 @@ class PageController(
         request: HttpServletRequest,
         response: HttpServletResponse
     ): String? {
-        if (photosite.isProfileActive("prod")) {
-            val newExpiryDate = DomainCertificatesHelper.maintainServerCertificate(
-                photosite = photosite,
-                certbotUri = certbotUri,
-                certbotAlias = certbotAlias,
-                certbotPassword = certbotPassword,
-                expiryDate = expiryDate
-            )
-            if (newExpiryDate.isAfter(expiryDate)) {
-                Application.restart("ssl")
-            }
-        }
+        refreshCertIfNeeded()
 
         val requestUri = getRequestUri(request)
         return if (resourceFileExists(requestUri)) {
@@ -79,22 +78,51 @@ class PageController(
             null
         } else {
             val currentPage = PageHelper.determinePage(requestUri)
-            val language = lang?:photosite.languageDefault
+            val language = lang ?: photosite.languageDefault
             model.addAttribute("theme", photosite.theme)
             model.addAttribute("siteUrl", photosite.siteUrl)
             model.addAttribute("language", language)
             model.addAttribute("title", photosite.siteTitle)
             model.addAttribute("naviMain", PageHelper.createMainNavigation(photosite, currentPage, language))
             model.addAttribute("naviSub", PageHelper.createSubNavigation(photosite, language))
-            val fullPageTreeStatic = PageTree(
-                pageDirectory = Paths.get(photosite.rootDirectory.canonicalPath, "resources", "pagetree").toFile(),
-                nameFilter = { name -> "pagetree" == name || name.startsWith("-") },
-                dump = false
-            )
-            val naviStatic = PageHelper.createStaticNavigation(photosite, fullPageTreeStatic, language)
-            model.addAttribute("naviStatic", naviStatic)
-            PageHelper.createContent(photosite, currentPage, model, language, photosite.pageTree, fullPageTreeStatic)
+            model.addAttribute("naviStatic", PageHelper.createStaticNavigation(photosite, fullPageTreeStatic, language))
+
+            arrayOf(photosite.pageTree, fullPageTreeStatic)
+                .map { pageTree -> pageTree.getPage(currentPage) }
+                .find { obj: Any? -> nonNull(obj) }
+                ?.let { pageDescriptor ->
+                    val normalizedPath: String = pageDescriptor.normalizedPath()
+                    val keywords = pageDescriptor.getKeywords().toMutableList()
+                    keywords.addAll(normalizedPath
+                        .split("/")
+                        .dropLastWhile { it.isEmpty() }
+                        .map { s: String ->
+                            s.trim { it <= ' ' }.lowercase(Locale.forLanguageTag(language))
+                        })
+                    model.addAttribute("breadcrumb", normalizedPath)
+                    model.addAttribute("metaKeywords", keywords.joinToString(", "))
+                    model.addAttribute("metaDescription", keywords.joinToString(" "))
+                    val pluginConfig = photosite.getPluginConfig(pageDescriptor.content?.contentType ?: "")
+                    model.addAttribute("head", pluginConfig?.getHead(photosite.theme))
+                    model.addAttribute("content", pluginConfig?.getHtml(pageDescriptor, language))
+                }
+
             "pagetemplate"
+        }
+    }
+
+    private fun refreshCertIfNeeded() {
+        if (photosite.isProfileActive("prod")) {
+            val newExpiryDate = DomainCertificatesHelper.maintainServerCertificate(
+                photosite = photosite,
+                certbotUri = certbotUri,
+                certbotAlias = certbotAlias,
+                certbotPassword = certbotPassword,
+                expiryDate = expiryDate
+            )
+            if (newExpiryDate.isAfter(expiryDate)) {
+                Application.restart("ssl")
+            }
         }
     }
 
@@ -114,7 +142,7 @@ class PageController(
     }
 
     private fun getResourceFile(resourcePath: String): File? {
-        return Paths.get(photosite.rootDirectory.canonicalPath, resourcePath).toFile()
+        return Paths.get(Photosite.rootDirectory.canonicalPath, resourcePath).toFile()
     }
 
     private fun getResource(

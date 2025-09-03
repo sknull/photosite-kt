@@ -11,13 +11,12 @@ import org.springframework.stereotype.Component
 class Rotator : Plugin(
     name = "Rotator"
 ) {
-    override fun getHtml(photosite: Photosite, page: Page, language: String): String {
+    override fun getHtml(page: Page, language: String): String {
         val sb = StringBuilder()
-        val images: List<ImageFile> = page.images
+        val images: List<ImageFile> = page.content.images
         val n = (images.size * Math.random()).toInt()
         if (images.size > n) {
-            photosite
-                .getRelativeResourcePath(images[n].file)
+            Photosite.getRelativeResourcePath(images[n].file)
                 ?.let {
                     sb
                         .append("<img src=\"/")

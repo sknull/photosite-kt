@@ -1,8 +1,7 @@
 package de.visualdigits.photosite.model.common
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 
-@JsonIgnoreProperties("i18nMap")
 open class LanguageProvider(
     var lang: List<Language> = listOf(),
 ) {

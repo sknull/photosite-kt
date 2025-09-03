@@ -57,7 +57,7 @@ class RssController(
         val pagePath = page.normalizedPath()
         when {
             pagePath.isNotEmpty() -> {
-                val images: List<ImageFile> = page.images
+                val images: List<ImageFile> = page.content.images
                 val description = if (images.isNotEmpty()) {
                     val image: ImageFile = images[0]
                     var imageName = "teaser.jpg"
@@ -67,14 +67,13 @@ class RssController(
                     }
                     val thumbUrl =
                         photosite.protocol + photosite.domain + "/" + ImageHelper.getThumbnail(
-                            photosite,
                             image
                         )
                     val teaser = page.content?.teaser
                     var description =
                         "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"
                     if (teaser != null) {
-                        val text: String = teaser.getHtml(photosite, page, lang)
+                        val text: String = teaser.getHtml(lang)
                         if (text.isNotBlank()) {
                             description += text.trim { it <= ' ' } + "<br/>\n"
                         }
@@ -90,7 +89,7 @@ class RssController(
                         author = "Stephan Knull",
                         category = pagePath,
                         link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
-                        pubDate = page.lastModifiedTimestamp,
+                        pubDate = page.content.lastModifiedTimestamp,
                         description = description
                     )
                 )

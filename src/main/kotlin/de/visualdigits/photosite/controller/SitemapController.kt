@@ -90,7 +90,7 @@ class SitemapController(
                 .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.lastModifiedTimestamp))
+                .append(isoDate(page.content.lastModifiedTimestamp))
                 .append("</lastmod>\n")
                 //                        .append("    <changefreq>" + self.changefreq + "</changefreq>\n")
                 //                        .append("    <priority>" + self.priority + "</priority>\n")
@@ -119,10 +119,10 @@ class SitemapController(
                 .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.lastModifiedTimestamp))
+                .append(isoDate(page.content.lastModifiedTimestamp))
                 .append("</lastmod>\n")
-            for (imageFile in page.images) {
-                val imagePath = photosite.getRelativeResourcePath(imageFile.file)
+            for (imageFile in page.content.images) {
+                val imagePath = Photosite.getRelativeResourcePath(imageFile.file)
                 sb
                     .append("    <image:image>\n")
                     .append("      <image:loc>")
@@ -155,20 +155,19 @@ class SitemapController(
 
     @GetMapping(value = ["/sitemap.xsl"], produces = ["text/xsl"])
     fun sitemapXsl(@RequestParam(name = "page") page: String, model: Model): String {
-        val site = photosite
         val language = photosite.languageDefault
         val theme = photosite.theme!!
-        val siteUrl = site.protocol + site.domain
+        val siteUrl = photosite.protocol + photosite.domain
         model.addAttribute("theme", theme)
         model.addAttribute("siteUrl", siteUrl)
         model.addAttribute("language", language)
-        model.addAttribute("title", site.siteTitle)
+        model.addAttribute("title", photosite.siteTitle)
         model.addAttribute("breadcrumb", page)
         var comments = "<!--\n"
         comments += "     PAGE  : sitemap-$page\n"
         comments += "-->"
         model.addAttribute("comments", comments)
-        val xslFile = Paths.get(site.rootDirectory.canonicalPath, "resources", "themes", site.theme, "sitemap", "sitemap-$page.xsl").toFile()
+        val xslFile = Paths.get(Photosite.rootDirectory.canonicalPath, "resources", "themes", photosite.theme, "sitemap", "sitemap-$page.xsl").toFile()
         val content = readFile(xslFile)
         model.addAttribute("content", content)
         return "/xsltemplate"

@@ -29,11 +29,11 @@ class PageTree(
         var page: Page? = null
         if (nameFilter == null || nameFilter(name)) {
             if (descriptorFile.exists()) {
-                page = Page.load(descriptorFile)
+                page = Page.readValue(descriptorFile)
             } else if ("thumbs" != name) {
                 page = Page()
                 page.name = name
-                page.loadExternalContent(pageDirectory)
+                page.content.loadExternalContent(pageDirectory)
             }
         }
         if (page != null) {
@@ -78,7 +78,7 @@ class PageTree(
     fun lastModified(): OffsetDateTime {
         return lastModifiedPages(rootPage?.path!!, 1)
             .firstOrNull()
-            ?.lastModifiedTimestamp
+            ?.content?.lastModifiedTimestamp
             ?: OffsetDateTime.MIN
     }
 

@@ -148,35 +148,10 @@ object PageHelper {
         return sb.toString()
     }
 
-    fun createContent(
-        photosite: Photosite,
-        page: String,
-        model: Model,
-        language: String,
-        vararg pageTrees: PageTree
-    ) {
-        pageTrees
-            .map { pageTree -> pageTree.getPage(page) }
-            .find { obj: Any? -> Objects.nonNull(obj) }
-            ?.let { pageDescriptor ->
-                val keywords = pageDescriptor.getKeywords().toMutableList()
-                val normalizedPath: String = pageDescriptor.normalizedPath()
-                keywords.addAll(normalizedPath.split("/").dropLastWhile { it.isEmpty() }
-                    .map { s: String -> s.trim { it <= ' ' }.lowercase(Locale.getDefault())
-                })
-                model.addAttribute("breadcrumb", normalizedPath)
-                model.addAttribute("metaKeywords", keywords.joinToString(", "))
-                model.addAttribute("metaDescription", keywords.joinToString(" "))
-                model.addAttribute("head", pageDescriptor.getHead(photosite))
-                val html: String = pageDescriptor.getHtml(photosite, pageDescriptor, language)
-                model.addAttribute("content", html)
-            }
-    }
-
     private fun createPageLink(
         photosite: Photosite,
         page: Page,
-        language: String?,
+        language: String,
         level: Int,
         indent: String?,
         pagePath: String?

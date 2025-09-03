@@ -35,7 +35,7 @@ class WebConfig(
     fun templateResolver(): ITemplateResolver {
         val templateResolver = FileTemplateResolver()
         templateResolver.prefix = Paths.get(
-            photosite.rootDirectory.canonicalPath,
+            Photosite.rootDirectory.canonicalPath,
             "resources",
             "themes",
             photosite.theme,

@@ -1,9 +1,6 @@
 package de.visualdigits.photosite.model.page.teaser
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import de.visualdigits.photosite.model.common.HtmlSnippet
-import de.visualdigits.photosite.model.page.Page
-import de.visualdigits.photosite.model.siteconfig.Photosite
 import org.apache.commons.text.StringEscapeUtils
 
 
@@ -28,9 +25,9 @@ class GoogleMaps(
 
     @JacksonXmlProperty(isAttribute = true)
     val zoom: String? = null
-) : HtmlSnippet {
+) {
 
-    override fun getHtml(photosite: Photosite, page: Page, language: String): String {
+    fun getHtml(): String {
         val sb = StringBuilder()
         val url = "https://www.google.com/maps/embed?pb=" +
                 "!1m18!1m12!1m3" +

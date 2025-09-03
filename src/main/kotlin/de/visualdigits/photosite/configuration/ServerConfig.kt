@@ -17,10 +17,10 @@ class ServerConfig(
     private val log = LoggerFactory.getLogger(ServerConfig::class.java)
 
     override fun customize(server: ConfigurableServletWebServerFactory) {
-        log.info("rootDirectory: ${photosite.rootDirectory}")
+        log.info("rootDirectory: ${Photosite.rootDirectory}")
         server.setPort(443)
         val ssl = Ssl()
-        ssl.keyStore = "${photosite.rootDirectory}/secrets/keystore.p12"
+        ssl.keyStore = "${Photosite.rootDirectory}/secrets/keystore.p12"
         ssl.keyStoreType = "PKCS12"
         ssl.keyAlias = "springboot"
         ssl.keyStorePassword = "foodlyboo"

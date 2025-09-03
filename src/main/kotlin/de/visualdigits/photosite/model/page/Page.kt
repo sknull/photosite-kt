@@ -6,7 +6,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import com.github.rjeschke.txtmark.Processor
-import de.visualdigits.photosite.model.common.HtmlSnippet
 import de.visualdigits.photosite.model.common.ImageFile
 import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.common.LanguageProvider
@@ -24,8 +23,7 @@ import java.util.function.Consumer
 import java.util.regex.Pattern
 
 @JsonIgnoreProperties(
-    "log",
-    "file",
+    "descriptorFile",
     "path",
     "name",
     "mdContent",
@@ -33,46 +31,48 @@ import java.util.regex.Pattern
     "images",
     "parent",
     "childs",
-    "lastModifiedTimestamp"
+    "lastModifiedTimestamp",
+    "languageMap",
+
+    "head",
+    "html",
+    "keywords",
+    "title"
 )
 class Page(
     @JacksonXmlProperty(isAttribute = true) val icon: String? = null,
     @JacksonXmlProperty(localName = "tocname") val tocName: String? = null,
     i18n: List<Language> = listOf(),
-    val content: Content? = null,
-) : LanguageProvider(i18n), HtmlSnippet {
+    val content: Content = Content(),
+) : LanguageProvider(i18n) {
 
-    private val log = LoggerFactory.getLogger(Page::class.java)
+    private val log = LoggerFactory.getLogger(javaClass)
 
-    var file: File? = null
+    var descriptorFile: File? = null
     var path: String? = null
     var name: String? = null
-    var mdContent: String? = null
-    var htmlContent: String? = null
-    var images: MutableList<ImageFile> = mutableListOf()
+
     var parent: Page? = null
     var childs: MutableList<Page> = mutableListOf()
-    var lastModifiedTimestamp: OffsetDateTime = OffsetDateTime.MIN
 
     companion object {
-        val MAPPER = XmlMapper.builder()
+        val mapper = XmlMapper.builder()
             .addModule(kotlinModule())
-            .disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
-            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
             .build()
 
-        fun load(descriptorFile: File): Page? {
+        fun readValue(descriptorFile: File): Page? {
             val directory = descriptorFile.parentFile
             return try {
-                val page = MAPPER.readValue(
+                val page = mapper.readValue(
                     descriptorFile,
                     Page::class.java
                 )
-                page.file = descriptorFile
+                page.descriptorFile = descriptorFile
                 page.name = directory.getName()
-                page.loadExternalContent(directory)
-                page.loadImages(directory)
+                page.content.loadExternalContent(directory)
+                page.content.loadImages(directory)
                 page
             } catch (e: IOException) {
                 throw IllegalArgumentException("Could not parse page file: $descriptorFile", e)
@@ -161,31 +161,7 @@ class Page(
         return path?:"UNSET"
     }
 
-    fun loadExternalContent(directory: File) {
-        log.debug("Loading external content for directory: {}", directory)
-        if (mdContent == null) {
-            mdContent = readFile(File(directory, "page.md"))
-        }
-        if (htmlContent == null) {
-            htmlContent = readFile(File(directory, "page.html"))
-        }
-    }
-
-    private fun loadImages(directory: File) {
-        if (images.isEmpty()) {
-            directory
-                .listFiles { file: File ->
-                    file.isFile() && file.getName().lowercase(Locale.getDefault()).endsWith(".jpg")
-                }?.map { image ->
-                    ImageFile(image)
-                }?.toMutableList()
-                ?.let { images.addAll(it) }
-            sortImages()
-            determineLastModifiedTimestamp()
-        }
-    }
-
-    fun getTitle(language: String?): String? {
+    fun getTitle(language: String): String? {
         var title = name
         val lang = languageMap[language]
         if (lang != null) {
@@ -199,59 +175,6 @@ class Page(
             }
         }
         return title
-    }
-
-    fun clear() {
-        childs.clear()
-    }
-
-    override fun getHead(photosite: Photosite): String {
-        var head: String = ""
-        if (content != null) {
-            head = content.getHead(photosite)
-        }
-        return head
-    }
-
-    override fun getHtml(
-        photosite: Photosite,
-        page: Page,
-        language: String
-    ): String {
-        val sb = StringBuilder()
-        sb
-            .append("\n          <div id=\"")
-            .append(page.name)
-            .append("\">\n")
-            .append("          <h1>")
-            .append(page.getTitle(language))
-            .append("</h1>\n")
-        when {
-            content != null -> {
-                val teaser = content.teaser
-                if (teaser != null) {
-                    sb.append(teaser.getHtml(photosite, page, language))
-                }
-                sb.append(content.getHtml(photosite, page, language))
-            }
-            htmlContent?.isNotEmpty() == true -> {
-                sb.append(htmlContent)
-            }
-            mdContent?.isNotEmpty() == true -> {
-                val html = Processor.process(mdContent)
-                sb.append(html)
-            }
-        }
-        sb.append("        </div><!-- ")
-            .append(page.name)
-            .append(" -->\n")
-        sb.append("      ")
-        var html = sb.toString()
-
-//        html = obfuscateLink(html);
-        html = obfuscateEmail(html)
-        html = obfuscateText(html)
-        return html
     }
 
     fun getKeywords(): Set<String> {
@@ -276,63 +199,12 @@ class Page(
         childs.forEach { c -> c.getKeywords(keywords) }
     }
 
-    fun determineLastModifiedTimestamp() {
-        lastModifiedTimestamp = OffsetDateTime.MIN
-        images.forEach { image ->
-            val time = image.date?.toInstant()?.atOffset(ZoneOffset.UTC)?:OffsetDateTime.MIN
-            if (time > lastModifiedTimestamp) {
-                lastModifiedTimestamp = time
-            }
-        }
-    }
-
-    private fun sortImages() {
-        val sort = determineSort()
-        if (sort.by == "manual") {
-            val map = mutableMapOf<String, ImageFile>()
-            images.forEach(Consumer { p: ImageFile -> map[p.file.getName()] = p })
-            val sortedPages: MutableList<ImageFile> = ArrayList()
-            sort.orderList.forEach { p ->
-                val imageFile = map[p]
-                if (imageFile != null) {
-                    sortedPages.add(imageFile)
-                    images.remove(imageFile)
-                }
-            }
-            images.let { sortedPages.addAll(it) }
-            images.clear()
-            images.addAll(sortedPages)
-        } else {
-            when (sort.by) {
-                "name" -> images.sortBy { it.name }
-                "mtime" -> images.sortBy { it.date }
-            }
-            if (sort.dir == SortDir.desc) {
-                images.reverse()
-            }
-        }
-    }
-
-    private fun determineSort(): Sort {
-        return content?.sort?:Sort(by = "name", dir = SortDir.asc)
-    }
-
     fun addChild(child: Page) {
         if (!childs.contains(child)) {
             child.parent = this
             child.path = path + "/" + child.name
             childs.add(child)
         }
-    }
-
-    private fun readFile(file: File): String {
-        return if (file.exists()) {
-            try {
-                file.readText()
-            } catch (e: IOException) {
-                throw IllegalStateException("Could not read file contents: ", e)
-            }
-        } else ""
     }
 
     fun normalizedPath(): String {

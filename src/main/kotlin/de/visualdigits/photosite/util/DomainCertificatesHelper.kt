@@ -81,7 +81,7 @@ object DomainCertificatesHelper {
     }
 
     fun determineExpiryDate(photosite: Photosite, alias: String?, password: String): LocalDateTime {
-        val keystore = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_KEY_STORE).toFile()
+        val keystore = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_KEY_STORE).toFile()
         val expiryDate = if (keystore.exists()) {
             runCatching {
                 Files.newInputStream(keystore.toPath()).use { ins ->
@@ -112,10 +112,10 @@ object DomainCertificatesHelper {
         keystorePassword: String
     ) {
         fetchCertificate(photosite, certbotUri, domains)
-        val keyFile = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_KEY).toFile()
-        val cerFile = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_CHAIN_CRT).toFile()
+        val keyFile = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_KEY).toFile()
+        val cerFile = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_CHAIN_CRT).toFile()
         val keystoreBytes = convertPEMToPKCS12(keyFile, cerFile, keystorePassword, keystoreAlias)
-        val keystore = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_KEY_STORE).toFile()
+        val keystore = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_KEY_STORE).toFile()
         log.info("Creating target keystore file '$keystore'")
         writeFile(keystoreBytes, keystore)
     }
@@ -164,7 +164,7 @@ object DomainCertificatesHelper {
             csrb.sign(domainKeyPair)
 
             // Write the CSR to a file, for later use.
-            val domainCsrFile = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_CSR).toFile()
+            val domainCsrFile = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_CSR).toFile()
             log.info("Creating CSR file '$domainCsrFile'")
             runCatching {
                 FileWriter(domainCsrFile).use { out -> csrb.write(out) }
@@ -200,7 +200,7 @@ object DomainCertificatesHelper {
             log.info("Certificate URL: {}", certificate!!.location)
 
             // Write a combined file containing the certificate and chain.
-            val domainChainFile = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_CHAIN_CRT).toFile()
+            val domainChainFile = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_CHAIN_CRT).toFile()
             log.info("Creating domain chin file '$domainChainFile'")
             FileWriter(domainChainFile).use { fw -> certificate.writeCertificate(fw) }
         }.onFailure { e ->
@@ -219,7 +219,7 @@ object DomainCertificatesHelper {
      * @return User's [KeyPair].
      */
     private fun loadOrCreateUserKeyPair(photosite: Photosite): KeyPair {
-        val userKeyFile = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_USER_KEY).toFile()
+        val userKeyFile = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_USER_KEY).toFile()
         if (userKeyFile.exists()) {
             // If there is a key file, read it
             try {
@@ -247,7 +247,7 @@ object DomainCertificatesHelper {
      * @return Domain [KeyPair].
      */
     private fun loadOrCreateDomainKeyPair(photosite: Photosite): KeyPair {
-        val domainKeyFile = Paths.get(photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_KEY).toFile()
+        val domainKeyFile = Paths.get(Photosite.rootDirectory.canonicalPath, "secrets", FILE_DOMAIN_KEY).toFile()
         if (domainKeyFile.exists()) {
             try {
                 FileReader(domainKeyFile).use { fr -> return KeyPairUtils.readKeyPair(fr) }
@@ -357,7 +357,7 @@ object DomainCertificatesHelper {
     private fun httpChallenge(photosite: Photosite, auth: Authorization): Challenge {
         // Find a single http-01 challenge
         val challenge = auth.findChallenge(Http01Challenge::class.java)?: error("Found no " + Http01Challenge.TYPE + " challenge, don't know what to do...")
-        val challengeDirectory = Paths.get(photosite.rootDirectory.canonicalPath, ".well-known", "acme-challenge").toFile()
+        val challengeDirectory = Paths.get(Photosite.rootDirectory.canonicalPath, ".well-known", "acme-challenge").toFile()
         check(!(!challengeDirectory.exists() && !challengeDirectory.mkdirs())) { "Could not create challenge directory: $challengeDirectory" }
         val challengeFile = File(challengeDirectory, challenge.token)
         log.info("Creating challenge file: $challengeFile")

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.io.File
 import java.nio.file.Paths
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Locale
 
@@ -68,7 +67,7 @@ class MaintenanceController(
 
     @GetMapping(value = ["/maintenance/createThumbnails"])
     fun createThumbnails(httpResponse: HttpServletResponse) {
-        createThumbnails(Paths.get(photosite.rootDirectory.canonicalPath, "resources", "pagetree").toFile())
+        createThumbnails(Paths.get(Photosite.rootDirectory.canonicalPath, "resources", "pagetree").toFile())
         httpResponse.sendRedirect("/")
     }
 
@@ -83,7 +82,7 @@ class MaintenanceController(
         rootFolder.listFiles { file: File ->
             file.isFile() && file.getName().lowercase(Locale.getDefault()).endsWith(".jpg")
         }?.forEach { imageFile ->
-            ImageHelper.getThumbnail(photosite, ImageFile(imageFile))
+            ImageHelper.getThumbnail(ImageFile(imageFile))
         }
 
         // recurse into sub folders

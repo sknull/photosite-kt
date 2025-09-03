@@ -1,9 +1,6 @@
 package de.visualdigits.photosite.model.page.teaser
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import de.visualdigits.photosite.model.common.HtmlSnippet
-import de.visualdigits.photosite.model.page.Page
-import de.visualdigits.photosite.model.siteconfig.Photosite
 
 
 class Teaser(
@@ -11,7 +8,7 @@ class Teaser(
     val googleMaps: GoogleMaps? = null,
 
     val texts: List<Text>? = null
-) : HtmlSnippet {
+) {
 
     val i18nMap: MutableMap<String, Text> = mutableMapOf()
 
@@ -21,10 +18,10 @@ class Teaser(
         }
     }
 
-    override fun getHtml(photosite: Photosite, page: Page, language: String): String {
+    fun getHtml(language: String): String {
         val sb = StringBuilder()
         if (googleMaps != null) {
-            sb.append(googleMaps.getHtml(photosite, page, language))
+            sb.append(googleMaps.getHtml())
         }
         val text = i18nMap[language]
         if (text != null) {

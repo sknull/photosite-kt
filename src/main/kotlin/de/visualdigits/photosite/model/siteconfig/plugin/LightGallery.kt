@@ -25,26 +25,25 @@ class LightGallery(
     name = "LightGallery"
 ) {
 
-    override fun getHead(photosite: Photosite): String {
-        val theme = photosite.theme
+    override fun getHead(theme: String): String {
         return """<link href="/resources/themes/$theme/plugins/lightgallery/css/lightgallery.css" rel="stylesheet" type="text/css"/>
-    <link href="/resources/themes/$theme/css/plugin-photostory.css" rel="stylesheet" type="text/css"/>
-    <link href="/resources/themes/$theme/css/plugin-lightgallery.css" rel="stylesheet" type="text/css"/>
-    <script src="/resources/themes/$theme/plugins/lightgallery/js/lightgallery.js" type="text/javascript"></script>
-    <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-thumbnail.js" type="text/javascript"></script>
-    <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-fullscreen.js" type="text/javascript"></script>
-    <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-autoplay.js" type="text/javascript"></script>"""
+        <link href="/resources/themes/$theme/css/plugin-photostory.css" rel="stylesheet" type="text/css"/>
+        <link href="/resources/themes/$theme/css/plugin-lightgallery.css" rel="stylesheet" type="text/css"/>
+        <script src="/resources/themes/$theme/plugins/lightgallery/js/lightgallery.js" type="text/javascript"></script>
+        <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-thumbnail.js" type="text/javascript"></script>
+        <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-fullscreen.js" type="text/javascript"></script>
+        <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-autoplay.js" type="text/javascript"></script>"""
     }
 
-    override fun getHtml(photosite: Photosite, page: Page, language: String): String {
+    override fun getHtml(page: Page, language: String): String {
         val sb =
             StringBuilder("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
-        page.images
+        page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file
                 val metadata = imageFile.metadata
-                val imagePath = photosite.getRelativeResourcePath(image)
-                val thumbPath = ImageHelper.getThumbnail(photosite, imageFile)
+                val imagePath = Photosite.getRelativeResourcePath(image)
+                val thumbPath = ImageHelper.getThumbnail(imageFile)
                 val exifDir =
                     metadata?.getFirstDirectoryOfType(ExifIFD0Directory::class.java)
                 val exifSubDir =
