@@ -1,8 +1,10 @@
-package de.visualdigits.photosite.model.pagemodern
+package de.visualdigits.photosite.model.page
+
+import java.util.Locale
 
 
 class Text(
-    val lang: String? = null,
+    val lang: Locale? = null,
     var value: String? = null
 ) {
     init {

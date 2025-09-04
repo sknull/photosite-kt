@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.controller
 
-import de.visualdigits.photosite.model.common.ImageFile
+import de.visualdigits.photosite.model.page.ImageFile
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.rss.Channel
 import de.visualdigits.photosite.model.rss.Item
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import java.io.File
+import java.util.Locale
 
 @Controller
 class RssController(
@@ -22,11 +23,11 @@ class RssController(
     @GetMapping(value = ["/rss.xml"], produces = ["application/xml"])
     @ResponseBody
     fun rssFeed(
-        @RequestParam(name = "lang", required = false, defaultValue = "") lang: String, response: HttpServletResponse
+        @RequestParam(name = "lang", required = false, defaultValue = "") lang: Locale, response: HttpServletResponse
     ): String {
         val items = mutableListOf<Item>()
         val pageTree = photosite.pageTree
-        val lastModified = pageTree.lastModified()
+        val lastModified = pageTree.content.lastModified
         val feed = Rss(
             channels = listOf(
                 Channel(
@@ -51,10 +52,10 @@ class RssController(
 
     private fun processPage(
         page: Page,
-        lang: String,
+        lang: Locale,
         items: MutableList<Item>
     ) {
-        val pagePath = page.normalizedPath()
+        val pagePath = page.path()
         when {
             pagePath.isNotEmpty() -> {
                 val images: List<ImageFile> = page.content.images
@@ -69,7 +70,7 @@ class RssController(
                         photosite.protocol + photosite.domain + "/" + ImageHelper.getThumbnail(
                             image
                         )
-                    val teaser = page.content?.teaser
+                    val teaser = page.content.teaser
                     var description =
                         "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"
                     if (teaser != null) {
@@ -89,7 +90,7 @@ class RssController(
                         author = "Stephan Knull",
                         category = pagePath,
                         link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
-                        pubDate = page.content.lastModified(),
+                        pubDate = page.content.lastModified,
                         description = description
                     )
                 )

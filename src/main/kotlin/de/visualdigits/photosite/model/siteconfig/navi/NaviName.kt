@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.model.siteconfig.navi
 
-import de.visualdigits.photosite.model.common.Label
+import de.visualdigits.photosite.model.page.Label
 
 class NaviName(
     var rootFolder: String? = null,

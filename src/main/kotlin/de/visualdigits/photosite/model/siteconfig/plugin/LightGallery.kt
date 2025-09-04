@@ -3,8 +3,8 @@ package de.visualdigits.photosite.model.siteconfig.plugin
 import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
+import de.visualdigits.photosite.model.page.ContentType
 import de.visualdigits.photosite.model.page.Page
-import de.visualdigits.photosite.model.pagemodern.ContentType
 import de.visualdigits.photosite.model.siteconfig.Photosite
 import de.visualdigits.photosite.util.ImageHelper
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -57,7 +57,7 @@ class LightGallery(
                     .append(imagePath)
                     .append("\"")
                 if (exifDir != null && exifSubDir != null) {
-                    imageName += "&nbsp;(" + DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss").format(imageFile.lastModified()) + ")"
+                    imageName += "&nbsp;(" + DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss").format(imageFile.lastModified) + ")"
                     sb.append(" data-sub-html=\"")
                         .append("<div class='camera-infos camera-infos-grid'>")
                         .append("<div id='camera-infos-caption' class='info-box'>")

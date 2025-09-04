@@ -1,30 +1,16 @@
-package de.visualdigits.photosite.model.page.teaser
+package de.visualdigits.photosite.model.page
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import org.apache.commons.text.StringEscapeUtils
 
 
 class GoogleMaps(
-    @JacksonXmlProperty(isAttribute = true)
     val name: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
     val width: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
     val height: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
     val align: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
-    val lat: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
-    val lng: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
-    val zoom: String? = null
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val zoom: Int? = null
 ) {
 
     fun getHtml(): String {

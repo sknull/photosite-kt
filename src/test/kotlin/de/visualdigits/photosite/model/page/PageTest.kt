@@ -1,8 +1,5 @@
 package de.visualdigits.photosite.model.page
 
-import de.visualdigits.photosite.model.common.Label
-import de.visualdigits.photosite.model.common.Translation
-import de.visualdigits.photosite.model.pagemodern.Page
 import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -14,8 +11,8 @@ class PageTest {
     fun testConvertDescriptor() {
 //        val tree = Page.readValue(File("W:/"))
         val tree = Page.readValue(File("C:/Users/sknul/.photosite/resources/pagetree"))
-        val mainTree = tree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
-        val staticTree = tree.clone { p -> p.name.startsWith("-") }
+//        val mainTree = tree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
+//        val staticTree = tree.clone { p -> p.name.startsWith("-") }
 //        println(
 //            mainTree.mainNaviHtml(
 //                naviName = NaviName(
@@ -33,21 +30,21 @@ class PageTest {
 //                theme = "dark"
 //            )
 //        )
-        println(
-            staticTree.subNaviHtml(
-                naviName = NaviName(
-                    label = Label(
-                        translations = listOf(
-                            Translation(lang = Locale.GERMAN, name = "STATISCH"),
-                            Translation(lang = Locale.ENGLISH, name = "STATIC")
-                        )
-                    )
-                ),
-                language = Locale.GERMAN,
-                currentPage = mainTree.page("pagetree")!!,
-                theme = "dark"
-            )
-        )
+//        println(
+//            staticTree.subNaviHtml(
+//                naviName = NaviName(
+//                    label = Label(
+//                        lang = listOf(
+//                            Translation(lang = Locale.GERMAN, name = "STATISCH"),
+//                            Translation(lang = Locale.ENGLISH, name = "STATIC")
+//                        )
+//                    )
+//                ),
+//                language = Locale.GERMAN,
+//                currentPage = mainTree.page("pagetree")!!,
+//                theme = "dark"
+//            )
+//        )
 //        println("--------------------------------")
 //        println(staticTree)
     }

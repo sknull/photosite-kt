@@ -1,7 +1,7 @@
 package de.visualdigits.photosite.model.siteconfig.plugin
 
+import de.visualdigits.photosite.model.page.ContentType
 import de.visualdigits.photosite.model.page.Page
-import de.visualdigits.photosite.model.pagemodern.ContentType
 import java.util.Locale
 
 abstract class Plugin(

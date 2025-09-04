@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.model.pagemodern
+package de.visualdigits.photosite.model.page
 
 
 class Image(

@@ -1,11 +1,10 @@
 package de.visualdigits.photosite.controller
 
 import de.visualdigits.photosite.Application
+import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.siteconfig.Photosite
-import de.visualdigits.photosite.model.siteconfig.navi.PageTree
 import de.visualdigits.photosite.util.DomainCertificatesHelper
 import de.visualdigits.photosite.util.DomainCertificatesHelper.determineExpiryDate
-import de.visualdigits.photosite.util.PageHelper
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -27,7 +26,6 @@ import java.net.URLDecoder
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.util.Locale
-import java.util.Objects.nonNull
 
 
 @Controller("PageController")
@@ -46,17 +44,9 @@ class PageController(
 
     private lateinit var expiryDate: LocalDateTime
 
-    private lateinit var fullPageTreeStatic: PageTree
-
     @PostConstruct
     fun initialize() {
         expiryDate = determineExpiryDate(photosite, certbotAlias, certbotPassword)
-
-        fullPageTreeStatic = PageTree(
-            pageDirectory = Paths.get(Photosite.rootDirectory.canonicalPath, "resources", "pagetree").toFile(),
-            nameFilter = { name -> "pagetree" == name || name.startsWith("-") },
-            dump = false
-        )
     }
 
     @GetMapping(value = ["/**"], produces = ["application/xhtml+xml"])
@@ -77,34 +67,54 @@ class PageController(
             }
             null
         } else {
-            val currentPage = PageHelper.determinePage(requestUri)
+            val currentPageName = requestUri.drop(1)
+            val currentPage = photosite.pageTree.page(currentPageName)?:error("No current page")
+            val currentPagePath = currentPage.path()
             val language = lang ?: photosite.languageDefault
             model.addAttribute("theme", photosite.theme)
             model.addAttribute("siteUrl", photosite.siteUrl)
             model.addAttribute("language", language)
             model.addAttribute("title", photosite.siteTitle)
-            model.addAttribute("naviMain", PageHelper.createMainNavigation(photosite, currentPage, language))
-            model.addAttribute("naviSub", PageHelper.createSubNavigation(photosite, language))
-            model.addAttribute("naviStatic", PageHelper.createStaticNavigation(photosite, fullPageTreeStatic, language))
+            model.addAttribute("naviMain", photosite.mainTree.mainNaviHtml(photosite.naviMain?:error("No main navi"), language, currentPage, photosite.theme))
+            model.addAttribute("naviSub",
+                photosite.subTrees
+                    .map { (naviName, pages) ->
+                        Page.subNaviHtml(
+                            naviName,
+                            language,
+                            currentPage,
+                            pages,
+                            photosite.theme
+                        )
+                    }
+                    .joinToString("")
+            )
+            model.addAttribute("naviStatic", Page.subNaviHtml(
+                photosite.naviStatic?:error("No static navi"),
+                language,
+                currentPage,
+                photosite.staticTree.children,
+                photosite.theme
+            ))
 
-            arrayOf(photosite.pageTree, fullPageTreeStatic)
-                .map { pageTree -> pageTree.getPage(currentPage) }
-                .find { obj: Any? -> nonNull(obj) }
-                ?.let { pageDescriptor ->
-                    val normalizedPath: String = pageDescriptor.normalizedPath()
-                    val keywords = pageDescriptor.getKeywords().toMutableList()
-                    keywords.addAll(normalizedPath
+            listOf(photosite.mainTree, photosite.staticTree)
+                .firstNotNullOfOrNull { pageTree -> pageTree.page(currentPagePath) }
+                ?.let { page ->
+                    val keywords = page.content.keywords.toMutableList()
+                    val path = page.path()
+                    keywords.addAll(
+                        path
                         .split("/")
                         .dropLastWhile { it.isEmpty() }
                         .map { s: String ->
                             s.trim { it <= ' ' }.lowercase(language)
                         })
-                    model.addAttribute("breadcrumb", normalizedPath)
+                    model.addAttribute("breadcrumb", path)
                     model.addAttribute("metaKeywords", keywords.joinToString(", "))
                     model.addAttribute("metaDescription", keywords.joinToString(" "))
-                    val pluginConfig = photosite.pluginsMap[pageDescriptor.content.contentType]
+                    val pluginConfig = photosite.pluginsMap[page.content.contentType]
                     model.addAttribute("head", pluginConfig?.getHead(photosite.theme))
-                    model.addAttribute("content", pluginConfig?.getHtml(pageDescriptor, language))
+                    model.addAttribute("content", pluginConfig?.getHtml(page, language))
                 }
 
             "pagetemplate"

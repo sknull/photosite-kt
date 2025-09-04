@@ -32,7 +32,7 @@ class SitemapController(
     @GetMapping(value = ["/sitemap-index.xml"])
     @ResponseBody
     fun sitemapIndex(response: HttpServletResponse) {
-        val lastModified = isoDate(photosite.pageTree.lastModified())
+        val lastModified = isoDate(photosite.pageTree.content.lastModified)
         val siteUrl: String = photosite.protocol + photosite.domain
         var body = "  <sitemap>\n"
         body += "    <loc>$siteUrl/sitemap-site.xml</loc>\n"
@@ -58,7 +58,7 @@ class SitemapController(
     @GetMapping(value = ["/sitemap-site.xml"])
     @ResponseBody
     fun sitemapSite(response: HttpServletResponse) {
-        val lastModified = isoDate(photosite.pageTree.lastModified())
+        val lastModified = isoDate(photosite.pageTree.content.lastModified)
         val siteUrl: String = photosite.protocol + photosite.domain
         var body = "  <url>\n"
         body += "    <loc>$siteUrl</loc>\n"
@@ -87,10 +87,10 @@ class SitemapController(
                 .append("    <loc>")
                 .append(siteUrl)
                 .append("/")
-                .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
+                .append(StringEscapeUtils.escapeXml11(page.path()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.content.lastModified()))
+                .append(isoDate(page.content.lastModified))
                 .append("</lastmod>\n")
                 //                        .append("    <changefreq>" + self.changefreq + "</changefreq>\n")
                 //                        .append("    <priority>" + self.priority + "</priority>\n")
@@ -116,10 +116,10 @@ class SitemapController(
             sb
                 .append("  <url>\n").append("    <loc>")
                 .append(siteUrl).append("/")
-                .append(StringEscapeUtils.escapeXml11(page.normalizedPath()))
+                .append(StringEscapeUtils.escapeXml11(page.path()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.content.lastModified()))
+                .append(isoDate(page.content.lastModified))
                 .append("</lastmod>\n")
             for (imageFile in page.content.images) {
                 val imagePath = Photosite.getRelativeResourcePath(imageFile.file)

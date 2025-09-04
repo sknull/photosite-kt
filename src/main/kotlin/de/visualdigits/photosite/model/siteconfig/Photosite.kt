@@ -1,8 +1,8 @@
 package de.visualdigits.photosite.model.siteconfig
 
-import de.visualdigits.photosite.model.pagemodern.ContentType
+import de.visualdigits.photosite.model.page.ContentType
+import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.siteconfig.navi.NaviName
-import de.visualdigits.photosite.model.siteconfig.navi.PageTree
 import de.visualdigits.photosite.model.siteconfig.plugin.Plugin
 import de.visualdigits.photosite.model.siteconfig.plugin.Plugins
 import jakarta.annotation.PostConstruct
@@ -59,7 +59,10 @@ class Photosite(
     private lateinit var envvironment: Environment
 
     var siteUrl: String? = null
-    var pageTree: PageTree = PageTree()
+    var pageTree: Page = Page()
+    var mainTree: Page = Page()
+    var subTrees: List<Pair<NaviName, List<Page>>> = listOf()
+    var staticTree: Page = Page()
 
     @PostConstruct
     fun initialize() {
@@ -78,11 +81,10 @@ class Photosite(
 
     fun reloadPageTree() {
         log.info("initializing page tree...")
-        pageTree = PageTree(
-            pageDirectory = Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile(),
-            nameFilter = { name -> "pagetree" == name || (!name.startsWith("#") && !name.startsWith("-")) },
-            dump = true
-        )
+        pageTree = Page.readValue(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
+        mainTree = pageTree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
+        subTrees = naviSub?.mapNotNull { n -> n.rootFolder?.let { rf -> Pair(n,pageTree.page(rf)?.lastModifiedPages(n.numberOfEntries)?:error("No sub navigation '${n.rootFolder}'")) } }?:listOf()
+        staticTree = pageTree.clone { p -> p.name.startsWith("-") }
         log.info("initialized page tree")
     }
 }

@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.model.siteconfig.plugin
 
-import de.visualdigits.photosite.model.pagemodern.ContentType
+import de.visualdigits.photosite.model.page.ContentType
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 

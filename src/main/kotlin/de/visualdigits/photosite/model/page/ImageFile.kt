@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.model.common
+package de.visualdigits.photosite.model.page
 
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.Metadata
@@ -21,20 +21,21 @@ class ImageFile(
 
     var metadata: Metadata? = null
 
-    fun lastModified(): OffsetDateTime {
+    var lastModified: OffsetDateTime = OffsetDateTime.MIN
+
+    init {
         if (metadata == null) {
             try {
                 metadata = ImageMetadataReader.readMetadata(file)
             } catch (e: Exception) {
                 log.error("Could not extract meta data from file: $file", e)
             }
+            lastModified = metadata
+                ?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
+                ?.getDateOriginal(TimeZone.getTimeZone("Europe/Berlin"))
+                ?.toInstant()?.atOffset(ZoneOffset.UTC)
+                ?: Instant.ofEpochMilli(file.lastModified()).atOffset(ZoneOffset.UTC)
         }
-
-        return metadata
-            ?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
-            ?.getDateOriginal(TimeZone.getTimeZone("Europe/Berlin"))
-            ?.toInstant()?.atOffset(ZoneOffset.UTC)
-            ?: Instant.ofEpochMilli(file.lastModified()).atOffset(ZoneOffset.UTC)
     }
 }
 

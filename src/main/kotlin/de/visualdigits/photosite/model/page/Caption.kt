@@ -1,20 +1,23 @@
 package de.visualdigits.photosite.model.page
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import de.visualdigits.photosite.model.common.Translation
-import de.visualdigits.photosite.model.common.LanguageProvider
+import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import java.util.Locale
 
-
+@JsonIgnoreProperties(
+    "translationsMap"
+)
 class Caption(
-    @JacksonXmlProperty(isAttribute = true)
     val name: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
     val alt: String? = null,
-
-    @JacksonXmlProperty(isAttribute = true)
     val caption: String? = null,
+    @JsonAlias("i18n", "translations") val translations: List<Translation> = listOf()
+) {
 
-    i18n: List<Translation> = listOf()
-) : LanguageProvider(i18n)
+    lateinit var translationsMap: Map<Locale, Translation>
+
+    init {
+        translationsMap = translations.associateBy { t -> t.lang!! }
+    }
+}
 

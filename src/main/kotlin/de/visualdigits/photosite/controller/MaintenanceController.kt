@@ -1,7 +1,7 @@
 package de.visualdigits.photosite.controller
 
 import de.visualdigits.photosite.Application
-import de.visualdigits.photosite.model.common.ImageFile
+import de.visualdigits.photosite.model.page.ImageFile
 import de.visualdigits.photosite.model.siteconfig.Photosite
 import de.visualdigits.photosite.util.DomainCertificatesHelper
 import de.visualdigits.photosite.util.DomainCertificatesHelper.determineExpiryDate

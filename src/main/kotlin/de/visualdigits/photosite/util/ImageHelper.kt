@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.util
 
-import de.visualdigits.photosite.model.common.ImageFile
+import de.visualdigits.photosite.model.page.ImageFile
 import de.visualdigits.photosite.model.siteconfig.Photosite
 import net.coobird.thumbnailator.Thumbnails
 import org.slf4j.LoggerFactory
