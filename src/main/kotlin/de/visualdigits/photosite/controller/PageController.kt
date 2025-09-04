@@ -67,8 +67,7 @@ class PageController(
             }
             null
         } else {
-            val currentPageName = requestUri.drop(1)
-            val currentPage = photosite.pageTree.page(currentPageName)?:error("No current page")
+            val currentPage = photosite.pageTree.page(requestUri.drop(1))?:photosite.pageTree
             val currentPagePath = currentPage.path()
             val language = lang ?: photosite.languageDefault
             model.addAttribute("theme", photosite.theme)
