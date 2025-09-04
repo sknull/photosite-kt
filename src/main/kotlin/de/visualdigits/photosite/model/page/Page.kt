@@ -277,7 +277,7 @@ class Page(
 
     fun lastModifiedPages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
         return allPages(filter = filter)
-            .sortedByDescending { p -> p.content.lastModified }
+            .sortedByDescending { p -> listOf(p.lastModified, p.content.lastModified).max() }
             .let { l ->
                 count
                     ?.let { c -> l.take(c) }
