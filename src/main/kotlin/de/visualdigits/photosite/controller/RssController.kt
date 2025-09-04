@@ -23,8 +23,9 @@ class RssController(
     @GetMapping(value = ["/rss.xml"], produces = ["application/xml"])
     @ResponseBody
     fun rssFeed(
-        @RequestParam(name = "lang", required = false, defaultValue = "de") lang: Locale, response: HttpServletResponse
+        @RequestParam(name = "lang", required = false, defaultValue = "de") lang: Locale
     ): String {
+        val language = Locale.forLanguageTag(lang.language) ?: photosite.languageDefault
         val items = mutableListOf<Item>()
         val pageTree = photosite.pageTree
         val lastModified = pageTree.content.lastModified
@@ -44,7 +45,7 @@ class RssController(
         )
         val pages = determinePages(10)
         pages.forEach { page ->
-            processPage(page, lang, items)
+            processPage(page, language, items)
         }
 
         return feed.marshall()

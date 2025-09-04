@@ -71,7 +71,7 @@ class PageController(
             if (requestUri.startsWith("/")) requestUri = requestUri.drop(1)
             val currentPage = photosite.pageTree.page(requestUri)?:photosite.pageTree
             val currentPagePath = currentPage.path()
-            val language = lang ?: photosite.languageDefault
+            val language = lang?.language?.let { l -> Locale.forLanguageTag(l) } ?: photosite.languageDefault
             model.addAttribute("theme", photosite.theme)
             model.addAttribute("siteUrl", photosite.siteUrl)
             model.addAttribute("language", language)

@@ -2,8 +2,14 @@ package de.visualdigits.photosite.model.page
 
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.util.Locale
 
 class PageTest {
+
+    @Test
+    fun testLocale() {
+        println(Locale.GERMAN.language)
+    }
 
     @Test
     fun testConvertDescriptor() {
