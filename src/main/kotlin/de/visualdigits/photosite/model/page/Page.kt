@@ -1,11 +1,12 @@
 package de.visualdigits.photosite.model.page
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.module.kotlin.kotlinModule
-import de.visualdigits.photosite.model.common.Language
+import de.visualdigits.photosite.model.common.Translation
 import de.visualdigits.photosite.model.common.LanguageProvider
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -33,9 +34,9 @@ import java.util.TreeSet
 class Page(
     @JacksonXmlProperty(isAttribute = true) val icon: String? = null,
     @JacksonXmlProperty(localName = "tocname") val tocName: String? = null,
-    i18n: List<Language> = listOf(),
+    @JsonAlias("i18n", "translations") translations: List<Translation> = listOf(),
     val content: Content = Content(),
-) : LanguageProvider(i18n) {
+) : LanguageProvider(translations) {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -75,9 +76,9 @@ class Page(
         return path?:"UNSET"
     }
 
-    fun getTitle(language: String): String? {
+    fun getTitle(language: Locale): String? {
         var title = name
-        val lang = languageMap[language]
+        val lang = translationsMap[language]
         if (lang != null) {
             var l: String? = lang.name
             if (l?.isNotBlank() == true) {

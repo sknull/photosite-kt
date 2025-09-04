@@ -1,30 +1,37 @@
 package de.visualdigits.photosite.model.pagemodern
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import com.fasterxml.jackson.module.kotlin.kotlinModule
+import de.visualdigits.photosite.model.siteconfig.navi.NaviName
+import org.apache.commons.text.StringEscapeUtils
 import java.io.File
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import kotlin.collections.maxOfOrNull
+import java.util.Locale
 
-
+@JsonIgnoreProperties(
+    "level",
+    "parent",
+    "children",
+    "translationsMap"
+)
 class Page(
     val icon: Any? = null,
     @JsonAlias("tocname", "tocName") val tocName: String? = null,
     var content: Content = Content(),
-    val i18n: List<Lang> = listOf()
+    @JsonAlias("i18n", "translations") val translations: List<Translation> = listOf()
 ) {
     var level: Int = 0
     var name: String = "/"
 
-    var directory: File? = null
-    var files: Array<File> = arrayOf()
-
     var parent: Page? = null
     var children: MutableList<Page> = mutableListOf()
+
+    val translationsMap = translations.associateBy { t -> t.lang }
 
     companion object {
 
@@ -34,23 +41,39 @@ class Page(
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build()
 
-        fun readValue(directory: File, level: Int = 0): Page {
-        println("${"  ".repeat(level)}${directory.canonicalPath}")
-            val files = directory.listFiles()?:arrayOf()
-            val descriptorFile = File(directory, "page.xml")
+        private val jsonMapper = jacksonMapperBuilder()
+            .addModule(kotlinModule())
+            .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .build()
+            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+
+        fun readValue(directory: File): Page {
+            return readValue(directory, 0)
+        }
+
+        private fun readValue(directory: File, level: Int): Page {
+//            println("${"  ".repeat(level)}${directory.canonicalPath}")
+
+            val descriptorFile = File(directory, "page.json")
+//            val descriptorFile = File(directory, "page.xml")
             val page = if (descriptorFile.exists()) {
-                xmlMapper.readValue(descriptorFile, Page::class.java)
+                jsonMapper.readValue(descriptorFile, Page::class.java)
+//                xmlMapper.readValue(descriptorFile, Page::class.java)
             } else {
                 Page()
             }
             page.level = level
             page.name = directory.name
-            page.directory = directory
-            page.files = files
+            page.content.descriptorFile = descriptorFile
+            page.content.directory = directory
+            page.content.files = directory.listFiles()?:arrayOf()
 
-            page.loadContent()
+            page.content.loadContent()
+            page.content.loadImages()
+            page.content.sortImages()
 
-            page.children = files
+            page.children = page.content.files
                 .filter { f -> f.isDirectory }
                 .map { d ->
                     val c = readValue(d, level + 1)
@@ -60,6 +83,7 @@ class Page(
                 .sortedBy { c -> c.name }
                 .toMutableList()
 
+//            jsonMapper.writeValue(File(directory, "page.json"), page)
             return page
         }
     }
@@ -68,17 +92,150 @@ class Page(
         return "${"  ".repeat(level)}$name [${path()}]\n${children.joinToString("") { it.toString() }}"
     }
 
+    fun mainNaviHtml(
+        naviName: NaviName,
+        language: Locale,
+        currentPage: Page,
+        theme: String
+    ): String {
+        val name = naviName.label?.translationsMap[language]?.name
+        val html = StringBuilder()
+        html.append("          <nav role=\"navigation\" itemscope=\"itemscope\" itemtype=\"http://schema.org/SiteNavigationElement\"> <!-- ")
+            .append(name)
+            .append(" -->\n")
+            .append("              <span class=\"sidebar-title\">")
+            .append(name)
+            .append("</span>\n")
+            .append("              <ul class=\"toplevel\" role=\"menubar\">\n")
+
+        appendChildPages(theme, currentPage, this, language, "                ", html) { p -> true }
+
+        html.append("              </ul>\n")
+            .append("          </nav> <!-- ")
+            .append(name)
+            .append(" -->\n")
+
+        return html.toString()
+    }
+
+    fun subNaviHtml(
+        naviName: NaviName,
+        language: Locale,
+        currentPage: Page,
+        theme: String
+    ): String {
+        val name = naviName.label?.translationsMap[language]?.name
+        val html = StringBuilder()
+        html
+            .append("          <div class=\"sub-navigation\"> <!-- ")
+            .append(name)
+            .append(" -->\n")
+            .append("              <span class=\"sidebar-title\">")
+            .append(name)
+            .append("</span>\n")
+            .append("              <ul class=\"toplevel\" role=\"menubar\">\n")
+
+        appendChildPages(theme, currentPage, this, language, "                ", html) { p -> p.path() != "pagetree" }
+
+        html
+            .append("              </ul>\n")
+            .append("          </div> <!-- ")
+            .append(name)
+            .append(" -->\n")
+        return html.toString()
+    }
+
+    private fun appendChildPages(
+        theme: String,
+        currentPage: Page,
+        page: Page,
+        language: Locale,
+        indent: String,
+        html: StringBuilder,
+        predicate: (p: Page) -> Boolean
+    ) {
+        val children: List<Page> = page.children.filter(predicate).sortedBy { p -> p.path() }
+        children.forEach { child ->
+            val pagePath = child.path()
+            val clazz = determineStyleClass(child, currentPage)
+            val html1 = StringBuilder("$indent<li class=\"$clazz\">\n")
+                .append(createPageLink(theme, child, language, indent, pagePath))
+                .append(indent)
+                .append("  <ul>\n")
+            appendChildPages(theme, currentPage, child, language, "$indent    ", html1) { p: Page -> p.children.isNotEmpty() }
+            appendChildPages(theme, currentPage, child, language, "$indent    ", html1) { p: Page -> p.children.isEmpty() }
+            html1.append(indent)
+                .append("  </ul>\n")
+                .append(indent)
+                .append("</li>\n")
+            html.append(html1)
+        }
+    }
+
+    private fun createPageLink(
+        theme: String,
+        page: Page,
+        language: Locale,
+        indent: String?,
+        pagePath: String?
+    ): String {
+        val html = StringBuilder()
+        html.append(indent)
+            .append("  <a href=\"/")
+            .append(StringEscapeUtils.escapeHtml4(pagePath))
+            .append("?lang=")
+            .append(language)
+            .append("&")
+            .append("\" itemprop=\"url\" style=\"padding-left: ")
+            .append(10 + page.level * 10)
+            .append("px;\">\n")
+            .append(indent)
+            .append("    <div class=\"nav-item\"")
+            .append(" itemprop=\"name\">")
+        page.icon?.let { i ->
+            html.append("<div class=\"nav-icon\"><img src=\"/resources/themes/")
+                .append(theme)
+                .append("/images/icons/")
+                .append(i)
+                .append(".png\"/></div>")
+        }
+        html.append("<div class=\"nav-text\">")
+            .append(page.translationsMap[language]?.name?:page.name)
+            .append("</div>")
+        html.append("</div>\n")
+        html.append(indent)
+            .append("  </a>\n")
+
+        return html.toString()
+    }
+
+    private fun determineStyleClass(page: Page, currentPage: Page): String {
+        val pagePath: String = page.path()
+        val currentPagePath = currentPage.path()
+        val isFolder: Boolean = page.children.isNotEmpty()
+        val isCurrent = pagePath == currentPagePath
+        val inCurrentPath = currentPagePath.contains(pagePath)
+        var clazz = if (isFolder) "folder" else "page"
+        if (isCurrent) {
+            clazz += " current"
+        } else if (inCurrentPath) {
+            clazz += " parent"
+            if (page.parent == null) {
+                clazz += " ancestor"
+            }
+        }
+        return clazz
+    }
+
     fun clone(childrenFilter: ((p: Page) -> Boolean)? = null ): Page {
         val clone = Page(
             icon = icon,
             tocName = tocName,
             content = content,
-            i18n = i18n
+            translations = translations
         )
         clone.level = level
         clone.name = name
-        clone.directory = directory
-        clone.files = files
         val clonedChildren = children
             .map { c ->
                 val cc = c.clone()
@@ -92,20 +249,27 @@ class Page(
         return clone
     }
 
-    fun loadContent() {
-        val mdFile = File(directory, "page.md")
-        if (mdFile.exists()) {
-            content.contentType = ContentType.Markdown
-            content.mdContent = mdFile.readText()
+    fun page(path: String): Page? {
+        return createPageMap()[path]
+    }
+
+    private fun createPageMap(pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
+        pageMap[path()] = this
+        children.forEach { c ->
+            c.createPageMap(pageMap)
         }
 
-        val htmlFile = File(directory, "page.html")
-        if (htmlFile.exists()) {
-            content.contentType = ContentType.Html
-            content.htmlContent = htmlFile.readText()
-        }
+        return pageMap
+    }
 
-        content.loadImages(files.filter { f -> f.isFile && f.extension == "jpg" })
+    fun lastModifiedPages(count: Int? = null): List<Page> {
+        return createPageMap().values
+            .sortedByDescending { p -> p.content.lastModified }
+            .let { l ->
+                count
+                    ?.let { c -> l.take(c) }
+                    ?: l
+            }
     }
 
     fun path(): String = rootLine().joinToString("/") { p -> p.name }

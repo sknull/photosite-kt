@@ -61,7 +61,7 @@ class PageController(
 
     @GetMapping(value = ["/**"], produces = ["application/xhtml+xml"])
     fun page(
-        @RequestParam(name = "lang", required = false) lang: String?,
+        @RequestParam(name = "lang", required = false) lang: Locale?,
         model: Model,
         request: HttpServletRequest,
         response: HttpServletResponse
@@ -97,7 +97,7 @@ class PageController(
                         .split("/")
                         .dropLastWhile { it.isEmpty() }
                         .map { s: String ->
-                            s.trim { it <= ' ' }.lowercase(Locale.forLanguageTag(language))
+                            s.trim { it <= ' ' }.lowercase(language)
                         })
                     model.addAttribute("breadcrumb", normalizedPath)
                     model.addAttribute("metaKeywords", keywords.joinToString(", "))

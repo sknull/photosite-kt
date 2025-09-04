@@ -1,13 +1,15 @@
 package de.visualdigits.photosite.util
 
 import de.visualdigits.photosite.model.common.Label
-import de.visualdigits.photosite.model.common.Language
+import de.visualdigits.photosite.model.common.Translation
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.PageByNameComparator
 import de.visualdigits.photosite.model.siteconfig.Photosite
 import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import de.visualdigits.photosite.model.siteconfig.navi.PageTree
 import org.apache.commons.text.StringEscapeUtils
+import org.springframework.cglib.core.Local
+import java.util.Locale
 
 private const val indent = "                "
 
@@ -26,7 +28,7 @@ object PageHelper {
     fun createMainNavigation(
         photosite: Photosite,
         currentPage: String,
-        language: String
+        language: Locale
     ): String {
         var pages = photosite.pageTree.rootPage?.childs?: listOf()
         pages = pages.filter { p: Page -> p.childs.isNotEmpty() }
@@ -47,7 +49,7 @@ object PageHelper {
     private fun appendPage(
         photosite: Photosite,
         currentPage: String,
-        language: String,
+        language: Locale,
         html: StringBuilder,
         child: Page
     ) {
@@ -67,7 +69,7 @@ object PageHelper {
         photosite: Photosite,
         currentPage: String,
         page: Page,
-        language: String,
+        language: Locale,
         level: Int,
         indent: String,
         html: StringBuilder,
@@ -87,7 +89,7 @@ object PageHelper {
         }
     }
 
-    fun createSubNavigation(photosite: Photosite, language: String): String {
+    fun createSubNavigation(photosite: Photosite, language: Locale): String {
         val sb = StringBuilder()
             .append("\n")
         photosite.naviSub
@@ -97,13 +99,12 @@ object PageHelper {
         return sb.toString()
     }
 
-    fun createStaticNavigation(photosite: Photosite, pageTreeStatic: PageTree, language: String): String {
-        val i18n: MutableList<Language> = ArrayList<Language>()
-        i18n.add(Language("de", "", "S I T E L I N K S", ""))
-        i18n.add(Language("en", "", "S I T E L I N K S", ""))
+    fun createStaticNavigation(photosite: Photosite, pageTreeStatic: PageTree, language: Locale): String {
+        val i18n: MutableList<Translation> = ArrayList<Translation>()
+        i18n.add(Translation(Locale.GERMAN, "", "S I T E L I N K S", ""))
+        i18n.add(Translation(Locale.ENGLISH, "", "S I T E L I N K S", ""))
         val label = Label()
-        label.lang = i18n
-        label.initialize()
+        label.translations = i18n
         val naviName = NaviName(
             "pagetree",
             10,
@@ -116,7 +117,7 @@ object PageHelper {
         photosite: Photosite,
         pageTree: PageTree,
         naviSub: NaviName,
-        language: String
+        language: Locale
     ): String {
         val rootPath = naviSub.rootFolder!!
         val pages = pageTree.lastModifiedPages(rootPath, naviSub.numberOfEntries)
@@ -148,7 +149,7 @@ object PageHelper {
     private fun createPageLink(
         photosite: Photosite,
         page: Page,
-        language: String,
+        language: Locale,
         level: Int,
         indent: String?,
         pagePath: String?

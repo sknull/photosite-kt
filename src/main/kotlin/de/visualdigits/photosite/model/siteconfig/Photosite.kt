@@ -25,10 +25,11 @@ class Photosite(
     var siteSubTitle: String? = null,
     var protocol: String? = null,
     var domain: String? = null,
-    var languages: List<String> = listOf(),
-    var languageDefault: String = Locale.GERMAN.toLanguageTag(),
+    var languages: List<Locale> = listOf(),
+    var languageDefault: Locale = Locale.GERMAN,
     var naviMain: NaviName? = null,
     var naviSub: List<NaviName>? = null,
+    var naviStatic: NaviName? = null,
     var plugins: Plugins? = null
 ) {
 

@@ -1,28 +1,14 @@
 package de.visualdigits.photosite.model.page
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
-import com.fasterxml.jackson.module.kotlin.kotlinModule
-import de.visualdigits.photosite.model.pagemodern.ContentType
-import de.visualdigits.photosite.model.pagemodern.ImageFile
+import de.visualdigits.photosite.model.common.Label
+import de.visualdigits.photosite.model.common.Translation
 import de.visualdigits.photosite.model.pagemodern.Page
+import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import org.junit.jupiter.api.Test
 import java.io.File
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
+import java.util.Locale
 
 class PageTest {
-
-    private val jsonMapper = jacksonMapperBuilder()
-        .addModule(kotlinModule())
-        .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-        .enable(SerializationFeature.INDENT_OUTPUT)
-        .build()
-        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
     @Test
     fun testConvertDescriptor() {
@@ -30,7 +16,40 @@ class PageTest {
         val tree = Page.readValue(File("C:/Users/sknul/.photosite/resources/pagetree"))
         val mainTree = tree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
         val staticTree = tree.clone { p -> p.name.startsWith("-") }
-        println(staticTree)
+//        println(
+//            mainTree.mainNaviHtml(
+//                naviName = NaviName(
+//                    rootFolder = "pagetree/Arts",
+//                    numberOfEntries = 10,
+//                    label = Label(
+//                        translations = listOf(
+//                            Translation(lang = Locale.GERMAN, name = "KUNST"),
+//                            Translation(lang = Locale.ENGLISH, name = "ARTS")
+//                        )
+//                    )
+//                ),
+//                language = Locale.GERMAN,
+//                currentPage = mainTree.page("pagetree/Arts")!!,
+//                theme = "dark"
+//            )
+//        )
+        println(
+            staticTree.subNaviHtml(
+                naviName = NaviName(
+                    label = Label(
+                        translations = listOf(
+                            Translation(lang = Locale.GERMAN, name = "STATISCH"),
+                            Translation(lang = Locale.ENGLISH, name = "STATIC")
+                        )
+                    )
+                ),
+                language = Locale.GERMAN,
+                currentPage = mainTree.page("pagetree")!!,
+                theme = "dark"
+            )
+        )
+//        println("--------------------------------")
+//        println(staticTree)
     }
 
 }

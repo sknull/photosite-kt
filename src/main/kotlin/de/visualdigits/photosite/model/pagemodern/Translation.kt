@@ -1,9 +1,10 @@
 package de.visualdigits.photosite.model.pagemodern
 
+import java.util.Locale
 
-class Lang(
-    val lang: String? = null,
-    val value: String? = null,
+
+class Translation(
+    val lang: Locale? = null,
     val alt: String? = null,
     val name: String? = null,
     val title: String? = null

@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.lightgallery")
@@ -36,7 +37,7 @@ class LightGallery(
         <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-autoplay.js" type="text/javascript"></script>"""
     }
 
-    override fun getHtml(page: Page, language: String): String {
+    override fun getHtml(page: Page, language: Locale): String {
         val sb =
             StringBuilder("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
         page.content.images

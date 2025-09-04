@@ -129,9 +129,9 @@ class SitemapController(
                     .append(siteUrl).append("/")
                     .append(StringEscapeUtils.escapeXml11(imagePath))
                     .append("</image:loc>\n")
-                val caption = page.content?.captionsMap?.get(imageFile.name)
+                val caption = page.content.captionsMap[imageFile.name]
                 caption?.also { c ->
-                    c.getTranslation(lang)?.let { l ->
+                    c.translationsMap[lang]?.let { l ->
                         l.alt?:l.title?.let { captionText ->
                             sb
                                 .append("      <image:title><![CDATA[")

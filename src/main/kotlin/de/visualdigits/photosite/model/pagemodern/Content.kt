@@ -1,11 +1,22 @@
 package de.visualdigits.photosite.model.pagemodern
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.io.File
+import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.function.Consumer
 
 
+@JsonIgnoreProperties(
+    "descriptorFile",
+    "directory",
+    "files",
+    "images",
+    "lastModified",
+    "captionsMap"
+)
 class Content(
     @JsonAlias("plugin", "contentType") var contentType: ContentType? = null,
     val mode: String? = null,
@@ -18,6 +29,10 @@ class Content(
     val keywords: String? = null,
     val paragraphs: List<Paragraph> = listOf()
 ) {
+    var descriptorFile: File? = null
+    var directory: File? = null
+    var files: Array<File> = arrayOf()
+
     var mdContent: String? = null
     var htmlContent: String? = null
     var images: MutableList<ImageFile> = mutableListOf()
@@ -31,10 +46,29 @@ class Content(
         captionsMap = captions.associate { c -> Pair(c.name!!, c) }
     }
 
-    fun loadImages(imageFiles: List<File>) {
-        images = imageFiles.map { f -> ImageFile(f) }.toMutableList()
-        lastModified = images.maxOfOrNull { i -> i.lastModified } ?: OffsetDateTime.MIN
-        sortImages()
+    fun loadContent() {
+        val mdFile = File(directory, "page.md")
+        if (mdFile.exists()) {
+            contentType = ContentType.Markdown
+            mdContent = mdFile.readText()
+        }
+
+        val htmlFile = File(directory, "page.html")
+        if (htmlFile.exists()) {
+            contentType = ContentType.Html
+            htmlContent = htmlFile.readText()
+        }
+    }
+
+    fun loadImages() {
+        images = files
+            .filter { f -> f.isFile && f.extension == "jpg" }
+            .map { f -> ImageFile(f) }
+            .toMutableList()
+        lastModified = images
+            .maxOfOrNull { i -> i.lastModified }
+            ?: descriptorFile?.lastModified()?.let { lm -> Instant.ofEpochMilli(lm).atOffset(ZoneOffset.UTC) }
+            ?: OffsetDateTime.MIN
     }
 
     fun sortImages() {

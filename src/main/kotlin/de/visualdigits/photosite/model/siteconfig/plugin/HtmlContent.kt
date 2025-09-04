@@ -5,6 +5,7 @@ import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.pagemodern.ContentType
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
+import java.util.Locale
 import java.util.regex.Pattern
 
 @Component
@@ -15,7 +16,7 @@ open class HtmlContent(
     contentType = contentType
 ) {
 
-    override fun getHtml(page: Page, language: String): String {
+    override fun getHtml(page: Page, language: Locale): String {
         var html = page.content.htmlContent?:""
         html = obfuscateText(html)
         html = obfuscateEmail(html)

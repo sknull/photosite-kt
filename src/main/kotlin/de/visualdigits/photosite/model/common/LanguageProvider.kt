@@ -1,24 +1,12 @@
 package de.visualdigits.photosite.model.common
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
+import com.fasterxml.jackson.annotation.JsonAlias
+import java.util.Locale
 
 open class LanguageProvider(
-    var lang: List<Language> = listOf(),
+    @JsonAlias("lang", "translations") var translations: List<Translation> = listOf(),
 ) {
 
-    val languageMap: MutableMap<String, Language> = mutableMapOf()
-
-    init {
-        initialize()
-    }
-
-    fun initialize() {
-        lang.forEach {
-            languageMap[it.lang ?: throw IllegalArgumentException("No language given")] = it
-        }
-    }
-
-    fun getTranslation(language: String): Language? {
-        return languageMap[language]
-    }
+    val translationsMap: Map<Locale, Translation> = translations
+        .associate { t -> Pair(t.lang!!, t) }
 }
