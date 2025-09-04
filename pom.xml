@@ -334,7 +334,7 @@
         <version>3.3.2</version>
         <configuration>
           <executable>true</executable>
-          <mainClass>de.visualdigits.klanglicht.Application</mainClass>
+          <mainClass>de.visualdigits.photosite.Application</mainClass>
         </configuration>
         <executions>
           <execution>

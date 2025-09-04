@@ -1,8 +1,11 @@
 package de.visualdigits.photosite.model.page
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.apache.commons.text.StringEscapeUtils
 
-
+@JsonIgnoreProperties(
+    "html"
+)
 class GoogleMaps(
     val name: String? = null,
     val width: String? = null,
@@ -10,7 +13,7 @@ class GoogleMaps(
     val align: String? = null,
     val lat: Double? = null,
     val lng: Double? = null,
-    val zoom: Int? = null
+    val zoom: Int? = null,
 ) {
 
     fun getHtml(): String {

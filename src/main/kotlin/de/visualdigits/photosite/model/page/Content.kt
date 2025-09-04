@@ -3,9 +3,7 @@ package de.visualdigits.photosite.model.page
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.io.File
-import java.time.Instant
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.function.Consumer
 
 
@@ -27,14 +25,14 @@ class Content(
     val teaser: Teaser? = null,
     var captions: List<Caption> = listOf(),
     var keywords: List<String> = listOf(),
-    val paragraphs: List<Paragraph> = listOf()
+    val paragraphs: List<Paragraph> = listOf(),
+    var mdContent: String? = null,
+    var htmlContent: String? = null
 ) {
     var descriptorFile: File? = null
     var directory: File? = null
     var files: Array<File> = arrayOf()
 
-    var mdContent: String? = null
-    var htmlContent: String? = null
     var images: MutableList<ImageFile> = mutableListOf()
 
     var lastModified: OffsetDateTime = OffsetDateTime.MIN

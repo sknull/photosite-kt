@@ -1,16 +1,14 @@
 package de.visualdigits.photosite.model.page
 
-import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import org.junit.jupiter.api.Test
 import java.io.File
-import java.util.Locale
 
 class PageTest {
 
     @Test
     fun testConvertDescriptor() {
-//        val tree = Page.readValue(File("W:/"))
-        val tree = Page.readValue(File("C:/Users/sknul/.photosite/resources/pagetree"))
+        Page.readValue(File("W:/"))
+//        val tree = Page.readValue(File("C:/Users/sknul/.photosite/resources/pagetree"))
 //        val mainTree = tree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
 //        val staticTree = tree.clone { p -> p.name.startsWith("-") }
 //        println(

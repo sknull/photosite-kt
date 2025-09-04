@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import org.apache.commons.text.StringEscapeUtils
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.Locale
 
@@ -25,6 +25,7 @@ class Page(
     var content: Content = Content(),
     @JsonAlias("i18n", "translations") val translations: List<Translation> = listOf()
 ) {
+
     var level: Int = 0
     var name: String = "/"
 
@@ -35,11 +36,7 @@ class Page(
 
     companion object {
 
-        private val xmlMapper = XmlMapper.builder()
-            .addModule(kotlinModule())
-            .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build()
+        private val log = LoggerFactory.getLogger(Page::class.java)
 
         private val jsonMapper = jacksonMapperBuilder()
             .addModule(kotlinModule())
@@ -53,13 +50,11 @@ class Page(
         }
 
         private fun readValue(directory: File, level: Int): Page {
-//            println("${"  ".repeat(level)}${directory.canonicalPath}")
+            log.info("Initializing page '${"  ".repeat(level)}${directory.canonicalPath}'")
 
             val descriptorFile = File(directory, "page.json")
-//            val descriptorFile = File(directory, "page.xml")
             val page = if (descriptorFile.exists()) {
                 jsonMapper.readValue(descriptorFile, Page::class.java)
-//                xmlMapper.readValue(descriptorFile, Page::class.java)
             } else {
                 Page()
             }
@@ -83,7 +78,6 @@ class Page(
                 .sortedBy { c -> c.name }
                 .toMutableList()
 
-//            jsonMapper.writeValue(File(directory, "page.json"), page)
             return page
         }
 
@@ -92,7 +86,8 @@ class Page(
             language: Locale,
             currentPage: Page,
             pages: List<Page>,
-            theme: String
+            theme: String,
+            level: Int? = null
         ): String {
             val name = naviName.label?.translationsMap[language]?.name
             val html = StringBuilder()
@@ -108,7 +103,7 @@ class Page(
             pages.forEach { page ->
                 val clazz = determineStyleClass(page, currentPage)
                 val html1 = StringBuilder("                  <li class=\"$clazz\">\n")
-                    .append(page.pageLink(theme, language, "                  "))
+                    .append(page.pageLink(theme, language, "", level))
                     .append("                  </li>\n")
                 html.append(html1)
             }
@@ -199,7 +194,8 @@ class Page(
     fun pageLink(
         theme: String,
         language: Locale,
-        indent: String? = ""
+        indent: String? = "",
+        level: Int? = null,
     ): String {
         val html = StringBuilder()
         html.append(indent)
@@ -209,7 +205,7 @@ class Page(
             .append(language)
             .append("&")
             .append("\" itemprop=\"url\" style=\"padding-left: ")
-            .append(10 + level * 10)
+            .append(10 + (level?:this.level) * 10)
             .append("px;\">\n")
             .append(indent)
             .append("    <div class=\"nav-item\"")
@@ -257,9 +253,9 @@ class Page(
         return createPageMap()[path]
     }
 
-    fun allPages(allPages: MutableList<Page> = mutableListOf()): List<Page> {
-        allPages.add(this)
-        children.forEach { c -> c.allPages(allPages) }
+    fun allPages(allPages: MutableList<Page> = mutableListOf(), filter: ((p: Page) -> Boolean)? = null ): List<Page> {
+        if (filter?.let { f -> f(this) } == true) allPages.add(this)
+        children.forEach { c -> c.allPages(allPages, filter) }
 
         return allPages
     }
@@ -274,7 +270,7 @@ class Page(
     }
 
     fun lastModifiedPages(count: Int? = null): List<Page> {
-        return allPages()
+        return allPages { p -> p.children.isEmpty() }
             .sortedByDescending { p -> p.content.lastModified }
             .let { l ->
                 count

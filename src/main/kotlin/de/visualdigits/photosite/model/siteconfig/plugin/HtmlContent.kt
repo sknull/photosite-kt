@@ -9,7 +9,7 @@ import java.util.regex.Pattern
 
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.html")
-open class HtmlContent(
+class HtmlContent(
     contentType: ContentType = ContentType.Html
 ) : Plugin(
     contentType = contentType

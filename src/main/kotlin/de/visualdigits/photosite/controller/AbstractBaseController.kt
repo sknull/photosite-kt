@@ -10,7 +10,6 @@ abstract class AbstractBaseController(
 
     private val log = LoggerFactory.getLogger(AbstractBaseController::class.java)
 
-    companion object {
-    }
+    companion object
 }
 

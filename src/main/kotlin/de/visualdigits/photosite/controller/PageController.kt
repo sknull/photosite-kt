@@ -78,23 +78,24 @@ class PageController(
             model.addAttribute("naviMain", photosite.mainTree.mainNaviHtml(photosite.naviMain?:error("No main navi"), language, currentPage, photosite.theme))
             model.addAttribute("naviSub",
                 photosite.subTrees
-                    .map { (naviName, pages) ->
+                    .joinToString("") { (naviName, pages) ->
                         Page.subNaviHtml(
                             naviName,
                             language,
                             currentPage,
                             pages,
-                            photosite.theme
+                            photosite.theme,
+                            0
                         )
                     }
-                    .joinToString("")
             )
             model.addAttribute("naviStatic", Page.subNaviHtml(
                 photosite.naviStatic?:error("No static navi"),
                 language,
                 currentPage,
                 photosite.staticTree.children,
-                photosite.theme
+                photosite.theme,
+                0
             ))
 
             listOf(photosite.mainTree, photosite.staticTree)
@@ -102,13 +103,7 @@ class PageController(
                 ?.let { page ->
                     val keywords = page.content.keywords.toMutableList()
                     val path = page.path()
-                    keywords.addAll(
-                        path
-                        .split("/")
-                        .dropLastWhile { it.isEmpty() }
-                        .map { s: String ->
-                            s.trim { it <= ' ' }.lowercase(language)
-                        })
+                    keywords.addAll(path.split("/"))
                     model.addAttribute("breadcrumb", path)
                     model.addAttribute("metaKeywords", keywords.joinToString(", "))
                     model.addAttribute("metaDescription", keywords.joinToString(" "))
