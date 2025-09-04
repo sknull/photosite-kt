@@ -23,7 +23,7 @@ class RssController(
     @GetMapping(value = ["/rss.xml"], produces = ["application/xml"])
     @ResponseBody
     fun rssFeed(
-        @RequestParam(name = "lang", required = false, defaultValue = "") lang: Locale, response: HttpServletResponse
+        @RequestParam(name = "lang", required = false, defaultValue = "de") lang: Locale, response: HttpServletResponse
     ): String {
         val items = mutableListOf<Item>()
         val pageTree = photosite.pageTree

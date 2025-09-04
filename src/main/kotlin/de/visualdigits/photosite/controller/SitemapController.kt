@@ -17,6 +17,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
+import java.time.OffsetDateTime
 
 @Controller
 class SitemapController(
@@ -32,19 +33,17 @@ class SitemapController(
     @GetMapping(value = ["/sitemap-index.xml"])
     @ResponseBody
     fun sitemapIndex(response: HttpServletResponse) {
-        val lastModified = isoDate(photosite.pageTree.content.lastModified)
-        val siteUrl: String = photosite.protocol + photosite.domain
         var body = "  <sitemap>\n"
-        body += "    <loc>$siteUrl/sitemap-site.xml</loc>\n"
-        body += "    <lastmod>$lastModified</lastmod>\n"
+        body += "    <loc>${photosite.protocol + photosite.domain}/sitemap-site.xml</loc>\n"
+        body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
         body += "  </sitemap>\n"
         body += "  <sitemap>\n"
-        body += "    <loc>$siteUrl/sitemap-page.xml</loc>\n"
-        body += "    <lastmod>$lastModified</lastmod>\n"
+        body += "    <loc>${photosite.protocol + photosite.domain}/sitemap-page.xml</loc>\n"
+        body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
         body += "  </sitemap>\n"
         body += "  <sitemap>\n"
-        body += "    <loc>$siteUrl/sitemap-post.xml</loc>\n"
-        body += "    <lastmod>$lastModified</lastmod>\n"
+        body += "    <loc>${photosite.protocol + photosite.domain}/sitemap-post.xml</loc>\n"
+        body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
         body += "  </sitemap>\n"
         sendSitemap(
             response,
@@ -58,11 +57,9 @@ class SitemapController(
     @GetMapping(value = ["/sitemap-site.xml"])
     @ResponseBody
     fun sitemapSite(response: HttpServletResponse) {
-        val lastModified = isoDate(photosite.pageTree.content.lastModified)
-        val siteUrl: String = photosite.protocol + photosite.domain
         var body = "  <url>\n"
-        body += "    <loc>$siteUrl</loc>\n"
-        body += "    <lastmod>$lastModified</lastmod>\n"
+        body += "    <loc>${photosite.protocol + photosite.domain}</loc>\n"
+        body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
         //        body += "    <changefreq>" + self.changefreq + "</changefreq>\n"
 //        body += "    <priority>" + self.priority + "</priority>\n"
         body += "  </url>\n"
@@ -79,18 +76,17 @@ class SitemapController(
     @ResponseBody
     fun sitemapPage(response: HttpServletResponse) {
         log.info("Rendering page site map...")
-        val siteUrl: String = photosite.protocol + photosite.domain
         val sb = StringBuilder()
-        determinePages().forEach { page ->
+        determinePages { p -> p.children.isNotEmpty() && p.lastModified > OffsetDateTime.MIN }.forEach { page ->
             sb
                 .append("  <url>\n")
                 .append("    <loc>")
-                .append(siteUrl)
+                .append(photosite.protocol + photosite.domain)
                 .append("/")
                 .append(StringEscapeUtils.escapeXml11(page.path()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.content.lastModified))
+                .append(isoDate(page.lastModified))
                 .append("</lastmod>\n")
                 //                        .append("    <changefreq>" + self.changefreq + "</changefreq>\n")
                 //                        .append("    <priority>" + self.priority + "</priority>\n")
@@ -109,29 +105,27 @@ class SitemapController(
     @ResponseBody
     fun sitemapPost(response: HttpServletResponse) {
         log.info("Rendering post site map...")
-        val siteUrl = photosite.protocol + photosite.domain
-        val lang = photosite.languageDefault!!
         val sb = StringBuilder()
-        determinePages().forEach { page ->
+        determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified > OffsetDateTime.MIN }.forEach { page ->
             sb
                 .append("  <url>\n").append("    <loc>")
-                .append(siteUrl).append("/")
+                .append(photosite.protocol + photosite.domain).append("/")
                 .append(StringEscapeUtils.escapeXml11(page.path()))
                 .append("</loc>\n")
                 .append("    <lastmod>")
-                .append(isoDate(page.content.lastModified))
+                .append(isoDate(page.lastModified))
                 .append("</lastmod>\n")
             for (imageFile in page.content.images) {
                 val imagePath = Photosite.getRelativeResourcePath(imageFile.file)
                 sb
                     .append("    <image:image>\n")
                     .append("      <image:loc>")
-                    .append(siteUrl).append("/")
+                    .append(photosite.protocol + photosite.domain).append("/")
                     .append(StringEscapeUtils.escapeXml11(imagePath))
                     .append("</image:loc>\n")
                 val caption = page.content.captionsMap[imageFile.name]
                 caption?.also { c ->
-                    c.translationsMap[lang]?.let { l ->
+                    c.translationsMap[photosite.languageDefault!!]?.let { l ->
                         l.alt?:l.title?.let { captionText ->
                             sb
                                 .append("      <image:title><![CDATA[")
@@ -155,12 +149,9 @@ class SitemapController(
 
     @GetMapping(value = ["/sitemap.xsl"], produces = ["text/xsl"])
     fun sitemapXsl(@RequestParam(name = "page") page: String, model: Model): String {
-        val language = photosite.languageDefault
-        val theme = photosite.theme!!
-        val siteUrl = photosite.protocol + photosite.domain
-        model.addAttribute("theme", theme)
-        model.addAttribute("siteUrl", siteUrl)
-        model.addAttribute("language", language)
+        model.addAttribute("theme", photosite.theme!!)
+        model.addAttribute("siteUrl", photosite.protocol + photosite.domain)
+        model.addAttribute("language", photosite.languageDefault)
         model.addAttribute("title", photosite.siteTitle)
         model.addAttribute("breadcrumb", page)
         var comments = "<!--\n"

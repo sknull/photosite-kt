@@ -83,7 +83,7 @@ class Photosite(
         log.info("initializing page tree...")
         pageTree = Page.readValue(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
         mainTree = pageTree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
-        subTrees = naviSub?.mapNotNull { n -> n.rootFolder?.let { rf -> Pair(n,pageTree.page(rf)?.lastModifiedPages(n.numberOfEntries)?:error("No sub navigation '${n.rootFolder}'")) } }?:listOf()
+        subTrees = naviSub?.mapNotNull { n -> n.rootFolder?.let { rf -> Pair(n,pageTree.page(rf)?.lastModifiedPages(n.numberOfEntries) { p -> p.children.isEmpty() } ?:error("No sub navigation '${n.rootFolder}'")) } }?:listOf()
         staticTree = pageTree.clone { p -> p.name.startsWith("-") }
         log.info("initialized page tree")
     }

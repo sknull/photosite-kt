@@ -11,6 +11,7 @@ import de.visualdigits.photosite.model.siteconfig.navi.NaviName
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.time.OffsetDateTime
 import java.util.Locale
 
 @JsonIgnoreProperties(
@@ -32,6 +33,8 @@ class Page(
     var parent: Page? = null
     var children: MutableList<Page> = mutableListOf()
 
+    var lastModified: OffsetDateTime = OffsetDateTime.MIN
+
     val translationsMap: Map<Locale, Translation> = translations.associateBy { t -> t.lang!! }
 
     companion object {
@@ -45,11 +48,7 @@ class Page(
             .build()
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
-        fun readValue(directory: File): Page {
-            return readValue(directory, 0)
-        }
-
-        private fun readValue(directory: File, level: Int): Page {
+        fun readValue(directory: File, level: Int = 0): Page {
             log.info("Initializing page '${"  ".repeat(level)}${directory.canonicalPath}'")
 
             val descriptorFile = File(directory, "page.json")
@@ -77,6 +76,8 @@ class Page(
                 }
                 .sortedBy { c -> c.name }
                 .toMutableList()
+
+            page.calculateLastModified()
 
             return page
         }
@@ -253,11 +254,11 @@ class Page(
         return createPageMap()[path]
     }
 
-    fun allPages(allPages: MutableList<Page> = mutableListOf(), filter: ((p: Page) -> Boolean)? = null ): List<Page> {
-        if (filter?.let { f -> f(this) } == true) allPages.add(this)
-        children.forEach { c -> c.allPages(allPages, filter) }
+    fun allPages(pages: MutableList<Page> = mutableListOf(), filter: ((p: Page) -> Boolean)? = null): List<Page> {
+        if (filter == null || filter(this)) pages.add(this)
+        children.forEach { c -> c.allPages(pages, filter) }
 
-        return allPages
+        return pages
     }
 
     private fun createPageMap(pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
@@ -269,8 +270,13 @@ class Page(
         return pageMap
     }
 
-    fun lastModifiedPages(count: Int? = null): List<Page> {
-        return allPages { p -> p.children.isEmpty() }
+    fun calculateLastModified() {
+        val allPages = allPages()
+        lastModified = allPages.maxOf { p -> listOf(p.lastModified, p.content.lastModified).max() }
+    }
+
+    fun lastModifiedPages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
+        return allPages(filter = filter)
             .sortedByDescending { p -> p.content.lastModified }
             .let { l ->
                 count
