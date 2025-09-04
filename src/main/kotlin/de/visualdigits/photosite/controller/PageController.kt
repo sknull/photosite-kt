@@ -58,7 +58,7 @@ class PageController(
     ): String? {
         refreshCertIfNeeded()
 
-        val requestUri = getRequestUri(request)
+        var requestUri = getRequestUri(request)
         return if (resourceFileExists(requestUri)) {
             if (requestUri.startsWith("/resources") || requestUri.startsWith("/.well-known/acme-challenge")) {
                 getResource(requestUri, response)
@@ -67,7 +67,9 @@ class PageController(
             }
             null
         } else {
-            val currentPage = photosite.pageTree.page(requestUri.drop(1))?:photosite.pageTree
+            requestUri = requestUri.replace("/pagetree", "")
+            if (requestUri.startsWith("/")) requestUri = requestUri.drop(1)
+            val currentPage = photosite.pageTree.page(requestUri)?:photosite.pageTree
             val currentPagePath = currentPage.path()
             val language = lang ?: photosite.languageDefault
             model.addAttribute("theme", photosite.theme)
@@ -134,7 +136,7 @@ class PageController(
         var uri = ""
         try {
             uri = URLDecoder.decode(request.requestURI, request.characterEncoding)
-        } catch (e: UnsupportedEncodingException) {
+        } catch (_: UnsupportedEncodingException) {
             // ignore
         }
         return uri
