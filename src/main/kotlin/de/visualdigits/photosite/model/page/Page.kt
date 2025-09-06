@@ -1,13 +1,14 @@
 package de.visualdigits.photosite.model.page
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import com.fasterxml.jackson.module.kotlin.kotlinModule
-import de.visualdigits.photosite.model.siteconfig.navi.NaviName
+import de.visualdigits.photosite.model.common.Translation
+import de.visualdigits.photosite.model.page.content.Content
+import de.visualdigits.photosite.model.navi.NaviName
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -21,10 +22,10 @@ import java.util.Locale
     "translationsMap"
 )
 class Page(
-    val icon: Any? = null,
-    @JsonAlias("tocname", "tocName") val tocName: String? = null,
+    var icon: String? = null,
+    val tocName: String? = null,
     var content: Content = Content(),
-    @JsonAlias("i18n", "translations") val translations: List<Translation> = listOf()
+    val translations: List<Translation> = listOf()
 ) {
 
     var level: Int = 0
@@ -74,8 +75,11 @@ class Page(
                     c.parent = page
                     c
                 }
-                .sortedBy { c -> c.name }
+                .sortedBy { c -> c.path() }
                 .toMutableList()
+            if (page.children.isNotEmpty()) {
+                page.icon = "folder"
+            }
 
             page.calculateLastModified()
 
@@ -126,7 +130,7 @@ class Page(
             html: StringBuilder,
             predicate: (p: Page) -> Boolean
         ) {
-            val children: List<Page> = page.children.filter(predicate).sortedBy { p -> p.path() }
+            val children: List<Page> = page.children.filter(predicate).sortedBy { p -> p.name }
             children.forEach { child ->
                 val clazz = determineStyleClass(child, currentPage)
                 val html1 = StringBuilder("$indent<li class=\"$clazz\">\n")
@@ -182,7 +186,7 @@ class Page(
             .append("</span>\n")
             .append("              <ul class=\"toplevel\" role=\"menubar\">\n")
 
-        appendChildPages(theme, currentPage, this, language, "                ", html) { p -> true }
+        appendChildPages(theme, currentPage, this, language, "                ", html) { _ -> true }
 
         html.append("              </ul>\n")
             .append("          </nav> <!-- ")
@@ -272,12 +276,12 @@ class Page(
 
     fun calculateLastModified() {
         val allPages = allPages()
-        lastModified = allPages.maxOf { p -> listOf(p.lastModified, p.content.lastModified).max() }
+        lastModified = allPages.maxOf { p -> p.content.lastModified }
     }
 
     fun lastModifiedPages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
         return allPages(filter = filter)
-            .sortedByDescending { p -> listOf(p.lastModified, p.content.lastModified).max() }
+            .sortedByDescending { p -> p.content.lastModified }
             .let { l ->
                 count
                     ?.let { c -> l.take(c) }

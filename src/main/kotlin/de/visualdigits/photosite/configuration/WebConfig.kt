@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.configuration
 
-import de.visualdigits.photosite.model.siteconfig.Photosite
+import de.visualdigits.photosite.model.photosite.Photosite
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Description

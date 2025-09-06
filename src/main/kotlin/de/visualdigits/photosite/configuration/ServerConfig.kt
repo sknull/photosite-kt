@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.configuration
 
-import de.visualdigits.photosite.model.siteconfig.Photosite
+import de.visualdigits.photosite.model.photosite.Photosite
 import org.slf4j.LoggerFactory
 import org.springframework.boot.web.server.Ssl
 import org.springframework.boot.web.server.WebServerFactoryCustomizer

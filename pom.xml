@@ -60,16 +60,6 @@
       <version>${version.kotlin.maven}</version>
     </dependency>
     <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-maven-noarg</artifactId>
-      <version>${version.kotlin.maven}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-maven-allopen</artifactId>
-      <version>${version.kotlin.maven}</version>
-    </dependency>
-    <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
       <artifactId>kotlinx-coroutines-core</artifactId>
       <version>${version.kotlin.coroutines}</version>
@@ -286,24 +276,12 @@
           <jvmTarget>${project.build.target}</jvmTarget>
           <compilerPlugins>
             <plugin>spring</plugin>
-            <plugin>no-arg</plugin>
-            <plugin>all-open</plugin>
           </compilerPlugins>
-          <pluginOptions>
-            <option>all-open:annotation=javax.persistence.Entity</option>
-            <option>all-open:annotation=javax.persistence.Embeddable</option>
-            <option>all-open:annotation=javax.persistence.MappedSuperclass</option>
-          </pluginOptions>
           <args>
             <arg>-Xjsr305=strict</arg>
           </args>
         </configuration>
         <dependencies>
-          <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-maven-noarg</artifactId>
-            <version>${version.kotlin.maven}</version>
-          </dependency>
           <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-maven-allopen</artifactId>
