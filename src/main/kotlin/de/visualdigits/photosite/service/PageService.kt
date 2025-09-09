@@ -108,6 +108,13 @@ class PageService(
                 )
             )
 
+            val languageSelector = photosite.languages.joinToString("") { l ->
+                val current = if (lang == l) " class=\"current\"" else ""
+                "<li><a${current} href=\"/?lang=${l.language}\">${l.language}</a></li>"
+            }
+
+            model.addAttribute("languageSelector", "<ol>$languageSelector</ol>")
+
             listOf(photosite.mainTree, photosite.staticTree)
                 .firstNotNullOfOrNull { pageTree -> pageTree.page(currentPagePath) }
                 ?.let { page ->
