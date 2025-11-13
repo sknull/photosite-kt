@@ -1,8 +1,8 @@
 package de.visualdigits.photosite.model.photosite
 
+import de.visualdigits.photosite.model.navi.NaviName
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.content.ContentType
-import de.visualdigits.photosite.model.navi.NaviName
 import de.visualdigits.photosite.model.plugin.Plugin
 import de.visualdigits.photosite.model.plugin.Plugins
 import jakarta.annotation.PostConstruct
@@ -20,6 +20,10 @@ import java.util.Locale
 @ConfigurationProperties(prefix = "photosite")
 @ConfigurationPropertiesScan
 class Photosite(
+    var serverPort: Int? = null,
+    var internalPort: Int? = null,
+    var internalEndpoints: List<String> = listOf(),
+    var ssl: Ssl? = null,
     var theme: String = "default",
     var siteTitle: String? = null,
     var siteSubTitle: String? = null,

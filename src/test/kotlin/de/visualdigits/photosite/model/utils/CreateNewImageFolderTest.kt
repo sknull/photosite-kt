@@ -2,9 +2,6 @@ package de.visualdigits.photosite.model.utils
 
 import org.junit.jupiter.api.Test
 import java.io.File
-import java.nio.file.Path
-import kotlin.io.path.name
-import kotlin.io.path.writeText
 
 class CreateNewImageFolderTest {
 

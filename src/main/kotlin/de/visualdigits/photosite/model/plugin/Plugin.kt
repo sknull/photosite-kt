@@ -15,9 +15,9 @@ abstract class Plugin(
         val mdContent: String? = page.content.mdContent
         val htmlContent: String? = page.content.htmlContent
         return if (mdContent?.isNotBlank() == true) {
-            mdContent
+            "\n$mdContent"
         } else if (htmlContent?.isNotBlank() == true) {
-            htmlContent
+            "\n$htmlContent"
         } else ""
     }
 }

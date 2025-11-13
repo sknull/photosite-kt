@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import java.util.Locale
 import java.util.regex.Pattern
-import kotlin.text.iterator
 
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.html")
@@ -22,7 +21,7 @@ open class HtmlContent(
         html = obfuscateText(html)
         html = obfuscateEmail(html)
 
-        return html
+        return "\n$html"
     }
 
     protected fun obfuscateText(html: String): String {

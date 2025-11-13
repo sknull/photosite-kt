@@ -30,13 +30,13 @@ class PageService(
     private val domainCertificatesService: DomainCertificatesService
 ) {
 
-    @Value("\${certbot.uri}")
+    @Value("\${photosite.ssl.certbot-uri}")
     private lateinit var certbotUri: String
 
-    @Value("\${certbot.alias}")
+    @Value("\${photosite.ssl.key-alias}")
     private lateinit var certbotAlias: String
 
-    @Value("\${certbot.password}")
+    @Value("\${photosite.ssl.key-store-password}")
     private lateinit var certbotPassword: String
 
     private lateinit var expiryDate: LocalDateTime
@@ -70,6 +70,7 @@ class PageService(
             val currentPage = photosite.pageTree.page(requestUri) ?: photosite.pageTree
             val currentPagePath = currentPage.path()
             val language = Locale.forLanguageTag(lang.language)
+            model.addAttribute("language", language.language)
             model.addAttribute("theme", photosite.theme)
             model.addAttribute("siteUrl", photosite.siteUrl)
             model.addAttribute("language", language)
@@ -86,16 +87,17 @@ class PageService(
             model.addAttribute(
                 "naviSub",
                 photosite.subTrees
-                    .joinToString("") { (naviName, pages) ->
+                    .mapIndexed { index, (naviName, pages) ->
                         Page.subNaviHtml(
                             naviName,
                             language,
                             currentPage,
                             pages,
                             photosite.theme,
-                            0
+                            0,
+                            "sub-navigation_$index"
                         )
-                    }
+                    }.joinToString("")
             )
             model.addAttribute(
                 "naviStatic", Page.subNaviHtml(
@@ -104,7 +106,8 @@ class PageService(
                     currentPage,
                     photosite.staticTree.children,
                     photosite.theme,
-                    0
+                    0,
+                    "static-navigation"
                 )
             )
 

@@ -4,7 +4,3 @@ security:
 spring:
   config:
     import: file:${user.home}/.photosite/secrets/application.yml
-
-certbot:
-  uri: https://acme-staging-v02.api.letsencrypt.org/directory
-#  uri: https://acme-v02.api.letsencrypt.org/directory

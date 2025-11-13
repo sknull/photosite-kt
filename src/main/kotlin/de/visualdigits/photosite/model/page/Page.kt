@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import de.visualdigits.photosite.model.common.Translation
-import de.visualdigits.photosite.model.page.content.Content
 import de.visualdigits.photosite.model.navi.NaviName
+import de.visualdigits.photosite.model.page.content.Content
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -31,6 +31,8 @@ class Page(
     var level: Int = 0
     var name: String = "/"
 
+    var ariaName: String = ""
+
     var parent: Page? = null
     var children: MutableList<Page> = mutableListOf()
 
@@ -49,7 +51,7 @@ class Page(
             .build()
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
 
-        fun readValue(directory: File, level: Int = 0): Page {
+        fun readValue(directory: File, level: Int = 0, ariaName: String = "navigation"): Page {
             log.info("Initializing page '${"  ".repeat(level)}${directory.canonicalPath}'")
 
             val descriptorFile = File(directory, "page.json")
@@ -59,6 +61,7 @@ class Page(
                 Page()
             }
             page.level = level
+            page.ariaName = ariaName
             page.name = directory.name
             page.content.descriptorFile = descriptorFile
             page.content.directory = directory
@@ -70,8 +73,8 @@ class Page(
 
             page.children = page.content.files
                 .filter { f -> f.isDirectory }
-                .map { d ->
-                    val c = readValue(d, level + 1)
+                .mapIndexed { index, d ->
+                    val c = readValue(d, level + 1, "${ariaName}_${index + 1}")
                     c.parent = page
                     c
                 }
@@ -92,22 +95,25 @@ class Page(
             currentPage: Page,
             pages: List<Page>,
             theme: String,
-            level: Int? = null
+            level: Int? = null,
+            rolePrefix: String
         ): String {
             val name = naviName.label?.translationsMap[language]?.name
             val html = StringBuilder()
+
             html
-                .append("          <div class=\"sub-navigation\"> <!-- ")
+                .append("          <div class=\"$rolePrefix\" aria-label=\"$rolePrefix\" role=\"menubar\" aria-activedescendant=\"$rolePrefix\"> <!-- ")
                 .append(name)
                 .append(" -->\n")
                 .append("              <span class=\"sidebar-title\">")
                 .append(name)
                 .append("</span>\n")
-                .append("              <ul class=\"toplevel\" role=\"menubar\">\n")
+                .append("              <ul id=\"$rolePrefix\" class=\"toplevel\" aria-label=\"$rolePrefix\" role=\"listbox\" aria-activedescendant=\"$rolePrefix-1\">\n")
 
-            pages.forEach { page ->
+            val numberOfPages = pages.size
+            pages.forEachIndexed { index, page ->
                 val clazz = determineStyleClass(page, currentPage)
-                val html1 = StringBuilder("                  <li class=\"$clazz\">\n")
+                val html1 = StringBuilder("                  <li id=\"$rolePrefix-${index + 1}\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
                     .append(page.pageLink(theme, language, "", level))
                     .append("                  </li>\n")
                 html.append(html1)
@@ -128,21 +134,22 @@ class Page(
             language: Locale,
             indent: String,
             html: StringBuilder,
-            predicate: (p: Page) -> Boolean
+            children: List<Page> = page.children
         ) {
-            val children: List<Page> = page.children.filter(predicate).sortedBy { p -> p.name }
-            children.forEach { child ->
+            val numberOfChildren = children.size
+            children.forEachIndexed { index, child ->
                 val clazz = determineStyleClass(child, currentPage)
-                val html1 = StringBuilder("$indent<li class=\"$clazz\">\n")
-                    .append(child.pageLink(theme, language, indent))
-                    .append(indent)
-                    .append("  <ul>\n")
-                appendChildPages(theme, currentPage, child, language, "$indent    ", html1) { p: Page -> p.children.isNotEmpty() }
-                appendChildPages(theme, currentPage, child, language, "$indent    ", html1) { p: Page -> p.children.isEmpty() }
-                html1.append(indent)
-                    .append("  </ul>\n")
-                    .append(indent)
-                    .append("</li>\n")
+                val subFolders = child.children.filter { c -> c.children.isNotEmpty() }
+                val subPages = child.children.filter { c -> c.children.isEmpty() }
+                val childAriaName = subFolders.firstOrNull()?.ariaName
+                val html1 = StringBuilder("$indent    <li id=\"${child.ariaName}\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\">\n")
+                    .append(child.pageLink(theme, language, "$indent    "))
+                    .append("$indent        <ul aria-label=\"${child.ariaName}\" role=\"listbox\" aria-activedescendant=\"${childAriaName}\">\n")
+                appendChildPages(theme, currentPage, child, language, "$indent    ", html1, subFolders)
+                appendChildPages(theme, currentPage, child, language, "$indent    ", html1, subPages)
+                html1
+                    .append("$indent        </ul>\n")
+                    .append("$indent    </li>\n")
                 html.append(html1)
             }
         }
@@ -167,7 +174,7 @@ class Page(
     }
 
     override fun toString(): String {
-        return "${"  ".repeat(level)}$name [${path()}]\n${children.joinToString("") { it.toString() }}"
+        return "${"  ".repeat(level)}$ariaName:$name [${path()}]\n${children.joinToString("") { it.toString() }}"
     }
 
     fun mainNaviHtml(
@@ -178,15 +185,24 @@ class Page(
     ): String {
         val name = naviName.label?.translationsMap[language]?.name
         val html = StringBuilder()
-        html.append("          <nav role=\"navigation\" itemscope=\"itemscope\" itemtype=\"http://schema.org/SiteNavigationElement\"> <!-- ")
+        val childAriaName = children.firstOrNull()?.ariaName
+
+        html.append("          <nav role=\"navigation\" itemscope=\"itemscope\" itemtype=\"http://schema.org/SiteNavigationElement\" aria-activedescendant=\"navigation-1\"> <!-- ")
             .append(name)
             .append(" -->\n")
             .append("              <span class=\"sidebar-title\">")
             .append(name)
             .append("</span>\n")
-            .append("              <ul class=\"toplevel\" role=\"menubar\">\n")
+            .append("              <ul class=\"toplevel\" role=\"menubar\" aria-activedescendant=\"${childAriaName}\">\n")
 
-        appendChildPages(theme, currentPage, this, language, "                ", html) { _ -> true }
+        appendChildPages(
+            theme = theme,
+            currentPage = currentPage,
+            page = this,
+            language = language,
+            indent = "              ",
+            html = html
+        )
 
         html.append("              </ul>\n")
             .append("          </nav> <!-- ")
@@ -220,7 +236,7 @@ class Page(
                 .append(theme)
                 .append("/images/icons/")
                 .append(i)
-                .append(".png\"/></div>")
+                .append(".png\" alt=\"\"/></div>")
         }
         html.append("<div class=\"nav-text\">")
             .append(translationsMap[language]?.name?:name)
@@ -237,9 +253,10 @@ class Page(
             icon = icon,
             tocName = tocName,
             content = content,
-            translations = translations
+            translations = translations,
         )
         clone.level = level
+        clone.ariaName = ariaName
         clone.name = name
         val clonedChildren = children
             .map { c ->

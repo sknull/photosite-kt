@@ -120,7 +120,7 @@ class LightGallery(
             .append("\n")
             .append("            })\n")
             .append("          </script>\n")
-        return sb.toString()
+        return "\n$sb"
     }
 
 }

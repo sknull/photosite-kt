@@ -5,7 +5,6 @@ import com.drew.metadata.Metadata
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.TimeZone

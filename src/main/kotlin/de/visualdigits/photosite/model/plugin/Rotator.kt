@@ -20,12 +20,12 @@ class Rotator : Plugin(
         val n = (images.size * Math.random()).toInt()
         if (images.size > n) {
             Photosite.getRelativeResourcePath(images[n].file)
-                ?.let {
+                ?.let { image ->
                     sb
                         .append("<img src=\"/")
-                        .append(it)
-                        .append("\"/>\n")
+                        .append(image)
+                        .append("\" alt=\"\"/>\n")
                 }
         }
-        return sb.toString()
+        return "\n$sb"
     }}

@@ -19,6 +19,6 @@ class MarkdownContent : HtmlContent(
         html = obfuscateText(html)
         html = obfuscateEmail(html)
 
-        return html
+        return "\n$html"
     }
 }

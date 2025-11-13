@@ -1,11 +1,11 @@
 package de.visualdigits.photosite.service
 
-import de.visualdigits.photosite.model.page.content.ImageFile
 import de.visualdigits.photosite.model.page.Page
+import de.visualdigits.photosite.model.page.content.ImageFile
+import de.visualdigits.photosite.model.photosite.Photosite
 import de.visualdigits.photosite.model.rss.Channel
 import de.visualdigits.photosite.model.rss.Item
 import de.visualdigits.photosite.model.rss.Rss
-import de.visualdigits.photosite.model.photosite.Photosite
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.Locale
@@ -67,7 +67,7 @@ class RssService(
                         )
                     val teaser = page.content.teaser
                     var description =
-                        "<img src=\"$thumbUrl\"/ alt=\"$imageName\" title=\"$imageName\"><br/>"
+                        "<img src=\"$thumbUrl\"/ alt=\"\" title=\"$imageName\"><br/>"
                     if (teaser != null) {
                         val text: String = teaser.getHtml(lang)
                         if (text.isNotBlank()) {
