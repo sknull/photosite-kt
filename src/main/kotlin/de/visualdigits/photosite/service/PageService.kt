@@ -2,6 +2,7 @@ package de.visualdigits.photosite.service
 
 import de.visualdigits.photosite.Application
 import de.visualdigits.photosite.model.page.Page
+import de.visualdigits.photosite.model.page.Page.Companion.mainNaviHtml
 import de.visualdigits.photosite.model.photosite.Photosite
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
@@ -58,7 +59,7 @@ class PageService(
 
         var requestUri = getRequestUri(request)
         return if (resourceFileExists(requestUri)) {
-            if (requestUri.startsWith("/resources") || requestUri.startsWith("/.well-known/acme-challenge")) {
+            if (requestUri.startsWith("/resources") || requestUri.startsWith("/.well-known/acme-challenge") || (requestUri.startsWith("/google") && requestUri.endsWith(".html"))) {
                 getResource(requestUri, response)
             } else {
                 response.sendError(404)
@@ -77,11 +78,12 @@ class PageService(
             model.addAttribute("title", photosite.siteTitle)
             model.addAttribute(
                 "naviMain",
-                photosite.mainTree.mainNaviHtml(
-                    photosite.naviMain ?: error("No main navi"),
-                    language,
-                    currentPage,
-                    photosite.theme
+                mainNaviHtml(
+                    page = photosite.mainTree,
+                    naviName = photosite.naviMain ?: error("No main navi"),
+                    language = language,
+                    currentPage = currentPage,
+                    theme = photosite.theme
                 )
             )
             model.addAttribute(

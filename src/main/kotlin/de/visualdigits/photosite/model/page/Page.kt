@@ -89,6 +89,35 @@ class Page(
             return page
         }
 
+        fun mainNaviHtml(
+            page: Page,
+            naviName: NaviName,
+            language: Locale,
+            currentPage: Page,
+            theme: String
+        ): String {
+            val name = naviName.label?.translationsMap[language]?.name
+            val html = StringBuilder()
+            val childAriaName = if (page.children.isNotEmpty()) " aria-activedescendant=\"${page.children.firstOrNull()?.ariaName}-item\"" else ""
+
+            html
+                .append("                        <span class=\"sidebar-title\">$name</span>\n")
+                .append("                        <ul id=\"main-navigation-box\" role=\"navigation\" itemscope itemtype=\"https://schema.org/BreadcrumbList\" class=\"toplevel\"$childAriaName>\n")
+
+            appendChildPages(
+                theme = theme,
+                currentPage = currentPage,
+                page = page,
+                language = language,
+                indent = "                            ",
+                html = html
+            )
+
+            html.append("                        </ul>\n")
+
+            return html.toString()
+        }
+
         fun subNaviHtml(
             naviName: NaviName,
             language: Locale,
@@ -102,23 +131,42 @@ class Page(
             val html = StringBuilder()
 
             html
-                .append("\n          <div id=\"$rolePrefix-wrapper\" aria-label=\"$rolePrefix-wrapper\" role=\"menubar\" aria-activedescendant=\"$rolePrefix-box\"> <!-- $name -->\n")
+                .append("\n          <div id=\"$rolePrefix-wrapper\"> <!-- $name - start -->\n")
                 .append("              <span class=\"sidebar-title\">$name</span>\n")
-                .append("              <ul id=\"$rolePrefix-box\" class=\"toplevel\" aria-label=\"$rolePrefix-box\" role=\"listbox\" aria-activedescendant=\"$rolePrefix-1-item\">\n")
+                .append("              <ul id=\"$rolePrefix-box\" role=\"navigation\" itemscope itemtype=\"https://schema.org/BreadcrumbList\" class=\"toplevel\" aria-activedescendant=\"$rolePrefix-1-item\">\n")
 
             val numberOfPages = pages.size
             pages.forEachIndexed { index, page ->
                 val clazz = determineStyleClass(page, currentPage)
                 val html1 = StringBuilder()
-                    .append("                  <li id=\"$rolePrefix-${index + 1}-item\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
-                    .append(page.pageLink(theme, language, "                       ", level))
+                    .append("                  <li id=\"$rolePrefix-${index + 1}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
+                    .append(pageLink(page, theme, language, "                      ", level))
+                    .append("                      <meta itemprop=\"position\" content=\"${index + 1}\"/>")
                     .append("                  </li>\n")
                 html.append(html1)
             }
 
             html
                 .append("              </ul>\n")
-                .append("          </div> <!-- $name -->\n      ")
+                .append("          </div> <!-- $name - end -->\n      ")
+            return html.toString()
+        }
+
+        private fun pageLink(
+            page: Page,
+            theme: String,
+            language: Locale,
+            indent: String? = "",
+            level: Int? = null,
+        ): String {
+            val html = StringBuilder()
+            html.append("$indent<a href=\"/${StringEscapeUtils.escapeHtml4(page.path())}?lang=$language&\" itemprop=\"item\" style=\"padding-left: ${10 + (level?:page.level) * 10}px;\">")
+                .append("<div class=\"nav-item\">")
+            page.icon?.let { i -> html.append("<div class=\"nav-icon\" itemprop=\"image\"><img src=\"/resources/themes/$theme/images/icons/$i.png\" alt=\"\"/></div>") }
+            html.append("<div class=\"nav-text\" itemprop=\"name\">${page.translationsMap[language]?.name?:page.name}</div>")
+                .append("</div>")
+                .append("</a>\n")
+
             return html.toString()
         }
 
@@ -134,25 +182,26 @@ class Page(
             val numberOfChildren = children.size
             children.forEachIndexed { index, child ->
                 val clazz = determineStyleClass(child, currentPage)
-                val html1 = StringBuilder("$indent<li id=\"${child.ariaName}-item\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\">\n")
-                    .append(child.pageLink(theme, language, "$indent        "))
+                val childAriaName1 = if (child.children.isNotEmpty()) " aria-activedescendant=\"${child.ariaName}-box\"" else ""
+                val html1 = StringBuilder("$indent<li id=\"${child.ariaName}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\"$childAriaName1>\n")
+                    .append(pageLink(child, theme, language, "$indent    "))
 
                 if (child.children.isNotEmpty()) {
                     val subFolders = child.children.filter { c -> c.children.isNotEmpty() }
                     val subPages = child.children.filter { c -> c.children.isEmpty() }
-                    val childAriaName = if (subFolders.isNotEmpty()) {
+                    val childAriaName2 = if (subFolders.isNotEmpty()) {
                         " aria-activedescendant=\"${subFolders.first().ariaName}-item\""
                     } else if (subPages.isNotEmpty()) {
                         " aria-activedescendant=\"${subPages.first().ariaName}-item\""
                     } else {
                         ""
                     }
-                    html1.append("$indent    <ul aria-label=\"${child.ariaName}-box\" role=\"listbox\"$childAriaName>\n")
+                    html1.append("$indent    <ul id=\"${child.ariaName}-box\" itemscope itemprop=\"folder\" role=\"navigation\"$childAriaName2>\n")
                     appendChildPages(theme, currentPage, child, language, "$indent        ", html1, subFolders)
                     appendChildPages(theme, currentPage, child, language, "$indent        ", html1, subPages)
                     html1.append("$indent    </ul>\n")
                 }
-
+                html1.append("$indent    <meta itemprop=\"position\" content=\"${index + 1}\"/>\n")
                 html1.append("$indent</li>\n")
                 html.append(html1)
             }
@@ -179,51 +228,6 @@ class Page(
 
     override fun toString(): String {
         return "${"  ".repeat(level)}$ariaName:$name [${path()}]\n${children.joinToString("") { it.toString() }}"
-    }
-
-    fun mainNaviHtml(
-        naviName: NaviName,
-        language: Locale,
-        currentPage: Page,
-        theme: String
-    ): String {
-        val name = naviName.label?.translationsMap[language]?.name
-        val html = StringBuilder()
-        val childAriaName = if (children.isNotEmpty()) " aria-activedescendant=\"${children.firstOrNull()?.ariaName}-item\"" else ""
-
-        html
-            .append("                        <span class=\"sidebar-title\">$name</span>\n")
-            .append("                        <ul id=\"main-navigation-box\" aria-label=\"main-navigation-box\" class=\"toplevel\"$childAriaName>\n")
-
-        appendChildPages(
-            theme = theme,
-            currentPage = currentPage,
-            page = this,
-            language = language,
-            indent = "                            ",
-            html = html
-        )
-
-        html.append("                        </ul>\n")
-
-        return html.toString()
-    }
-
-    fun pageLink(
-        theme: String,
-        language: Locale,
-        indent: String? = "",
-        level: Int? = null,
-    ): String {
-        val html = StringBuilder()
-        html.append("$indent<a href=\"/${StringEscapeUtils.escapeHtml4(path())}?lang=$language&\" itemprop=\"url\" style=\"padding-left: ${10 + (level?:this.level) * 10}px;\">")
-            .append("<div class=\"nav-item\" itemprop=\"name\">")
-        icon?.let { i -> html.append("<div class=\"nav-icon\"><img src=\"/resources/themes/$theme/images/icons/$i.png\" alt=\"\"/></div>") }
-        html.append("<div class=\"nav-text\">${translationsMap[language]?.name?:name}</div>")
-            .append("</div>")
-            .append("</a>\n")
-
-        return html.toString()
     }
 
     fun clone(childrenFilter: ((p: Page) -> Boolean)? = null ): Page {
