@@ -9,7 +9,7 @@
 
 == Status
 
-https://github.com/sknull/photosite-kt/actions/workflows/build.yml[image:https://github.com/sknull/photosite-kt/actions/workflows/build.yml/badge.svg[Klanglicht Kt]]
+https://github.com/sknull/photosite-kt/actions/workflows/github-ci.yml[image:https://github.com/sknull/photosite-kt/actions/workflows/github-ci.yml/badge.svg[Photosite]]
 
 == Introduction
 
