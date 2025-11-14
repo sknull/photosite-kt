@@ -38,8 +38,9 @@ class LightGallery(
     }
 
     override fun renderHtml(page: Page, language: Locale, imageService: ImageService): String {
-        val sb =
-            StringBuilder("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
+        val sb = StringBuilder()
+        sb.append("          <h1>${page.name}</h1>\n")
+            .append("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
         page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file

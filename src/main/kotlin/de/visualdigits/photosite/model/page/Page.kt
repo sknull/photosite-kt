@@ -102,28 +102,23 @@ class Page(
             val html = StringBuilder()
 
             html
-                .append("          <div class=\"$rolePrefix\" aria-label=\"$rolePrefix\" role=\"menubar\" aria-activedescendant=\"$rolePrefix\"> <!-- ")
-                .append(name)
-                .append(" -->\n")
-                .append("              <span class=\"sidebar-title\">")
-                .append(name)
-                .append("</span>\n")
-                .append("              <ul id=\"$rolePrefix\" class=\"toplevel\" aria-label=\"$rolePrefix\" role=\"listbox\" aria-activedescendant=\"$rolePrefix-1\">\n")
+                .append("\n          <div id=\"$rolePrefix-wrapper\" aria-label=\"$rolePrefix-wrapper\" role=\"menubar\" aria-activedescendant=\"$rolePrefix-box\"> <!-- $name -->\n")
+                .append("              <span class=\"sidebar-title\">$name</span>\n")
+                .append("              <ul id=\"$rolePrefix-box\" class=\"toplevel\" aria-label=\"$rolePrefix-box\" role=\"listbox\" aria-activedescendant=\"$rolePrefix-1-item\">\n")
 
             val numberOfPages = pages.size
             pages.forEachIndexed { index, page ->
                 val clazz = determineStyleClass(page, currentPage)
-                val html1 = StringBuilder("                  <li id=\"$rolePrefix-${index + 1}\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
-                    .append(page.pageLink(theme, language, "", level))
+                val html1 = StringBuilder()
+                    .append("                  <li id=\"$rolePrefix-${index + 1}-item\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
+                    .append(page.pageLink(theme, language, "                       ", level))
                     .append("                  </li>\n")
                 html.append(html1)
             }
 
             html
                 .append("              </ul>\n")
-                .append("          </div> <!-- ")
-                .append(name)
-                .append(" -->\n")
+                .append("          </div> <!-- $name -->\n      ")
             return html.toString()
         }
 
@@ -139,17 +134,26 @@ class Page(
             val numberOfChildren = children.size
             children.forEachIndexed { index, child ->
                 val clazz = determineStyleClass(child, currentPage)
-                val subFolders = child.children.filter { c -> c.children.isNotEmpty() }
-                val subPages = child.children.filter { c -> c.children.isEmpty() }
-                val childAriaName = subFolders.firstOrNull()?.ariaName
-                val html1 = StringBuilder("$indent    <li id=\"${child.ariaName}\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\">\n")
-                    .append(child.pageLink(theme, language, "$indent    "))
-                    .append("$indent        <ul aria-label=\"${child.ariaName}\" role=\"listbox\" aria-activedescendant=\"${childAriaName}\">\n")
-                appendChildPages(theme, currentPage, child, language, "$indent    ", html1, subFolders)
-                appendChildPages(theme, currentPage, child, language, "$indent    ", html1, subPages)
-                html1
-                    .append("$indent        </ul>\n")
-                    .append("$indent    </li>\n")
+                val html1 = StringBuilder("$indent<li id=\"${child.ariaName}-item\" class=\"$clazz\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\">\n")
+                    .append(child.pageLink(theme, language, "$indent        "))
+
+                if (child.children.isNotEmpty()) {
+                    val subFolders = child.children.filter { c -> c.children.isNotEmpty() }
+                    val subPages = child.children.filter { c -> c.children.isEmpty() }
+                    val childAriaName = if (subFolders.isNotEmpty()) {
+                        " aria-activedescendant=\"${subFolders.first().ariaName}-item\""
+                    } else if (subPages.isNotEmpty()) {
+                        " aria-activedescendant=\"${subPages.first().ariaName}-item\""
+                    } else {
+                        ""
+                    }
+                    html1.append("$indent    <ul aria-label=\"${child.ariaName}-box\" role=\"listbox\"$childAriaName>\n")
+                    appendChildPages(theme, currentPage, child, language, "$indent        ", html1, subFolders)
+                    appendChildPages(theme, currentPage, child, language, "$indent        ", html1, subPages)
+                    html1.append("$indent    </ul>\n")
+                }
+
+                html1.append("$indent</li>\n")
                 html.append(html1)
             }
         }
@@ -185,29 +189,22 @@ class Page(
     ): String {
         val name = naviName.label?.translationsMap[language]?.name
         val html = StringBuilder()
-        val childAriaName = children.firstOrNull()?.ariaName
+        val childAriaName = if (children.isNotEmpty()) " aria-activedescendant=\"${children.firstOrNull()?.ariaName}-item\"" else ""
 
-        html.append("          <nav role=\"navigation\" itemscope=\"itemscope\" itemtype=\"http://schema.org/SiteNavigationElement\" aria-activedescendant=\"navigation-1\"> <!-- ")
-            .append(name)
-            .append(" -->\n")
-            .append("              <span class=\"sidebar-title\">")
-            .append(name)
-            .append("</span>\n")
-            .append("              <ul class=\"toplevel\" role=\"menubar\" aria-activedescendant=\"${childAriaName}\">\n")
+        html
+            .append("                        <span class=\"sidebar-title\">$name</span>\n")
+            .append("                        <ul id=\"main-navigation-box\" aria-label=\"main-navigation-box\" class=\"toplevel\"$childAriaName>\n")
 
         appendChildPages(
             theme = theme,
             currentPage = currentPage,
             page = this,
             language = language,
-            indent = "              ",
+            indent = "                            ",
             html = html
         )
 
-        html.append("              </ul>\n")
-            .append("          </nav> <!-- ")
-            .append(name)
-            .append(" -->\n")
+        html.append("                        </ul>\n")
 
         return html.toString()
     }
@@ -219,31 +216,12 @@ class Page(
         level: Int? = null,
     ): String {
         val html = StringBuilder()
-        html.append(indent)
-            .append("  <a href=\"/")
-            .append(StringEscapeUtils.escapeHtml4(path()))
-            .append("?lang=")
-            .append(language)
-            .append("&")
-            .append("\" itemprop=\"url\" style=\"padding-left: ")
-            .append(10 + (level?:this.level) * 10)
-            .append("px;\">\n")
-            .append(indent)
-            .append("    <div class=\"nav-item\"")
-            .append(" itemprop=\"name\">")
-        icon?.let { i ->
-            html.append("<div class=\"nav-icon\"><img src=\"/resources/themes/")
-                .append(theme)
-                .append("/images/icons/")
-                .append(i)
-                .append(".png\" alt=\"\"/></div>")
-        }
-        html.append("<div class=\"nav-text\">")
-            .append(translationsMap[language]?.name?:name)
+        html.append("$indent<a href=\"/${StringEscapeUtils.escapeHtml4(path())}?lang=$language&\" itemprop=\"url\" style=\"padding-left: ${10 + (level?:this.level) * 10}px;\">")
+            .append("<div class=\"nav-item\" itemprop=\"name\">")
+        icon?.let { i -> html.append("<div class=\"nav-icon\"><img src=\"/resources/themes/$theme/images/icons/$i.png\" alt=\"\"/></div>") }
+        html.append("<div class=\"nav-text\">${translationsMap[language]?.name?:name}</div>")
             .append("</div>")
-        html.append("</div>\n")
-        html.append(indent)
-            .append("  </a>\n")
+            .append("</a>\n")
 
         return html.toString()
     }

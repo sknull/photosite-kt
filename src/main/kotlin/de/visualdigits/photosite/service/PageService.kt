@@ -95,7 +95,7 @@ class PageService(
                             pages,
                             photosite.theme,
                             0,
-                            "sub-navigation_$index"
+                            "sub-navigation_${index + 1}"
                         )
                     }.joinToString("")
             )

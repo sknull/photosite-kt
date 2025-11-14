@@ -27,5 +27,5 @@ class Rotator : Plugin(
                         .append("\" alt=\"\"/>\n")
                 }
         }
-        return "\n$sb"
+        return "\n<h1>${page.name.replace("pagetree", "Moin, moin!")}</h1>\n$sb"
     }}
