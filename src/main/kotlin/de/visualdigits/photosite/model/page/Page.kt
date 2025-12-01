@@ -29,7 +29,7 @@ class Page(
 ) {
 
     var level: Int = 0
-    var name: String = "/"
+    var path: String = "/"
 
     var ariaName: String = ""
 
@@ -46,6 +46,7 @@ class Page(
 
         private val jsonMapper = jacksonMapperBuilder()
             .addModule(kotlinModule())
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
             .enable(SerializationFeature.INDENT_OUTPUT)
             .build()
@@ -62,7 +63,7 @@ class Page(
             }
             page.level = level
             page.ariaName = ariaName
-            page.name = directory.name
+            page.path = directory.name
             page.content.descriptorFile = descriptorFile
             page.content.directory = directory
             page.content.files = directory.listFiles()?:arrayOf()
@@ -92,11 +93,11 @@ class Page(
         fun mainNaviHtml(
             page: Page,
             naviName: NaviName,
-            language: Locale,
+            locale: Locale,
             currentPage: Page,
             theme: String
         ): String {
-            val name = naviName.label?.translationsMap[language]?.name
+            val name = naviName.label?.translationsMap[locale]?.name
             val html = StringBuilder()
             val childAriaName = if (page.children.isNotEmpty()) " aria-activedescendant=\"${page.children.firstOrNull()?.ariaName}-item\"" else ""
 
@@ -108,7 +109,7 @@ class Page(
                 theme = theme,
                 currentPage = currentPage,
                 page = page,
-                language = language,
+                locale = locale,
                 indent = "                            ",
                 html = html
             )
@@ -120,14 +121,14 @@ class Page(
 
         fun subNaviHtml(
             naviName: NaviName,
-            language: Locale,
+            locale: Locale,
             currentPage: Page,
             pages: List<Page>,
             theme: String,
             level: Int? = null,
             rolePrefix: String
         ): String {
-            val name = naviName.label?.translationsMap[language]?.name
+            val name = naviName.label?.translationsMap[locale]?.name
             val html = StringBuilder()
 
             html
@@ -140,7 +141,7 @@ class Page(
                 val clazz = determineStyleClass(page, currentPage)
                 val html1 = StringBuilder()
                     .append("                  <li id=\"$rolePrefix-${index + 1}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
-                    .append(pageLink(page, theme, language, "                      ", level))
+                    .append(pageLink(page, theme, locale, "                      ", level))
                     .append("                      <meta itemprop=\"position\" content=\"${index + 1}\"/>")
                     .append("                  </li>\n")
                 html.append(html1)
@@ -155,15 +156,15 @@ class Page(
         private fun pageLink(
             page: Page,
             theme: String,
-            language: Locale,
+            locale: Locale,
             indent: String? = "",
             level: Int? = null,
         ): String {
             val html = StringBuilder()
-            html.append("$indent<a href=\"/${StringEscapeUtils.escapeHtml4(page.path())}?lang=$language&\" itemprop=\"item\" style=\"padding-left: ${10 + (level?:page.level) * 10}px;\">")
+            html.append("$indent<a href=\"/${StringEscapeUtils.escapeHtml4(page.path(locale))}?lang=$locale&\" itemprop=\"item\" style=\"padding-left: ${10 + (level?:page.level) * 10}px;\">")
                 .append("<div class=\"nav-item\">")
             page.icon?.let { i -> html.append("<div class=\"nav-icon\" itemprop=\"image\"><img src=\"/resources/themes/$theme/images/icons/$i.png\" alt=\"\"/></div>") }
-            html.append("<div class=\"nav-text\" itemprop=\"name\">${page.translationsMap[language]?.name?:page.name}</div>")
+            html.append("<div class=\"nav-text\" itemprop=\"name\">${page.translationsMap[locale]?.name?:page.path}</div>")
                 .append("</div>")
                 .append("</a>\n")
 
@@ -174,7 +175,7 @@ class Page(
             theme: String,
             currentPage: Page,
             page: Page,
-            language: Locale,
+            locale: Locale,
             indent: String,
             html: StringBuilder,
             children: List<Page> = page.children
@@ -184,7 +185,7 @@ class Page(
                 val clazz = determineStyleClass(child, currentPage)
                 val childAriaName1 = if (child.children.isNotEmpty()) " aria-activedescendant=\"${child.ariaName}-box\"" else ""
                 val html1 = StringBuilder("$indent<li id=\"${child.ariaName}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\"$childAriaName1>\n")
-                    .append(pageLink(child, theme, language, "$indent    "))
+                    .append(pageLink(child, theme, locale, "$indent    "))
 
                 if (child.children.isNotEmpty()) {
                     val subFolders = child.children.filter { c -> c.children.isNotEmpty() }
@@ -197,8 +198,8 @@ class Page(
                         ""
                     }
                     html1.append("$indent    <ul id=\"${child.ariaName}-box\" itemscope itemprop=\"folder\" role=\"navigation\"$childAriaName2>\n")
-                    appendChildPages(theme, currentPage, child, language, "$indent        ", html1, subFolders)
-                    appendChildPages(theme, currentPage, child, language, "$indent        ", html1, subPages)
+                    appendChildPages(theme, currentPage, child, locale, "$indent        ", html1, subFolders)
+                    appendChildPages(theme, currentPage, child, locale, "$indent        ", html1, subPages)
                     html1.append("$indent    </ul>\n")
                 }
                 html1.append("$indent    <meta itemprop=\"position\" content=\"${index + 1}\"/>\n")
@@ -227,7 +228,7 @@ class Page(
     }
 
     override fun toString(): String {
-        return "${"  ".repeat(level)}$ariaName:$name [${path()}]\n${children.joinToString("") { it.toString() }}"
+        return "${"  ".repeat(level)}$ariaName:$path [${path()}]\n${children.joinToString("") { it.toString() }}"
     }
 
     fun clone(childrenFilter: ((p: Page) -> Boolean)? = null ): Page {
@@ -239,7 +240,7 @@ class Page(
         )
         clone.level = level
         clone.ariaName = ariaName
-        clone.name = name
+        clone.path = path
         val clonedChildren = children
             .map { c ->
                 val cc = c.clone()
@@ -253,8 +254,8 @@ class Page(
         return clone
     }
 
-    fun page(path: String): Page? {
-        return createPageMap()[path]
+    fun page(path: String, locale: Locale? = null): Page? {
+        return createPageMap(locale)[path]
     }
 
     fun allPages(pages: MutableList<Page> = mutableListOf(), filter: ((p: Page) -> Boolean)? = null): List<Page> {
@@ -264,10 +265,10 @@ class Page(
         return pages
     }
 
-    private fun createPageMap(pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
-        pageMap[path()] = this
+    private fun createPageMap(locale: Locale? = null, pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
+        pageMap[path(locale)] = this
         children.forEach { c ->
-            c.createPageMap(pageMap)
+            c.createPageMap(locale, pageMap)
         }
 
         return pageMap
@@ -288,7 +289,9 @@ class Page(
             }
     }
 
-    fun path(): String = rootLine().drop(1).joinToString("/") { p -> p.name }
+    fun path(locale: Locale? = null): String = rootLine().drop(1).joinToString("/") { p ->
+        locale?.let { l -> p.translationsMap[l]?.name }?:p.path
+    }
 
     fun rootLine(rootLine: MutableList<Page> = mutableListOf()): List<Page> {
         rootLine.addFirst(this)

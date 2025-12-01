@@ -25,6 +25,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
+import java.lang.Exception
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -67,8 +68,9 @@ class DomainCertificatesService(
         expiryDate: LocalDateTime,
         gracePeriod: Long = 7
     ): LocalDateTime {
+        log.info("Server certificate will expire at '$expiryDate' - updating now...")
         return if (forceUpdate || LocalDateTime.now().isAfter(expiryDate.minus(gracePeriod, ChronoUnit.DAYS))) {
-            log.info("Server certificate will expire at '$expiryDate' - updating now...")
+            log.info("Updating certificates...")
             createCertificates(
                 certbotUri = certbotUri,
                 domains = listOf(photosite.domain),
@@ -79,6 +81,7 @@ class DomainCertificatesService(
             log.info("Successfully updated server certificate, new certificate will be valid until '$newExpiryDate'")
             newExpiryDate
         } else {
+            log.info("Skipping certificate update")
             expiryDate
         }
     }
@@ -228,7 +231,7 @@ class DomainCertificatesService(
             // If there is a key file, read it
             try {
                 FileReader(userKeyFile).use { fr -> return KeyPairUtils.readKeyPair(fr) }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw IllegalStateException("Could not read user key pair", e)
             }
         } else {
@@ -237,7 +240,7 @@ class DomainCertificatesService(
             log.info("Creating user key file '$userKeyFile'")
             try {
                 FileWriter(userKeyFile).use { fw -> KeyPairUtils.writeKeyPair(userKeyPair, fw) }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw IllegalStateException("Could not write user key pair", e)
             }
             return userKeyPair
@@ -255,7 +258,7 @@ class DomainCertificatesService(
         if (domainKeyFile.exists()) {
             try {
                 FileReader(domainKeyFile).use { fr -> return KeyPairUtils.readKeyPair(fr) }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw IllegalStateException("Could not domain read key pair", e)
             }
         } else {
@@ -263,7 +266,7 @@ class DomainCertificatesService(
             val domainKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE)
             try {
                 FileWriter(domainKeyFile).use { fw -> KeyPairUtils.writeKeyPair(domainKeyPair, fw) }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 throw IllegalStateException("Could not domain write key pair", e)
             }
             return domainKeyPair
@@ -291,7 +294,7 @@ class DomainCertificatesService(
                 .agreeToTermsOfService()
                 .useKeyPair(accountKey)
                 .create(session)
-        } catch (e: AcmeException) {
+        } catch (e: Exception) {
             throw IllegalStateException("Could not create session", e)
         }
         log.info("Registered a new user, URL: {}", account.location)
@@ -338,10 +341,7 @@ class DomainCertificatesService(
                 // Then update the status
                 challenge.update()
             }
-        } catch (ex: InterruptedException) {
-            log.error("interrupted", ex)
-            Thread.currentThread().interrupt()
-        } catch (ex: AcmeException) {
+        } catch (ex: Exception) {
             log.error("interrupted", ex)
             Thread.currentThread().interrupt()
         }
@@ -379,7 +379,7 @@ class DomainCertificatesService(
                     outs
                 )
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw IllegalStateException("Could not create challenge file: $challengeFile", e)
         }
         return challenge
@@ -432,7 +432,7 @@ class DomainCertificatesService(
                     certHolder = pem.readObject() as X509CertificateHolder
                 }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw IllegalStateException("Could not read cert file", e)
         }
         return certHolder
@@ -454,7 +454,7 @@ class DomainCertificatesService(
                     key = keyPair.private
                 }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             throw IllegalStateException("Could not read key file", e)
         }
         return key

@@ -2,6 +2,7 @@ package de.visualdigits.photosite.configuration
 
 import de.visualdigits.photosite.model.photosite.Photosite
 import org.apache.catalina.Context
+import org.apache.catalina.connector.Connector
 import org.apache.tomcat.util.descriptor.web.SecurityCollection
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint
 import org.slf4j.LoggerFactory
@@ -42,6 +43,14 @@ class HttpsConfiguration(
         ssl.keyAlias = photosite.ssl!!.keyAlias!!
         ssl.keyStorePassword = photosite.ssl!!.keyStorePassword!!
         factory.ssl = ssl
+
+        // redirect http to https
+        val connector = Connector("org.apache.coyote.http11.Http11NioProtocol")
+        connector.scheme = "http"
+        connector.port = 80
+        connector.secure = false
+        connector.redirectPort = 443
+        factory.addAdditionalTomcatConnectors(connector)
 
         return factory
     }

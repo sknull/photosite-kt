@@ -81,7 +81,7 @@ class RssService(
 
                 items.add(
                     Item(
-                        title = page.name,
+                        title = page.path,
                         author = "Stephan Knull",
                         category = pagePath,
                         link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",

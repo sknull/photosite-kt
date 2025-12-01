@@ -55,9 +55,12 @@ class PageService(
         request: HttpServletRequest,
         response: HttpServletResponse
     ): String? {
-        refreshCertIfNeeded()
+// todo causes too many requests and in turn denial of service
+//        refreshCertIfNeeded()
 
         var requestUri = getRequestUri(request)
+        val locale = Locale.forLanguageTag(lang.language)
+        val currentPage = photosite.pageTree.page(requestUri, locale) ?: photosite.pageTree
         return if (resourceFileExists(requestUri)) {
             if (requestUri.startsWith("/resources") || requestUri.startsWith("/.well-known/acme-challenge") || (requestUri.startsWith("/google") && requestUri.endsWith(".html"))) {
                 getResource(requestUri, response)
@@ -68,20 +71,19 @@ class PageService(
         } else {
             requestUri = requestUri.replace("/pagetree", "")
             if (requestUri.startsWith("/")) requestUri = requestUri.drop(1)
-            val currentPage = photosite.pageTree.page(requestUri) ?: photosite.pageTree
-            val currentPagePath = currentPage.path()
-            val language = Locale.forLanguageTag(lang.language)
-            model.addAttribute("language", language.language)
+            val locale = Locale.forLanguageTag(lang.language)
+            val currentPage = photosite.pageTree.page(requestUri, locale) ?: photosite.pageTree
+            val currentPagePath = currentPage.path(locale)
+            model.addAttribute("language", locale.language)
             model.addAttribute("theme", photosite.theme)
             model.addAttribute("siteUrl", photosite.siteUrl)
-            model.addAttribute("language", language)
             model.addAttribute("title", photosite.siteTitle)
             model.addAttribute(
                 "naviMain",
                 mainNaviHtml(
                     page = photosite.mainTree,
                     naviName = photosite.naviMain ?: error("No main navi"),
-                    language = language,
+                    locale = locale,
                     currentPage = currentPage,
                     theme = photosite.theme
                 )
@@ -92,7 +94,7 @@ class PageService(
                     .mapIndexed { index, (naviName, pages) ->
                         Page.subNaviHtml(
                             naviName,
-                            language,
+                            locale,
                             currentPage,
                             pages,
                             photosite.theme,
@@ -104,7 +106,7 @@ class PageService(
             model.addAttribute(
                 "naviStatic", Page.subNaviHtml(
                     photosite.naviStatic ?: error("No static navi"),
-                    language,
+                    locale,
                     currentPage,
                     photosite.staticTree.children,
                     photosite.theme,
@@ -121,7 +123,7 @@ class PageService(
             model.addAttribute("languageSelector", "<ol>$languageSelector</ol>")
 
             listOf(photosite.mainTree, photosite.staticTree)
-                .firstNotNullOfOrNull { pageTree -> pageTree.page(currentPagePath) }
+                .firstNotNullOfOrNull { pageTree -> pageTree.page(currentPagePath, locale) }
                 ?.let { page ->
                     val keywords = page.content.keywords.toMutableList()
                     val path = page.path()
@@ -131,7 +133,7 @@ class PageService(
                     model.addAttribute("metaDescription", keywords.joinToString(" "))
                     val pluginConfig = photosite.pluginsMap[page.content.contentType]
                     model.addAttribute("head", pluginConfig?.getHead(photosite.theme))
-                    model.addAttribute("content", pluginConfig?.renderHtml(page, language, imageService))
+                    model.addAttribute("content", pluginConfig?.renderHtml(page, locale, imageService))
                 }
 
             "pagetemplate"

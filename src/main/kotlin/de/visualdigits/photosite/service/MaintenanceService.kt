@@ -20,7 +20,7 @@ class MaintenanceService(
     private val imageService: ImageService
 ) {
 
-    private val log = LoggerFactory.getLogger(MaintenanceController::class.java)
+    private val log = LoggerFactory.getLogger(javaClass)
 
     private lateinit var expiryDate: LocalDateTime
 
