@@ -141,7 +141,7 @@ class Page(
                 val clazz = determineStyleClass(page, currentPage)
                 val html1 = StringBuilder()
                     .append("                  <li id=\"$rolePrefix-${index + 1}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
-                    .append(pageLink(page, theme, locale, "                      ", level))
+                    .append(pageLink("subnavi", page, theme, locale, "                      ", level))
                     .append("                      <meta itemprop=\"position\" content=\"${index + 1}\"/>")
                     .append("                  </li>\n")
                 html.append(html1)
@@ -154,6 +154,7 @@ class Page(
         }
 
         private fun pageLink(
+            naviName: String,
             page: Page,
             theme: String,
             locale: Locale,
@@ -161,7 +162,9 @@ class Page(
             level: Int? = null,
         ): String {
             val html = StringBuilder()
-            html.append("$indent<a href=\"/${StringEscapeUtils.escapeHtml4(page.path(locale))}?lang=$locale&\" itemprop=\"item\" style=\"padding-left: ${10 + (level?:page.level) * 10}px;\">")
+            val href = StringEscapeUtils.escapeHtml4("/pagetree/${page.path(locale)}")
+            val id = "$naviName${href.replace("/", "-")}"
+            html.append("$indent<a itemscope itemtype=\"https://schema.org/WebPage\" itemprop=\"item\" id=\"$id\" itemid=\"$id\" href=\"$href?lang=$locale&\" style=\"padding-left: ${10 + (level?:page.level) * 10}px;\">")
                 .append("<div class=\"nav-item\">")
             page.icon?.let { i -> html.append("<div class=\"nav-icon\" itemprop=\"image\"><img src=\"/resources/themes/$theme/images/icons/$i.png\" alt=\"\"/></div>") }
             html.append("<div class=\"nav-text\" itemprop=\"name\">${page.translationsMap[locale]?.name?:page.path}</div>")
@@ -185,7 +188,7 @@ class Page(
                 val clazz = determineStyleClass(child, currentPage)
                 val childAriaName1 = if (child.children.isNotEmpty()) " aria-activedescendant=\"${child.ariaName}-box\"" else ""
                 val html1 = StringBuilder("$indent<li id=\"${child.ariaName}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfChildren\"$childAriaName1>\n")
-                    .append(pageLink(child, theme, locale, "$indent    "))
+                    .append(pageLink("mainnavi", child, theme, locale, "$indent    "))
 
                 if (child.children.isNotEmpty()) {
                     val subFolders = child.children.filter { c -> c.children.isNotEmpty() }
@@ -254,8 +257,8 @@ class Page(
         return clone
     }
 
-    fun page(path: String, locale: Locale? = null): Page? {
-        return createPageMap(locale)[path]
+    fun page(path: String, pageTree: Page, locale: Locale? = null): Page {
+        return createPageMap(locale)[path] ?: pageTree
     }
 
     fun allPages(pages: MutableList<Page> = mutableListOf(), filter: ((p: Page) -> Boolean)? = null): List<Page> {

@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.controller.internal
+package de.visualdigits.photosite.controller
 
 import de.visualdigits.photosite.service.MaintenanceService
 import jakarta.servlet.http.HttpServletResponse

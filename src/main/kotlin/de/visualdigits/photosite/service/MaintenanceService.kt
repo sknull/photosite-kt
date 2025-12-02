@@ -1,7 +1,6 @@
 package de.visualdigits.photosite.service
 
 import de.visualdigits.photosite.Application
-import de.visualdigits.photosite.controller.internal.MaintenanceController
 import de.visualdigits.photosite.model.page.content.ImageFile
 import de.visualdigits.photosite.model.photosite.Photosite
 import jakarta.annotation.PostConstruct

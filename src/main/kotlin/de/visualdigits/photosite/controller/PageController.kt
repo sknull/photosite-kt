@@ -1,6 +1,8 @@
 package de.visualdigits.photosite.controller
 
+import de.visualdigits.photosite.HtmlUtil.getRequestUri
 import de.visualdigits.photosite.service.PageService
+import de.visualdigits.photosite.service.ResourceService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Controller
@@ -12,17 +14,26 @@ import java.util.Locale
 
 @Controller("PageController")
 class PageController(
-    private val pageService: PageService
+    private val pageService: PageService,
+    private val resourceService: ResourceService,
 ) {
 
     @GetMapping(value = ["/**"], produces = ["application/xhtml+xml"])
-    fun page(
+    fun dispatch(
         @RequestParam(name = "lang", required = false, defaultValue = "de") lang: Locale,
-        model: Model,
         request: HttpServletRequest,
-        response: HttpServletResponse
+        response: HttpServletResponse,
+        model: Model,
     ): String? {
-        return pageService.renderPage(lang, model, request, response)
+        val requestUri = request.getRequestUri()
+        return if (requestUri.startsWith("/resources")) {
+            resourceService.getResource(request, response)
+            null
+        } else if (requestUri.startsWith("/pagetree/")) {
+            pageService.renderPage(lang, requestUri.removePrefix("/pagetree/"), model)
+        } else {
+            pageService.renderPage(lang, requestUri.removePrefix("/"), model)
+        }
     }
 }
 

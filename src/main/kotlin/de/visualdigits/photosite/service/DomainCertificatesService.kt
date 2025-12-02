@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.service
 
+import de.visualdigits.photosite.Application
 import de.visualdigits.photosite.model.photosite.Photosite
 import org.apache.commons.io.IOUtils
 import org.bouncycastle.cert.X509CertificateHolder
@@ -15,7 +16,6 @@ import org.shredzone.acme4j.Session
 import org.shredzone.acme4j.Status
 import org.shredzone.acme4j.challenge.Challenge
 import org.shredzone.acme4j.challenge.Http01Challenge
-import org.shredzone.acme4j.exception.AcmeException
 import org.shredzone.acme4j.util.CSRBuilder
 import org.shredzone.acme4j.util.KeyPairUtils
 import org.slf4j.LoggerFactory
@@ -24,8 +24,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.io.IOException
-import java.lang.Exception
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -55,6 +53,25 @@ class DomainCertificatesService(
         private const val FILE_USER_KEY = "user.key"
         private const val RETRY_ATTEMPTS = 3
         private const val KEY_SIZE = 2048
+    }
+
+    fun refreshCertIfNeeded(
+        certbotUri: String,
+        certbotAlias: String,
+        certbotPassword: String,
+        expiryDate: LocalDateTime
+    ) {
+        if (photosite.isProfileActive("prod")) {
+            val newExpiryDate = maintainServerCertificate(
+                certbotUri = certbotUri,
+                certbotAlias = certbotAlias,
+                certbotPassword = certbotPassword,
+                expiryDate = expiryDate
+            )
+            if (newExpiryDate.isAfter(expiryDate)) {
+                Application.restart("ssl")
+            }
+        }
     }
 
     /**
