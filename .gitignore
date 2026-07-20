@@ -15,3 +15,4 @@ build/
 application-ssl.yml
 *.p12
 *.jks
+/out/
