@@ -1,11 +1,13 @@
 package de.visualdigits.photosite.service
 
+import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.content.ImageFile
 import de.visualdigits.photosite.model.photosite.Photosite
 import de.visualdigits.photosite.model.rss.Channel
 import de.visualdigits.photosite.model.rss.Item
 import de.visualdigits.photosite.model.rss.Rss
+import de.visualdigits.photosite.util.writeValueAsXmlString
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.Locale
@@ -19,35 +21,38 @@ class RssService(
     fun renderRssFeed(
         lang: Locale
     ): String {
-        val language = Locale.forLanguageTag(lang.language) ?: photosite.languageDefault
-        val items = mutableListOf<Item>()
+        val language = Language(lang.language)
+        val items = listOf<Item>()
         val pageTree = photosite.pageTree
         val lastModified = pageTree.content.lastModified
-        val feed = Rss(
-            channels = listOf(
-                Channel(
-                    title = photosite.siteTitle,
-                    generator = photosite.siteTitle,
-                    link = photosite.protocol + photosite.domain,
-                    description = photosite.siteSubTitle,
-                    language = "de",
-                    copyright = "Stephan Knull",
-                    items = items,
-                    lastBuildDate = fullDate(lastModified)
-                )
-            )
-        )
         val pages = determinePages(10)
+        val mutableItems = items.toMutableList()
         pages.forEach { page ->
-            processPage(page, language, items)
+            processPage(page, language, mutableItems)
         }
 
-        return feed.marshall()
+        val fixedItems = mutableItems.map { item ->
+            item.copy(link = item.link?.replace(" ", "+"))
+        }
+        val feed = Rss(
+            channel = Channel(
+                title = photosite.siteTitle,
+                source = photosite.siteTitle,
+                link = photosite.protocol + photosite.domain,
+                description = photosite.siteSubTitle,
+                language = "de",
+                copyright = "Stephan Knull",
+                items = fixedItems,
+                lastBuildDate = lastModified
+            )
+        )
+
+        return feed.writeValueAsXmlString()
     }
 
     private fun processPage(
         page: Page,
-        lang: Locale,
+        lang: Language,
         items: MutableList<Item>
     ) {
         val pagePath = page.path()
@@ -82,11 +87,11 @@ class RssService(
                 items.add(
                     Item(
                         title = page.path,
-                        author = "Stephan Knull",
-                        category = pagePath,
+                        creator = "Stephan Knull",
+                        identifier = pagePath,
                         link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
                         pubDate = page.content.lastModified,
-                        description = description
+                        encoded = description,
                     )
                 )
             }

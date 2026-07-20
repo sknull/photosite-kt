@@ -25,7 +25,7 @@ class ResourceService() {
     ) {
         val requestUri = getRequestUri(request)
         if (resourceFileExists(requestUri)) {
-            if (requestUri.startsWith("/resources")) {
+            if (requestUri.startsWith("/resources") || requestUri.startsWith("/.well-known")) {
                 getResource(requestUri, response)
             } else {
                 response.sendError(404)

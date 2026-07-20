@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.service
 
+import de.visualdigits.photosite.model.common.KmpOffsetDateTime
 import de.visualdigits.photosite.model.photosite.Photosite
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.io.IOUtils
@@ -14,7 +15,6 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
-import java.time.OffsetDateTime
 
 @Service
 class SitemapService(
@@ -67,7 +67,7 @@ class SitemapService(
     fun renderSitemapPage(response: HttpServletResponse) {
         log.info("Rendering page site map...")
         val sb = StringBuilder()
-        determinePages { p -> p.children.isNotEmpty() && p.lastModified > OffsetDateTime.MIN }.forEach { page ->
+        determinePages { p -> p.children.isNotEmpty() && p.lastModified > KmpOffsetDateTime.MIN }.forEach { page ->
             sb
                 .append("  <url>\n")
                 .append("    <loc>")
@@ -94,7 +94,7 @@ class SitemapService(
     fun renderSitemapPost(response: HttpServletResponse) {
         log.info("Rendering post site map...")
         val sb = StringBuilder()
-        determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified > OffsetDateTime.MIN }.forEach { page ->
+        determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified > KmpOffsetDateTime.MIN }.forEach { page ->
             sb
                 .append("  <url>\n").append("    <loc>")
                 .append(photosite.protocol + photosite.domain).append("/")

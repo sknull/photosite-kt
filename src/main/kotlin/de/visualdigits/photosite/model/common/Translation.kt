@@ -1,10 +1,12 @@
 package de.visualdigits.photosite.model.common
 
-import java.util.Locale
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 class Translation(
-    val lang: Locale? = null,
-    val alt: String? = null,
-    val name: String? = null,
-    val title: String? = null
+    @SerialName("lang") val lang: Language? = null,
+    @SerialName("alt") val alt: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("title") val title: String? = null
 )

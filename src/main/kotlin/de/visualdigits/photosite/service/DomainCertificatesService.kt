@@ -4,7 +4,6 @@ import de.visualdigits.photosite.Application
 import de.visualdigits.photosite.model.photosite.Photosite
 import org.apache.commons.io.IOUtils
 import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
@@ -30,6 +29,7 @@ import java.nio.file.Paths
 import java.security.KeyPair
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -39,9 +39,7 @@ import java.time.temporal.ChronoUnit
  * Helper class to obtain PEM key pairs for the given domains and convert them into a java compatible PKCS12 keystore.
  */
 @Service
-class DomainCertificatesService(
-    private val photosite: Photosite
-) {
+class DomainCertificatesService() {
 
     private val log = LoggerFactory.getLogger(DomainCertificatesService::class.java)
 
@@ -56,21 +54,20 @@ class DomainCertificatesService(
     }
 
     fun refreshCertIfNeeded(
+        domain: String,
         certbotUri: String,
         certbotAlias: String,
         certbotPassword: String,
         expiryDate: LocalDateTime
     ) {
-        if (photosite.isProfileActive("prod")) {
-            val newExpiryDate = maintainServerCertificate(
-                certbotUri = certbotUri,
-                certbotAlias = certbotAlias,
-                certbotPassword = certbotPassword,
-                expiryDate = expiryDate
-            )
-            if (newExpiryDate.isAfter(expiryDate)) {
-                Application.restart("ssl")
-            }
+        val newExpiryDate = maintainServerCertificate(
+            domain = domain,
+            certbotUri = certbotUri,
+            certbotAlias = certbotAlias,
+            certbotPassword = certbotPassword
+        )
+        if (newExpiryDate.isAfter(expiryDate)) {
+            Application.restart("ssl")
         }
     }
 
@@ -78,19 +75,28 @@ class DomainCertificatesService(
      * Maintain server certificates if valid less than given [gracePeriod] days or [forceUpdate] is true.
      */
     fun maintainServerCertificate(
+        domain: String,
         certbotUri: String,
         certbotAlias: String,
         certbotPassword: String,
         forceUpdate: Boolean = false,
-        expiryDate: LocalDateTime,
         gracePeriod: Long = 7
     ): LocalDateTime {
+        val expiryDate = if (forceUpdate) {
+            // force update by setting expiry date to now instead
+            // calculating the expiry date from the current pk12
+            // for the case the password was chnaged and we cannot decode
+            // the old file.
+            LocalDateTime.now()
+        } else {
+            determineExpiryDate(alias = certbotAlias, password = certbotPassword)
+        }
         log.info("Server certificate will expire at '$expiryDate' - updating now...")
-        return if (forceUpdate || LocalDateTime.now().isAfter(expiryDate.minus(gracePeriod, ChronoUnit.DAYS))) {
+        return if (LocalDateTime.now().isAfter(expiryDate.minus(gracePeriod, ChronoUnit.DAYS))) {
             log.info("Updating certificates...")
             createCertificates(
                 certbotUri = certbotUri,
-                domains = listOf(photosite.domain),
+                domains = listOf(domain),
                 keystoreAlias = certbotAlias,
                 keystorePassword = certbotPassword
             )
@@ -402,7 +408,7 @@ class DomainCertificatesService(
         return challenge
     }
 
-    private fun convertPEMToPKCS12(
+    fun convertPEMToPKCS12(
         keyFile: File,
         cerFile: File,
         password: String,
@@ -410,32 +416,39 @@ class DomainCertificatesService(
     ): ByteArray {
         log.info("Converting keyfile into pkcs12 keystore")
         // Get the private key
-        val certHolder = readCertFile(cerFile)
-        return createPkcs12(keyFile, password, alias, certHolder)
+        return createPkcs12(keyFile, password, alias, cerFile)
+    }
+
+    private fun readCertChain(cerFile: File): Array<X509Certificate> {
+        val factory = CertificateFactory.getInstance("X.509")
+        return Files.newInputStream(cerFile.toPath()).use { ins ->
+            // generateCertificates (Plural!) liest alle Zertifikate aus der PEM
+            val certs = factory.generateCertificates(ins)
+            certs.map { it as X509Certificate }.toTypedArray()
+        }
     }
 
     private fun createPkcs12(
         keyFile: File,
         password: String,
         alias: String?,
-        certHolder: X509CertificateHolder
+        cerFile: File // Wir übergeben das File statt nur einen Holder
     ): ByteArray {
         return runCatching {
-            // Put them into a PKCS12 keystore and write it to a byte[]
             ByteArrayOutputStream().use { bos ->
                 val ks = KeyStore.getInstance("PKCS12")
                 ks.load(null)
                 val key = readKeyFile(keyFile)
-                ks.setKeyEntry(alias, key, password.toCharArray(), arrayOf(
-                    JcaX509CertificateConverter()
-                        .setProvider(BouncyCastleProvider())
-                        .getCertificate(certHolder)
-                ))
+
+                // Lade die komplette Kette
+                val chain = readCertChain(cerFile)
+
+                // Setze die Kette (das Array enthält jetzt Leaf + Intermediates)
+                ks.setKeyEntry(alias, key, password.toCharArray(), chain)
+
                 ks.store(bos, password.toCharArray())
                 bos.toByteArray()
             }
-        }.onFailure { e ->
-            throw IllegalStateException("Could not convert PEM to PKCS12", e)
         }.getOrThrow()
     }
 

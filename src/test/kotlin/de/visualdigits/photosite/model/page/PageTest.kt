@@ -1,9 +1,11 @@
 package de.visualdigits.photosite.model.page
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.util.Locale
 
+@Disabled
 class PageTest {
 
     @Test
@@ -13,7 +15,8 @@ class PageTest {
 
     @Test
     fun testConvertDescriptor() {
-        Page.readValue(File("W:/"))
+        val page = Page.readValue(File("C:\\Users\\sknull\\.photosite\\resources\\pagetree"))
+        println(page)
 //        val tree = Page.readValue(File("C:/Users/sknul/.photosite/resources/pagetree"))
 //        val mainTree = tree.clone { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }
 //        val staticTree = tree.clone { p -> p.name.startsWith("-") }

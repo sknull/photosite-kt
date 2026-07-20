@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.model.photosite
 
+import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.navi.NaviName
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.content.ContentType
@@ -14,7 +15,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import java.io.File
 import java.nio.file.Paths
-import java.util.Locale
 
 @Configuration
 @ConfigurationProperties(prefix = "photosite")
@@ -29,8 +29,8 @@ class Photosite(
     var siteSubTitle: String? = null,
     var protocol: String? = null,
     var domain: String? = null,
-    var languages: List<Locale> = listOf(),
-    var languageDefault: Locale = Locale.GERMAN,
+    var languages: List<Language> = listOf(),
+    var languageDefault: Language = Language("de"),
     var naviMain: NaviName? = null,
     var naviSub: List<NaviName>? = null,
     var naviStatic: NaviName? = null,

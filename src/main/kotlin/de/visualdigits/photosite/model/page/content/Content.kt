@@ -1,19 +1,13 @@
 package de.visualdigits.photosite.model.page.content
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import de.visualdigits.photosite.model.common.KmpOffsetDateTime
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.io.File
-import java.time.OffsetDateTime
 import java.util.function.Consumer
 
 
-@JsonIgnoreProperties(
-    "descriptorFile",
-    "directory",
-    "files",
-    "images",
-    "lastModified",
-    "captionsMap"
-)
+@Serializable
 class Content(
     var contentType: ContentType? = null,
     val mode: String? = null,
@@ -28,15 +22,23 @@ class Content(
     var mdContent: String? = null,
     var htmlContent: String? = null
 ) {
+    @Transient
     var descriptorFile: File? = null
+
+    @Transient
     var directory: File? = null
+
+    @Transient
     var files: Array<File> = arrayOf()
 
+    @Transient
     var images: MutableList<ImageFile> = mutableListOf()
 
-    var lastModified: OffsetDateTime = OffsetDateTime.MIN
+    @Transient
+    var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
 
-    var captionsMap: Map<String, Caption>
+    @Transient
+    var captionsMap: Map<String, Caption> = mapOf()
 
     init {
         captions = captions.filter { c -> c.name?.isNotBlank() == true }
@@ -64,8 +66,8 @@ class Content(
             .map { f -> ImageFile(f) }
             .toMutableList()
         lastModified = images
-            .maxOfOrNull { i -> i.lastModified }
-            ?: OffsetDateTime.MIN
+            .maxOfOrNull { i -> i.lastModified() }
+            ?: KmpOffsetDateTime.MIN
     }
 
     fun sortImages() {
@@ -89,7 +91,7 @@ class Content(
                 "name" ->
                     images.sortBy { it.name }
                 "mtime" ->
-                    images.sortBy { it.lastModified }
+                    images.sortBy { it.lastModified() }
             }
             if (sort.dir == SortDir.desc) {
                 images.reverse()

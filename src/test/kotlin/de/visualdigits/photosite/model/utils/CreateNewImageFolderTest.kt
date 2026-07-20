@@ -1,8 +1,10 @@
 package de.visualdigits.photosite.model.utils
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
+@Disabled
 class CreateNewImageFolderTest {
 
     /**

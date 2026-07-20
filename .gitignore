@@ -11,4 +11,7 @@ build/
 .settings
 **/dependency-reduced-pom.xml
 **/*.log
-
+**/secrets/
+application-ssl.yml
+*.p12
+*.jks

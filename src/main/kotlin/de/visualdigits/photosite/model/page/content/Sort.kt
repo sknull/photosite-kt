@@ -1,12 +1,16 @@
 package de.visualdigits.photosite.model.page.content
 
+import kotlinx.serialization.Serializable
 
+
+@Serializable
 class Sort(
     val `by`: String? = null,
     val dir: SortDir? = null,
     val order: String? = null
 ){
 
+    @Transient
     val orderList: MutableList<String> = mutableListOf()
 
     init {

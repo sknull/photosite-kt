@@ -1,9 +1,11 @@
 package de.visualdigits.photosite.model.page.content
 
-import java.util.Locale
+import de.visualdigits.photosite.model.common.Language
+import kotlinx.serialization.Serializable
 
+@Serializable
 class Text(
-    val lang: Locale? = null,
+    val lang: Language? = null,
     var value: String? = null
 ) {
     init {

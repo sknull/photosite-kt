@@ -3,6 +3,7 @@ package de.visualdigits.photosite.model.plugin
 import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
+import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.content.ContentType
 import de.visualdigits.photosite.model.photosite.Photosite
@@ -10,8 +11,6 @@ import de.visualdigits.photosite.service.ImageService
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import java.io.File
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.lightgallery")
@@ -37,14 +36,14 @@ class LightGallery(
         <script src="/resources/themes/$theme/plugins/lightgallery/js/lg-autoplay.js" type="text/javascript"></script>"""
     }
 
-    override fun renderHtml(page: Page, language: Locale, imageService: ImageService): String {
+    override fun renderHtml(page: Page, language: Language, imageService: ImageService): String {
         val sb = StringBuilder()
         sb.append("          <h1>${page.path}</h1>\n")
             .append("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
         page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file
-                val metadata = imageFile.metadata
+                val metadata = imageFile.metadata()
                 val imagePath = Photosite.getRelativeResourcePath(image)
                 val thumbPath = imageService.getThumbnail(imageFile)
                 val exifDir =
@@ -58,7 +57,7 @@ class LightGallery(
                     .append(imagePath)
                     .append("\"")
                 if (exifDir != null && exifSubDir != null) {
-                    imageName += "&nbsp;(" + DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm:ss").format(imageFile.lastModified) + ")"
+                    imageName += "&nbsp;(" + imageFile.lastModified().format("yyy-MM-dd HH:mm:ss") + ")"
                     sb.append(" data-sub-html=\"")
                         .append("<div class='camera-infos camera-infos-grid'>")
                         .append("<div id='camera-infos-caption' class='info-box'>")

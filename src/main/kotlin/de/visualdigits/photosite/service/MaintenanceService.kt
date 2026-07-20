@@ -3,7 +3,6 @@ package de.visualdigits.photosite.service
 import de.visualdigits.photosite.Application
 import de.visualdigits.photosite.model.page.content.ImageFile
 import de.visualdigits.photosite.model.photosite.Photosite
-import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -21,14 +20,6 @@ class MaintenanceService(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    private lateinit var expiryDate: LocalDateTime
-
-
-    @PostConstruct
-    fun initialize() {
-        expiryDate = domainCertificatesService.determineExpiryDate(photosite.ssl!!.keyAlias!!, photosite.ssl!!.keyStorePassword!!)
-    }
-
 
     fun checkCerts(
         forceUpdate: Boolean,
@@ -36,14 +27,14 @@ class MaintenanceService(
     ) {
         if (photosite.isProfileActive("prod")) {
             val newExpiryDate = domainCertificatesService.maintainServerCertificate(
+                domain = photosite.domain!!,
                 certbotUri = photosite.ssl!!.certbotUri!!,
                 certbotAlias = photosite.ssl!!.keyAlias!!,
                 certbotPassword = photosite.ssl!!.keyStorePassword!!,
                 forceUpdate = forceUpdate,
-                expiryDate = expiryDate,
                 gracePeriod = 1
             )
-            if (newExpiryDate.isAfter(expiryDate)) {
+            if (newExpiryDate.isAfter(LocalDateTime.now())) {
                 Application.restart("ssl")
             } else {
                 response.sendRedirect("/")

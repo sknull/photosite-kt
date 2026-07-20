@@ -1,29 +1,26 @@
 package de.visualdigits.photosite.model.page.content
 
-import com.fasterxml.jackson.annotation.JsonAlias
-import java.util.Locale
+import de.visualdigits.photosite.model.common.Language
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
+@Serializable
 class Teaser(
-    @JsonAlias("googlemaps", "googleMaps") val googleMaps: GoogleMaps? = null,
-    val texts: List<Text> = listOf()
+   val googleMaps: GoogleMaps? = null,
+   val texts: List<Text> = listOf()
 ) {
 
-    lateinit var translationsMap: Map<Locale, Text>
+    @Transient
+    var translationsMap: Map<Language, Text> = texts.associateBy { t -> t.lang!! }
 
-    init {
-        translationsMap = texts.associate { t -> Pair(t.lang!!, t) }
-    }
-
-    fun getHtml(language: Locale): String {
+    fun getHtml(language: Language): String {
         val sb = StringBuilder()
         if (googleMaps != null) {
-            sb.append(googleMaps.getHtml())
+            sb.append(googleMaps.html)
         }
         val text = translationsMap[language]
-        if (text != null) {
-            text.value?.trim()?.let { sb.append(it) }
-        }
+        text?.value?.trim()?.let { sb.append(it) }
         return sb.toString()
     }
 }

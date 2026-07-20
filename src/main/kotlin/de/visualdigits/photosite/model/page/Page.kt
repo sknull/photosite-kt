@@ -1,63 +1,64 @@
 package de.visualdigits.photosite.model.page
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
-import com.fasterxml.jackson.module.kotlin.kotlinModule
+import de.visualdigits.photosite.model.common.KmpOffsetDateTime
+import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.common.Translation
 import de.visualdigits.photosite.model.navi.NaviName
 import de.visualdigits.photosite.model.page.content.Content
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.json.Json
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.time.OffsetDateTime
-import java.util.Locale
 
-@JsonIgnoreProperties(
-    "level",
-    "parent",
-    "children",
-    "translationsMap"
-)
-class Page(
-    var icon: String? = null,
-    val tocName: String? = null,
-    var content: Content = Content(),
-    val translations: List<Translation> = listOf()
+@Serializable
+data class Page(
+    @SerialName("icon") var icon: String? = null,
+    @SerialName("tocName") val tocName: String? = null,
+    @SerialName("content") var content: Content = Content(),
+    @SerialName("translations" )val translations: List<Translation> = listOf()
 ) {
 
+    @Transient
     var level: Int = 0
+
+    @Transient
     var path: String = "/"
 
+    @Transient
     var ariaName: String = ""
 
+    @Transient
     var parent: Page? = null
+
+    @Transient
     var children: MutableList<Page> = mutableListOf()
 
-    var lastModified: OffsetDateTime = OffsetDateTime.MIN
+    @Transient
+    var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
 
-    val translationsMap: Map<Locale, Translation> = translations.associateBy { t -> t.lang!! }
+    @Transient
+    val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang!! }
 
     companion object {
 
         private val log = LoggerFactory.getLogger(Page::class.java)
 
-        private val jsonMapper = jacksonMapperBuilder()
-            .addModule(kotlinModule())
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .build()
-            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+        private val jsonMapper = Json {
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+            encodeDefaults = true
+        }
 
         fun readValue(directory: File, level: Int = 0, ariaName: String = "navigation"): Page {
             log.info("Initializing page '${"  ".repeat(level)}${directory.canonicalPath}'")
 
             val descriptorFile = File(directory, "page.json")
             val page = if (descriptorFile.exists()) {
-                jsonMapper.readValue(descriptorFile, Page::class.java)
+                val json = descriptorFile.readText()
+                jsonMapper.decodeFromString<Page>(json)
             } else {
                 Page()
             }
@@ -93,7 +94,7 @@ class Page(
         fun mainNaviHtml(
             page: Page,
             naviName: NaviName,
-            locale: Locale,
+            locale: Language,
             currentPage: Page,
             theme: String
         ): String {
@@ -121,7 +122,7 @@ class Page(
 
         fun subNaviHtml(
             naviName: NaviName,
-            locale: Locale,
+            locale: Language,
             currentPage: Page,
             pages: List<Page>,
             theme: String,
@@ -157,7 +158,7 @@ class Page(
             naviName: String,
             page: Page,
             theme: String,
-            locale: Locale,
+            locale: Language,
             indent: String? = "",
             level: Int? = null,
         ): String {
@@ -178,7 +179,7 @@ class Page(
             theme: String,
             currentPage: Page,
             page: Page,
-            locale: Locale,
+            locale: Language,
             indent: String,
             html: StringBuilder,
             children: List<Page> = page.children
@@ -257,7 +258,7 @@ class Page(
         return clone
     }
 
-    fun page(path: String, pageTree: Page, locale: Locale? = null): Page {
+    fun page(path: String, pageTree: Page, locale: Language? = null): Page {
         return createPageMap(locale)[path] ?: pageTree
     }
 
@@ -268,7 +269,7 @@ class Page(
         return pages
     }
 
-    private fun createPageMap(locale: Locale? = null, pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
+    private fun createPageMap(locale: Language? = null, pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
         pageMap[path(locale)] = this
         children.forEach { c ->
             c.createPageMap(locale, pageMap)
@@ -292,7 +293,7 @@ class Page(
             }
     }
 
-    fun path(locale: Locale? = null): String = rootLine().drop(1).joinToString("/") { p ->
+    fun path(locale: Language? = null): String = rootLine().drop(1).joinToString("/") { p ->
         locale?.let { l -> p.translationsMap[l]?.name }?:p.path
     }
 

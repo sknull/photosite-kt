@@ -1,11 +1,11 @@
 package de.visualdigits.photosite.service
 
+import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.Page.Companion.mainNaviHtml
 import de.visualdigits.photosite.model.photosite.Photosite
 import org.springframework.stereotype.Service
 import org.springframework.ui.Model
-import java.util.Locale
 
 @Service
 class PageService(
@@ -14,11 +14,11 @@ class PageService(
 ) {
 
     fun renderPage(
-        lang: Locale,
+        lang: Language,
         requestUri: String,
         model: Model
     ): String? {
-        val locale = Locale.forLanguageTag(lang.language)
+        val locale = Language(lang.language)
         val currentPage = photosite.pageTree.page(requestUri, photosite.pageTree, locale)
         val currentPagePath = currentPage.path(locale)
         model.addAttribute("language", locale.language)

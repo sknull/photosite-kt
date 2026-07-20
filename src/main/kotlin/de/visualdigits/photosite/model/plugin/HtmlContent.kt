@@ -1,11 +1,11 @@
 package de.visualdigits.photosite.model.plugin
 
+import de.visualdigits.photosite.model.common.Language
 import de.visualdigits.photosite.model.page.Page
 import de.visualdigits.photosite.model.page.content.ContentType
 import de.visualdigits.photosite.service.ImageService
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
-import java.util.Locale
 import java.util.regex.Pattern
 
 @Component
@@ -16,7 +16,7 @@ open class HtmlContent(
     contentType = contentType
 ) {
 
-    override fun renderHtml(page: Page, language: Locale, imageService: ImageService): String {
+    override fun renderHtml(page: Page, language: Language, imageService: ImageService): String {
         var html = page.content.htmlContent?:""
         html = obfuscateText(html)
         html = obfuscateEmail(html)
