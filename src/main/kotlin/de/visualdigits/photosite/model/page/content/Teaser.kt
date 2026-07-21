@@ -19,8 +19,11 @@ data class Teaser(
         if (googleMaps != null) {
             sb.append(googleMaps.html)
         }
-        val text = translationsMap[language]
-        text?.value?.trim()?.let { sb.append(it) }
+        translationsMap[language]?.value
+            ?.trim()
+            ?.replace("\\\n", "<br/>")
+            ?.replace("\n", "<br/>")
+            ?.also { sb.append(it) }
         return sb.toString()
     }
 }
