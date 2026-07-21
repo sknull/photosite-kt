@@ -5,6 +5,7 @@ import org.hibernate.validator.internal.util.Contracts.assertNotNull
 import org.hibernate.validator.internal.util.Contracts.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledIf
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -17,18 +18,11 @@ import java.security.cert.X509Certificate
     "spring.config.import=optional:file:C:/Users/sknull/.photosite/secrets/secrets.yml"
 ])
 @ActiveProfiles("ssl")
-@DisabledIf("de.visualdigits.photosite.service.FixPemFilesTest#Companion.secretsMissing")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class FixPemFilesTest @Autowired constructor(
     private val photosite: Photosite,
     private val domainCertificatesService: DomainCertificatesService,
 ) {
-
-    companion object {
-        @JvmStatic
-        fun secretsMissing(): Boolean {
-            return !File("C:\\Users\\sknull\\.photosite\\secrets\\secrets.yml").exists()
-        }
-    }
 
     @Test
     fun testPEMwithFullChain() {
