@@ -18,3 +18,10 @@ This is also a very, very old project of mine which once back started as a pytho
 The idea was to avoid complexity of using databases and instead use descriptor files which reside alongside with the pictures in a directory structure.
 
 This runs currently on a raspberry pi 4 with 8GB RAM with an attached ssd drive which holds the pictures.
+
+The site is life https://trancefertohamburg.ddns.net/?lang=de[here]
+
+== Work In Progress
+
+In the meantime the project was migrated from maven to gradle and the good old jackson libraries have been replaced by kotlin native json serialization and Paul de Vrieze's https://github.com/pdvrieze/xmlutil[xml library]. Also first things depending on the jvm have been replaced by Kotlin Multiplatform compatible approaches (like usages of java.time).
+
