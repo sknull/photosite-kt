@@ -21,4 +21,4 @@ jobs:
       - name: Build and deploy package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn --batch-mode clean deploy -DskipTests -Pgithub
+        run: ./gradlew clean publish -x test

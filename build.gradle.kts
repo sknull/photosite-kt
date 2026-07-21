@@ -65,6 +65,17 @@ publishing {
         from(components["java"])
         artifact(testsJar)
     }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://github.com")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
 }
 
 tasks.withType<JavaCompile>() {
