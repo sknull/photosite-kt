@@ -64,12 +64,13 @@ publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
         artifact(testsJar)
+        artifactId = "photosite"
     }
 
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://github.com")
+            url = uri("https://maven.pkg.github.com/sknull/photosite-kt")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
