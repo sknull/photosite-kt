@@ -17,11 +17,18 @@ import java.security.cert.X509Certificate
     "spring.config.import=optional:file:C:/Users/sknull/.photosite/secrets/secrets.yml"
 ])
 @ActiveProfiles("ssl")
-@DisabledIf("secretsMissing")
+@DisabledIf("de.visualdigits.photosite.service.FixPemFilesTest#Companion.secretsMissing")
 class FixPemFilesTest @Autowired constructor(
     private val photosite: Photosite,
     private val domainCertificatesService: DomainCertificatesService,
 ) {
+
+    companion object {
+        @JvmStatic
+        fun secretsMissing(): Boolean {
+            return !File("C:\\Users\\sknull\\.photosite\\secrets\\secrets.yml").exists()
+        }
+    }
 
     @Test
     fun testPEMwithFullChain() {
