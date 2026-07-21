@@ -6,7 +6,7 @@ import kotlinx.serialization.Transient
 
 
 @Serializable
-class Teaser(
+data class Teaser(
    val googleMaps: GoogleMaps? = null,
    val texts: List<Text> = listOf()
 ) {

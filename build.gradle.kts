@@ -25,7 +25,6 @@ dependencies {
     implementation(libs.com.drewnoakes.metadata.extractor)
     implementation(libs.com.github.rjeschke.txtmark)
     implementation(libs.kotlin.reflect)
-    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.xml.serialization)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.reactor)

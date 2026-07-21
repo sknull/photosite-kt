@@ -2,6 +2,7 @@ package de.visualdigits.photosite.model.rss
 
 import de.visualdigits.photosite.model.common.KmpOffsetDateTime
 import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.serialization.XmlCData
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.apache.commons.text.StringEscapeUtils
@@ -12,10 +13,9 @@ data class Item(
     @XmlElement(true) val identifier: String? = null,
     @XmlElement(true) val id: String? = null,
 
-    @XmlElement(true) @XmlSerialName("date") val date: KmpOffsetDateTime? = null, // first publish date time
     @XmlElement(true) @XmlSerialName("pubDate") val pubDate: KmpOffsetDateTime? = null, // update date time or first publish date time when date is empty
-
     @XmlElement(true) val about: String? = null,
+
     @XmlElement(true) val creator: String? = null,
     @XmlElement(true) val type: String? = null,
     @XmlElement(true) val format: String? = null,
@@ -26,7 +26,8 @@ data class Item(
     @XmlElement(true) val subject: String? = null,
     @XmlElement(true) val audience: String? = null,
     @XmlElement(true) val isFormatOf: String? = null,
-    @XmlElement(true) @XmlSerialName("encoded") var encoded: String? = null,
+    @XmlElement(true) @XmlSerialName(prefix = "dc", namespace = "http://purl.org/dc/elements/1.1/", value = "date") val date: KmpOffsetDateTime? = null, // first publish date time
+    @XmlCData @XmlElement(true) @XmlSerialName(prefix = "content", namespace = "http://purl.org/rss/1.0/modules/content/", value = "encoded") var content: String? = null,
     @XmlElement(true) val topline: String? = null,
     @XmlElement(true) val states: String? = null,
 
@@ -41,8 +42,8 @@ data class Item(
     @XmlElement(true) @XmlSerialName("comment") val comments: MutableList<Comment> = mutableListOf(),
 ) {
 
-    val content: String?
+    val contentUnescaped: String?
         get() {
-            return encoded?.let { e -> StringEscapeUtils.unescapeXml(e) }
+            return content?.let { e -> StringEscapeUtils.unescapeXml(e) }
         }
 }

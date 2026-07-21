@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.model.photosite
 
-class Ssl(
+data class Ssl(
     var certbotUri: String? = null,
     var keyStore: String? = null,
     var keyStoreType: String? = null,

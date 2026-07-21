@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import org.apache.commons.text.StringEscapeUtils
 
 @Serializable
-class GoogleMaps(
+data class GoogleMaps(
     val name: String? = null,
     val width: String? = null,
     val height: String? = null,

@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.util
 
+import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.XML
@@ -10,15 +11,13 @@ inline fun <reified T> T.writeValueAsXmlString(
     writeXmlDeclaration: Boolean = true,
     expandSelfClosingTags: Boolean = false
 ): String {
-    val rawXml = XML.v1 {
+    val xmlConfig = XML {
         xmlDeclMode = if (writeXmlDeclaration) XmlDeclMode.Charset else XmlDeclMode.None
         xmlVersion = XmlVersion.XML10
         indentString = if (indent) "  " else ""
-//            policy = DefaultXmlSerializationPolicy(
-//                pedantic = false,
-//                autoPolymorphic = true
-//            )
-    }.encodeToString(this, null)
+    }
+
+    val rawXml = xmlConfig.encodeToString(this)
 
     val finalXml = if (expandSelfClosingTags) {
         rawXml.replace(Regex("""<([\w:]+)([^>]*)\s*/>""")) { match ->

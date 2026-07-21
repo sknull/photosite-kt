@@ -4,7 +4,7 @@ import de.visualdigits.photosite.model.common.Language
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Text(
+data class Text(
     val lang: Language? = null,
     var value: String? = null
 ) {

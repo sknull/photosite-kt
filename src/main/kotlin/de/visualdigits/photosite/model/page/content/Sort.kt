@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-class Sort(
+data class Sort(
     val `by`: String? = null,
     val dir: SortDir? = null,
     val order: String? = null

@@ -8,7 +8,7 @@ import java.util.function.Consumer
 
 
 @Serializable
-class Content(
+data class Content(
     var contentType: ContentType? = null,
     val mode: String? = null,
     val speed: Int? = null,

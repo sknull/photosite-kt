@@ -76,7 +76,7 @@ class PageService(
             ?.let { page ->
                 val keywords = page.content.keywords.toMutableList()
                 val path = page.path(locale)
-                keywords.addAll(path.split("/"))
+
                 model.addAttribute("breadcrumb", path)
                 model.addAttribute("metaKeywords", keywords.joinToString(", "))
                 model.addAttribute("metaDescription", keywords.joinToString(" "))

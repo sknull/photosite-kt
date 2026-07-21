@@ -67,7 +67,10 @@ class SitemapService(
     fun renderSitemapPage(response: HttpServletResponse) {
         log.info("Rendering page site map...")
         val sb = StringBuilder()
-        determinePages { p -> p.children.isNotEmpty() && p.lastModified > KmpOffsetDateTime.MIN }.forEach { page ->
+        val determinePages = determinePages { p ->
+            p.children.isNotEmpty() && p.lastModified > KmpOffsetDateTime.MIN
+        }
+        determinePages.forEach { page ->
             sb
                 .append("  <url>\n")
                 .append("    <loc>")

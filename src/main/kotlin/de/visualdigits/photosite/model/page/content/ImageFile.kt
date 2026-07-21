@@ -38,7 +38,7 @@ class ImageFile(
         }
 
     fun lastModified(): KmpOffsetDateTime {
-            return metadata
+            return metadata()
                 ?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
                 ?.getDateOriginal(TimeZone.getTimeZone("Europe/Berlin"))
                 ?.toInstant()

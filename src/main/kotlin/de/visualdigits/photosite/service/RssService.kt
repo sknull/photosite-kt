@@ -37,13 +37,13 @@ class RssService(
         val feed = Rss(
             channel = Channel(
                 title = photosite.siteTitle,
-                source = photosite.siteTitle,
-                link = photosite.protocol + photosite.domain,
                 description = photosite.siteSubTitle,
                 language = "de",
                 copyright = "Stephan Knull",
-                items = fixedItems,
-                lastBuildDate = lastModified
+                publisher = "Stephan Knull",
+                lastBuildDate = lastModified,
+                link = photosite.protocol + photosite.domain,
+                items = fixedItems
             )
         )
 
@@ -87,11 +87,12 @@ class RssService(
                 items.add(
                     Item(
                         title = page.path,
+                        link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
+                        subject = (page.content.keywords + pagePath.split("/").distinct().sorted()).joinToString(","),
                         creator = "Stephan Knull",
                         identifier = pagePath,
-                        link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
                         pubDate = page.content.lastModified,
-                        encoded = description,
+                        content = description,
                     )
                 )
             }

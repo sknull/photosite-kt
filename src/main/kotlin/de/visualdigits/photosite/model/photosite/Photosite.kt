@@ -19,7 +19,7 @@ import java.nio.file.Paths
 @Configuration
 @ConfigurationProperties(prefix = "photosite")
 @ConfigurationPropertiesScan
-class Photosite(
+data class Photosite(
     var serverPort: Int? = null,
     var internalPort: Int? = null,
     var internalEndpoints: List<String> = listOf(),

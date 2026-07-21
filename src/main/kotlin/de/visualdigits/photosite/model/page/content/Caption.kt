@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
-class Caption(
+data class Caption(
     val name: String? = null,
     val alt: String? = null,
     val caption: String? = null,

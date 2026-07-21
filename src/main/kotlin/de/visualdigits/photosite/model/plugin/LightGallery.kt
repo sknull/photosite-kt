@@ -39,7 +39,12 @@ class LightGallery(
     override fun renderHtml(page: Page, language: Language, imageService: ImageService): String {
         val sb = StringBuilder()
         sb.append("          <h1>${page.path}</h1>\n")
-            .append("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
+        page.content.teaser?.also { teaser ->
+            sb.append("          <div id=\"teaser\">\n")
+            sb.append(teaser.getHtml(language))
+            sb.append("          </div>\n")
+        }
+        sb.append("          <div id=\"lightgallery\" itemscope=\"itemscope\" itemtype=\"http://schema.org/ImageGallery\">\n")
         page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file
