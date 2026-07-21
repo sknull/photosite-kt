@@ -7,7 +7,7 @@ import java.util.Locale
 
 
 @SpringBootTest(properties = [
-    "spring.config.import=file:C:/Users/sknull/.photosite/secrets/secrets.yml"
+    "spring.config.import=optional:file:C:/Users/sknull/.photosite/secrets/secrets.yml"
 ])
 class RssServiceTest @Autowired constructor(
     private val rssService: RssService

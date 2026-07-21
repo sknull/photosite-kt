@@ -13,7 +13,7 @@ import java.security.KeyStore
 import java.security.cert.X509Certificate
 
 @SpringBootTest(properties = [
-    "spring.config.import=file:C:/Users/sknull/.photosite/secrets/secrets.yml"
+    "spring.config.import=optional:file:C:/Users/sknull/.photosite/secrets/secrets.yml"
 ])
 @ActiveProfiles("ssl")
 class FixPemFilesTest @Autowired constructor(
