@@ -46,6 +46,9 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
+    maxHeapSize = "2g" // Erhöht den Speicher für den Konsolen-Build
+    jvmArgs("-XX:+EnableDynamicAgentLoading") // (Falls du die Mockito-Warnung unterdrücken willst)
 }
 
 val testsJar by tasks.registering(Jar::class) {
