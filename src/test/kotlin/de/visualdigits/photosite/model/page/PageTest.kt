@@ -1,6 +1,7 @@
 package de.visualdigits.photosite.model.page
 
-import de.visualdigits.photosite.model.common.Language
+import de.visualdigits.photosite.domain.data.model.common.Language
+import de.visualdigits.photosite.domain.data.model.page.Page
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File

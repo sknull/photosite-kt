@@ -1,7 +1,7 @@
 package de.visualdigits.photosite.model.photosite
 
-import de.visualdigits.photosite.model.page.Page
-import de.visualdigits.photosite.model.photosite.Photosite.Companion.rootDirectory
+import de.visualdigits.photosite.domain.data.model.page.Page
+import de.visualdigits.photosite.domain.data.model.photosite.Photosite.Companion.rootDirectory
 import org.junit.jupiter.api.Test
 import java.nio.file.Paths
 

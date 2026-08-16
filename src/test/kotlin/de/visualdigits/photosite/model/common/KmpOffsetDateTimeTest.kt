@@ -1,5 +1,6 @@
 package de.visualdigits.photosite.model.common
 
+import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.time.Instant

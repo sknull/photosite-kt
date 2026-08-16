@@ -1,10 +1,10 @@
 package de.visualdigits.photosite.model.photosite
 
-import de.visualdigits.photosite.service.DomainCertificatesService
+import de.visualdigits.photosite.domain.data.model.photosite.Photosite
+import de.visualdigits.photosite.domain.service.DomainCertificatesService
 import org.hibernate.validator.internal.util.Contracts.assertNotNull
 import org.hibernate.validator.internal.util.Contracts.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledIf
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
