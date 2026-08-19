@@ -12,18 +12,24 @@ org-shredzone-acme4j-acme4j-client = "2.16"
 org-shredzone-acme4j-acme4j-utils = "2.16"
 org-webjars-bootstrap = "5.3.3"
 org-webjars-jquery = "3.7.1"
+version-hibernate-community = "6.5.2.Final"
 version-kotlin = "2.3.21"
 version-kotlin-xml-util = "0.90.3" # DO NOT UPDATE - MUST BE COMPATIBLE TO SPRING BOOT VERSION
 version-kotlinx-coroutines = "1.11.0"
 version-kotlinx-datetime = "0.8.0"
 version-kotlinx-serialization-json = "1.11.0"
 version-ksoup = "0.2.6"
-version-spring-boot = "3.4.5"
-version-spring-boot-dependency-management = "1.1.4"
+version-spring-boot = "4.0.1"
+version-spring-boot-starter-restdocs = "4.1.0"
+version-spring-boot-dependency-management = "1.1.7"
+version-spring-restdocs-mockmvc = "4.0.1"
+version-spring-springdoc = "2.8.5"
+version-sqlite-jdbc = "3.53.2.1"
 
 [libraries]
 com-drewnoakes-metadata-extractor = { module = "com.drewnoakes:metadata-extractor", version.ref = "com-drewnoakes-metadata-extractor" }
 com-github-rjeschke-txtmark = { module = "com.github.rjeschke:txtmark", version.ref = "com-github-rjeschke-txtmark" }
+hibernate-community-dialects = { module = "org.hibernate.orm:hibernate-community-dialects", version.ref = "version-hibernate-community" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "version-kotlin" }
 kotlin-xml-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "version-kotlin-xml-util" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "version-kotlinx-coroutines" }
@@ -39,25 +45,64 @@ org-shredzone-acme4j-acme4j-client = { module = "org.shredzone.acme4j:acme4j-cli
 org-shredzone-acme4j-acme4j-utils = { module = "org.shredzone.acme4j:acme4j-utils", version.ref = "org-shredzone-acme4j-acme4j-utils" }
 org-webjars-bootstrap = { module = "org.webjars:bootstrap", version.ref = "org-webjars-bootstrap" }
 org-webjars-jquery = { module = "org.webjars:jquery", version.ref = "org-webjars-jquery" }
+spring-boot-actuator  = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "version-spring-boot" }
+spring-boot-kotlinx-serialization-json = { module = "org.springframework.boot:spring-boot-starter-kotlinx-serialization-json", version.ref = "version-spring-boot" }
+spring-boot-restclient = { module = "org.springframework.boot:spring-boot-starter-restclient", version.ref = "version-spring-boot" }
+spring-boot-restdocs = { module = "org.springframework.boot:spring-boot-starter-restdocs", version.ref = "version-spring-boot-starter-restdocs" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "version-spring-boot" }
 spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "version-spring-boot" }
-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "version-spring-boot" }
 spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf", version.ref = "version-spring-boot" }
 spring-boot-starter-tomcat = { module = "org.springframework.boot:spring-boot-starter-tomcat", version.ref = "version-spring-boot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "version-spring-boot" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "version-spring-boot" }
+spring-boot-webclient = { module = "org.springframework.boot:spring-boot-starter-webclient", version.ref = "version-spring-boot" }
+spring-boot-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "version-spring-boot" }
+spring-boot-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc", version.ref = "version-spring-boot" }
+spring-restdocs-mockmvc = { module = "org.springframework.restdocs:spring-restdocs-mockmvc", version.ref = "version-spring-restdocs-mockmvc" }
+spring-springdoc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "version-spring-springdoc" }
+spring-springdoc-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "version-spring-springdoc" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "version-sqlite-jdbc" }
+
+spring-boot-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test", version.ref = "version-spring-boot" }
+spring-boot-webflux-test = { module = "org.springframework.boot:spring-boot-starter-webflux-test", version.ref = "version-spring-boot" }
+spring-boot-webclient-test = { module = "org.springframework.boot:spring-boot-starter-webclient-test", version.ref = "version-spring-boot" }
+spring-boot-actuator-test  = { module = "org.springframework.boot:spring-boot-starter-actuator-test", version.ref = "version-spring-boot" }
+spring-boot-kotlinx-serialization-json-test = { module = "org.springframework.boot:spring-boot-starter-kotlinx-serialization-json-test", version.ref = "version-spring-boot" }
+spring-boot-restclient-test = { module = "org.springframework.boot:spring-boot-starter-restclient-test", version.ref = "version-spring-boot" }
 
 [bundles]
 spring-boot = [
+    "spring-boot-actuator",
+    "spring-boot-kotlinx-serialization-json",
+    "spring-boot-restclient",
+    "spring-boot-restdocs",
+    "spring-boot-starter-data-jpa",
     "spring-boot-starter-logging",
     "spring-boot-starter-thymeleaf",
     "spring-boot-starter-tomcat",
     "spring-boot-starter-validation",
-    "spring-boot-starter-web"
+    "spring-boot-starter-web",
+    "spring-boot-webclient",
+    "spring-boot-webflux",
+    "spring-boot-webmvc",
+    "spring-restdocs-mockmvc",
+    "spring-springdoc",
+    "spring-springdoc-common"
+]
+
+spring-boot-test = [
+    "spring-boot-actuator-test",
+    "spring-boot-kotlinx-serialization-json-test",
+    "spring-boot-restclient-test",
+    "spring-boot-webclient-test",
+    "spring-boot-webflux-test",
+    "spring-boot-webmvc-test"
 ]
 
 [plugins]
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "version-kotlin" }
 kotlin-compiler = { id = "org.jetbrains.kotlin.jvm", version.ref = "version-kotlin" }
-spring-boot-plugin = { id = "org.springframework.boot", version.ref = "version-spring-boot"}
-spring-boot-dependency-management = { id = "io.spring.dependency-management", version.ref = "version-spring-boot-dependency-management"}
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "version-kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "version-kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "version-kotlin" }
+spring-boot-dependency-management = { id = "io.spring.dependency-management", version.ref = "version-spring-boot-dependency-management"}
+spring-boot-plugin = { id = "org.springframework.boot", version.ref = "version-spring-boot"}

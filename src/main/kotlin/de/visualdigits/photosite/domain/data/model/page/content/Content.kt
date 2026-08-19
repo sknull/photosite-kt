@@ -22,14 +22,6 @@ data class Content(
     var mdContent: String? = null,
     var htmlContent: String? = null
 ) {
-    @Transient
-    var descriptorFile: File? = null
-
-    @Transient
-    var directory: File? = null
-
-    @Transient
-    var files: Array<File> = arrayOf()
 
     @Transient
     var images: MutableList<ImageFile> = mutableListOf()
@@ -46,7 +38,7 @@ data class Content(
         keywords = keywords.firstOrNull()?.split(",")?.map { e -> e.trim() } ?: listOf()
     }
 
-    fun loadContent() {
+    fun loadContent(directory: File) {
         val mdFile = File(directory, "page.md")
         if (mdFile.exists()) {
             contentType = ContentType.Markdown
@@ -60,11 +52,16 @@ data class Content(
         }
     }
 
-    fun loadImages() {
+    fun loadImages(files: Array<File>) {
         images = files
             .filter { f -> f.isFile && f.extension == "jpg" }
             .map { f -> ImageFile(f) }
             .toMutableList()
+        calculateLastModified()
+        sortImages()
+    }
+
+    fun calculateLastModified() {
         lastModified = images
             .maxOfOrNull { i -> i.lastModified() }
             ?: KmpOffsetDateTime.MIN

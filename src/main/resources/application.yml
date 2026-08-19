@@ -7,3 +7,15 @@ spring:
   http:
     converters:
       preferred-json-mapper: kotlinx_serialization
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+  datasource:
+    url: jdbc:sqlite:photosite.db
+    driver-class-name: org.sqlite.JDBC
+    username: sa
+    password: ""

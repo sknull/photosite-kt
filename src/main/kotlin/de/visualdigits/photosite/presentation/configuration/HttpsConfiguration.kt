@@ -6,9 +6,9 @@ import org.apache.catalina.connector.Connector
 import org.apache.tomcat.util.descriptor.web.SecurityCollection
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint
 import org.slf4j.LoggerFactory
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.Ssl
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory
+import org.springframework.boot.web.server.servlet.ServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -50,7 +50,7 @@ class HttpsConfiguration(
         connector.port = 80
         connector.secure = false
         connector.redirectPort = 443
-        factory.addAdditionalTomcatConnectors(connector)
+        factory.addAdditionalConnectors(connector)
 
         return factory
     }

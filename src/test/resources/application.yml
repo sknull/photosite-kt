@@ -2,10 +2,25 @@ security:
   require-ssl: false
 
 spring:
-#  profiles:
-#    active:
-#      - ssl
+  config:
+    import: "file:///${user.home}/.photosite/secrets/secrets.yml"
+  http:
+    converters:
+      preferred-json-mapper: kotlinx_serialization
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+  datasource:
+    url: jdbc:sqlite:photosite.db
+    driver-class-name: org.sqlite.JDBC
+    username: sa
+    password: ""
 
-certbot:
-  uri: https://acme-staging-v02.api.letsencrypt.org/directory
-#  uri: https://acme-v02.api.letsencrypt.org/directory
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace

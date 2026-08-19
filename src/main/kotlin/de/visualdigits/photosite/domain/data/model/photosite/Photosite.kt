@@ -6,7 +6,7 @@ import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
 import de.visualdigits.photosite.domain.data.model.plugin.Plugin
 import de.visualdigits.photosite.domain.data.model.plugin.Plugins
-import jakarta.annotation.PostConstruct
+import de.visualdigits.photosite.domain.data.repository.PageRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -60,7 +60,7 @@ data class Photosite(
     val pluginsMap: MutableMap<ContentType, Plugin> = mutableMapOf()
 
     @Autowired
-    private lateinit var envvironment: Environment
+    private lateinit var environment: Environment
 
     var siteUrl: String? = null
     var pageTree: Page = Page()
@@ -68,28 +68,24 @@ data class Photosite(
     var subTrees: List<Pair<NaviName, List<Page>>> = listOf()
     var staticTree: Page = Page()
 
-    @PostConstruct
-    fun initialize() {
+    fun initialize(pageRepository: PageRepository) {
         plugins?.plugins()?.forEach { p -> pluginsMap[p.contentType] = p }
         siteUrl = protocol + domain
-        if (!isProfileActive("checkCerts")) {
-            reloadPageTree()
+        if (!environment.activeProfiles.contains("checkCerts")) {
+            log.info("initializing page tree...")
+            val readPageTreeFromDatabase = Page.readPageTreeFromDatabase(pageRepository)
+            pageTree = readPageTreeFromDatabase ?: Page.readPagetreeFromFilesystem(pageRepository)
+            mainTree = pageTree.clone { p -> !(p.path.startsWith("#") || p.path.startsWith("-")) }
+            subTrees = naviSub?.mapNotNull { n ->
+                n.rootFolder?.let { rf ->
+                    Pair(n, pageTree.page(rf, pageTree).lastModifiedPages(n.numberOfEntries) { p -> p.children.isEmpty() })
+                }
+            } ?: listOf()
+            staticTree = pageTree.clone { p -> p.path.startsWith("-") }
+            log.info("initialized page tree")
         } else {
             log.info("checkCerts profile is active - omitting pagetree initialization")
         }
-    }
-
-    fun isProfileActive(profile: String): Boolean {
-        return envvironment.activeProfiles.contains(profile)
-    }
-
-    fun reloadPageTree() {
-        log.info("initializing page tree...")
-        pageTree = Page.readValue(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
-        mainTree = pageTree.clone { p -> !(p.path.startsWith("#") || p.path.startsWith("-")) }
-        subTrees = naviSub?.mapNotNull { n -> n.rootFolder?.let { rf -> Pair(n, pageTree.page(rf, pageTree).lastModifiedPages(n.numberOfEntries) { p -> p.children.isEmpty() }) } }?:listOf()
-        staticTree = pageTree.clone { p -> p.path.startsWith("-") }
-        log.info("initialized page tree")
     }
 }
 

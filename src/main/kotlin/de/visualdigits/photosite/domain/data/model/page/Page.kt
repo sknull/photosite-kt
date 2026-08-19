@@ -5,6 +5,8 @@ import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.common.Translation
 import de.visualdigits.photosite.domain.data.model.navi.NaviName
 import de.visualdigits.photosite.domain.data.model.page.content.Content
+import de.visualdigits.photosite.domain.data.model.photosite.Photosite.Companion.rootDirectory
+import de.visualdigits.photosite.domain.data.repository.PageRepository
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -12,6 +14,7 @@ import kotlinx.serialization.json.Json
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.nio.file.Paths
 
 @Serializable
 data class Page(
@@ -22,7 +25,13 @@ data class Page(
 ) {
 
     @Transient
+    var directory: File? = null
+
+    @Transient
     var level: Int = 0
+
+    @Transient
+    var parentPath: String = ""
 
     @Transient
     var path: String = "/"
@@ -52,6 +61,13 @@ data class Page(
             encodeDefaults = true
         }
 
+        fun readPagetreeFromFilesystem(pageRepository: PageRepository): Page {
+            val rootPage = readValue(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
+            pageRepository.addPageTree(rootPage)
+
+            return rootPage
+        }
+
         fun readValue(directory: File, level: Int = 0, ariaName: String = "navigation"): Page {
             log.info("Initializing page '${"  ".repeat(level)}${directory.canonicalPath}'")
 
@@ -62,23 +78,22 @@ data class Page(
             } else {
                 Page()
             }
+
+            page.directory = directory
             page.level = level
             page.ariaName = ariaName
             page.path = directory.name
-            page.content.descriptorFile = descriptorFile
-            page.content.directory = directory
-            page.content.files = directory.listFiles()?:arrayOf()
+            val pageFiles = directory.listFiles()?:arrayOf()
 
-            page.content.loadContent()
-            page.content.loadImages()
-            page.content.sortImages()
+            page.content.loadContent(directory)
+            page.content.loadImages(pageFiles)
 
-            page.children = page.content.files
+            page.children = pageFiles
                 .filter { f -> f.isDirectory }
                 .mapIndexed { index, d ->
-                    val c = readValue(d, level + 1, "${ariaName}_${index + 1}")
-                    c.parent = page
-                    c
+                    val child = readValue(d, level + 1, "${ariaName}_${index + 1}")
+                    child.parent = page
+                    child
                 }
                 .sortedBy { c -> c.path() }
                 .toMutableList()
@@ -89,6 +104,43 @@ data class Page(
             page.calculateLastModified()
 
             return page
+        }
+
+        fun readPageTreeFromDatabase(pageRepository: PageRepository): Page? {
+            // read all pages from database
+            val pages = pageRepository
+                .getPagesEager()
+                .map { page ->
+                    val parentPath = page.path.substringBeforeLast("/")
+                    val finalParentPath = if (page.path == parentPath) {
+                        ""
+                    } else {
+                        parentPath
+                    }
+                    page.parentPath = finalParentPath
+                    page.level = page.path.split("/").size - 1
+
+                    page.directory?.also { directory -> page.content.loadContent(directory) }
+                    page.content.calculateLastModified()
+                    page.content.sortImages()
+
+                    page
+                }
+                .sortedBy { it.path }
+                .associateBy { it.path }
+
+            // reconstruct tree
+            pages.values.forEach { child ->
+                pages[child.parentPath]?.also { parent ->
+                    child.path = child.path.substringAfterLast("/")
+                    if (parent != child) {
+                        child.parent = parent
+                        parent.children.add(child)
+                    }
+                }
+            }
+
+            return pages.values.firstOrNull()?.rootPage()
         }
 
         fun mainNaviHtml(
@@ -232,6 +284,7 @@ data class Page(
     }
 
     override fun toString(): String {
+//        return "path=$path, parentPath=$parentPath"
         return "${"  ".repeat(level)}$ariaName:$path [${path()}]\n${children.joinToString("") { it.toString() }}"
     }
 
@@ -295,6 +348,11 @@ data class Page(
 
     fun path(locale: Language? = null): String = rootLine().drop(1).joinToString("/") { p ->
         locale?.let { l -> p.translationsMap[l]?.name }?:p.path
+    }
+
+    fun rootPage(): Page? {
+        val rootLine = rootLine()
+        return rootLine.firstOrNull()
     }
 
     fun rootLine(rootLine: MutableList<Page> = mutableListOf()): List<Page> {

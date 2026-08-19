@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.spring.boot.plugin)
     alias(libs.plugins.spring.boot.dependency.management)
     alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.jpa)
 }
 
 repositories {
@@ -39,8 +40,10 @@ dependencies {
     implementation(libs.org.shredzone.acme4j.acme4j.utils)
     implementation(libs.org.webjars.bootstrap)
     implementation(libs.org.webjars.jquery)
+    implementation(libs.sqlite.jdbc)
+    implementation(libs.hibernate.community.dialects)
 
-    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.bundles.spring.boot.test)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

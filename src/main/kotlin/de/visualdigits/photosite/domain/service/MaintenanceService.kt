@@ -1,10 +1,14 @@
 package de.visualdigits.photosite.domain.service
 
 import de.visualdigits.photosite.Application
+import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
+import de.visualdigits.photosite.domain.data.repository.PageRepository
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Paths
@@ -15,17 +19,20 @@ import java.util.Locale
 class MaintenanceService(
     private val photosite: Photosite,
     private val domainCertificatesService: DomainCertificatesService,
-    private val imageService: ImageService
+    private val imageService: ImageService,
+    private val pageRepository: PageRepository
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @Autowired
+    private lateinit var environment: Environment
 
     fun checkCerts(
         forceUpdate: Boolean,
         response: HttpServletResponse
     ) {
-        if (photosite.isProfileActive("prod")) {
+        if (environment.activeProfiles.contains("prod")) {
             val newExpiryDate = domainCertificatesService.maintainServerCertificate(
                 domain = photosite.domain!!,
                 certbotUri = photosite.ssl!!.certbotUri!!,
@@ -48,7 +55,7 @@ class MaintenanceService(
     }
 
     fun reloadPageTree(response: HttpServletResponse) {
-        photosite.reloadPageTree()
+        Page.readPagetreeFromFilesystem(pageRepository)
         response.sendRedirect("/")
     }
 

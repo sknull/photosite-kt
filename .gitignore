@@ -16,3 +16,4 @@ application-ssl.yml
 *.p12
 *.jks
 /out/
+/photosite.db
