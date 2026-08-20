@@ -1,9 +1,9 @@
 package de.visualdigits.photosite.domain.data.model.photosite
 
 data class Ssl(
-    var certbotUri: String? = null,
-    var keyStore: String? = null,
-    var keyStoreType: String? = null,
-    var keyAlias: String? = null,
-    var keyStorePassword: String? = null
+    val certbotUri: String? = null,
+    val keyStore: String? = null,
+    val keyStoreType: String? = null,
+    val keyAlias: String? = null,
+    val keyStorePassword: String? = null
 )

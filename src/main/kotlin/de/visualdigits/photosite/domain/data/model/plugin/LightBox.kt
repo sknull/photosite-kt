@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.lightbox")
 class LightBox(
-    var resizeDuration: Long = 0,
-    var fadeDuration: Long = 0,
-    var imageFadeDuration: Long = 0,
-    var wrapAround: Boolean = false
+    val resizeDuration: Long = 0,
+    val fadeDuration: Long = 0,
+    val imageFadeDuration: Long = 0,
+    val wrapAround: Boolean = false
 ) : Plugin(
     contentType = ContentType.LightBox
 )

@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties(prefix = "photosite.plugins.photostory")
 class PhotoStory(
-    var mode: String? = null,
-    var speed: Long = 0,
-    var pause: Long = 0,
-    var showThumbByDefault: Boolean = false,
-    var animateThumb: Boolean = false,
-    var progressBar: Boolean = false,
-    var download: Boolean = false
+    val mode: String? = null,
+    val speed: Long = 0,
+    val pause: Long = 0,
+    val showThumbByDefault: Boolean = false,
+    val animateThumb: Boolean = false,
+    val progressBar: Boolean = false,
+    val download: Boolean = false
 ) : Plugin(
     contentType = ContentType.PhotoStory
 )

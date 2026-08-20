@@ -12,21 +12,21 @@ import java.io.File
 import java.nio.file.Paths
 
 data class Photosite(
-    var serverPort: Int? = null,
-    var internalPort: Int? = null,
-    var internalEndpoints: List<String> = listOf(),
-    var ssl: Ssl? = null,
-    var theme: String = "default",
-    var siteTitle: String? = null,
-    var siteSubTitle: String? = null,
-    var protocol: String? = null,
-    var domain: String? = null,
-    var languages: List<Language> = listOf(),
-    var languageDefault: Language = Language("de"),
-    var naviMain: NavigationEntry? = null,
-    var naviSub: List<NavigationEntry> = listOf(),
-    var naviStatic: NavigationEntry? = null,
-    var plugins: Plugins? = null
+    val serverPort: Int? = null,
+    val internalPort: Int? = null,
+    val internalEndpoints: List<String> = listOf(),
+    val ssl: Ssl? = null,
+    val theme: String = "default",
+    val siteTitle: String? = null,
+    val siteSubTitle: String? = null,
+    val protocol: String? = null,
+    val domain: String? = null,
+    val languages: List<Language> = listOf(),
+    val languageDefault: Language = Language("de"),
+    val naviMain: NavigationEntry? = null,
+    val naviSub: List<NavigationEntry> = listOf(),
+    val naviStatic: NavigationEntry? = null,
+    val plugins: Plugins? = null
 ) {
 
     companion object {
