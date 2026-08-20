@@ -1,8 +1,5 @@
 package de.visualdigits.photosite.domain.data.model.plugin
 
-import com.drew.metadata.exif.ExifIFD0Directory
-import com.drew.metadata.exif.ExifSubIFDDescriptor
-import com.drew.metadata.exif.ExifSubIFDDirectory
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
@@ -48,46 +45,38 @@ class LightGallery(
         page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file
-                val metadata = imageFile.metadata()
                 val imagePath = Photosite.getRelativeResourcePath(image)
                 val thumbPath = imageService.getThumbnail(imageFile)
-                val exifDir =
-                    metadata?.getFirstDirectoryOfType(ExifIFD0Directory::class.java)
-                val exifSubDir =
-                    metadata?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
-                val exifSub = ExifSubIFDDescriptor(exifSubDir)
                 var imageName = image.getName()
                 imageName = imageName.substring(0, imageName.indexOf('.'))
                 sb.append("            <a class=\"item\" href=\"/")
                     .append(imagePath)
                     .append("\"")
-                if (exifDir != null && exifSubDir != null) {
-                    imageName += "&nbsp;(" + imageFile.lastModified().format("yyy-MM-dd HH:mm:ss") + ")"
-                    sb.append(" data-sub-html=\"")
-                        .append("<div class='camera-infos camera-infos-grid'>")
-                        .append("<div id='camera-infos-caption' class='info-box'>")
-                        .append(imageName)
-                        .append("</div>")
-                        .append("<div id='camera-infos-exposure' class='info-box'>")
-                        .append(exifSub.getApertureValueDescription())
-                        .append("&nbsp;|&nbsp;")
-                        .append(exifSub.getExposureTimeDescription())
-                        .append("&nbsp;")
-                        .append(exifSub.getExposureBiasDescription())
-                        .append("&nbsp;|&nbsp;ISO&nbsp;")
-                        .append(exifSub.getIsoEquivalentDescription())
-                        .append("&nbsp;|&nbsp;")
-                        .append(exifSub.getFocalLengthDescription())
-                        .append("</div>")
-                        .append("<div id='camera-infos-lens' class='info-box'>")
-                        .append(exifDir.getString(ExifIFD0Directory.TAG_MAKE))
-                        .append("&nbsp;")
-                        .append(exifDir.getString(ExifIFD0Directory.TAG_MODEL))
-                        .append("&nbsp;-&nbsp;")
-                        .append(exifSubDir.getString(ExifSubIFDDirectory.TAG_LENS_MODEL))
-                        .append("</div>")
-                        .append("</div>\"")
-                }
+                imageName += "&nbsp;(" + (imageFile.lastModified?.format("yyy-MM-dd HH:mm:ss")?:"") + ")"
+                sb.append(" data-sub-html=\"")
+                    .append("<div class='camera-infos camera-infos-grid'>")
+                    .append("<div id='camera-infos-caption' class='info-box'>")
+                    .append(imageName)
+                    .append("</div>")
+                    .append("<div id='camera-infos-exposure' class='info-box'>")
+                    .append(imageFile.apertureValue?:"")
+                    .append("&nbsp;|&nbsp;")
+                    .append(imageFile.exposureTime?:"")
+                    .append("&nbsp;")
+                    .append(imageFile.exposureBias?:"")
+                    .append("&nbsp;|&nbsp;ISO&nbsp;")
+                    .append(imageFile.isoEquivalent?:"")
+                    .append("&nbsp;|&nbsp;")
+                    .append(imageFile.focalLength?:"")
+                    .append("</div>")
+                    .append("<div id='camera-infos-lens' class='info-box'>")
+                    .append(imageFile.make?:"")
+                    .append("&nbsp;")
+                    .append(imageFile.model?:"")
+                    .append("&nbsp;-&nbsp;")
+                    .append(imageFile.lensModel?:"")
+                    .append("</div>")
+                    .append("</div>\"")
                 sb.append(">\n")
                 sb.append("              <img class=\"thumb\" src=\"/")
                     .append(thumbPath)

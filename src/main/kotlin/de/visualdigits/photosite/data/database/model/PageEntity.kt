@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.data.model
+package de.visualdigits.photosite.data.database.model
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.CollectionTable
@@ -12,7 +12,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import java.util.UUID
@@ -42,10 +41,10 @@ data class PageEntity(
     val teaserGoogleMapsLng: Double? = null,
     val teaserGoogleMapsZoom: Int? = null,
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "page_images", joinColumns = [JoinColumn(name = "page_id")])
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "page_id")
     @Fetch(FetchMode.SUBSELECT)
-    val images: MutableList<String> = mutableListOf(),
+    val images: MutableList<ImageFileEntity> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "page_id")
@@ -53,7 +52,7 @@ data class PageEntity(
     val teaserTexts: MutableList<TextEntity>? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "caption_id")
+    @JoinColumn(name = "page_id")
     @Fetch(FetchMode.SUBSELECT)
     val captions: MutableList<CaptionEntity> = mutableListOf(),
 
@@ -63,14 +62,14 @@ data class PageEntity(
     val keywords: MutableList<String> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "paragraph_id")
+    @JoinColumn(name = "page_id")
     @Fetch(FetchMode.SUBSELECT)
     val paragraphs: MutableList<ParagraphEntity> = mutableListOf(),
     val mdContent: String? = null,
     val htmlContent: String? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "translation_id")
+    @JoinColumn(name = "page_id")
     @Fetch(FetchMode.SUBSELECT)
     val translations: MutableList<TranslationEntity> = mutableListOf()
 ) {

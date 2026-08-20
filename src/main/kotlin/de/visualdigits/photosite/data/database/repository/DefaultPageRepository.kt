@@ -1,9 +1,9 @@
-package de.visualdigits.photosite.data.repository
+package de.visualdigits.photosite.data.database.repository
 
-import de.visualdigits.photosite.data.dao.SqlitePageDao
-import de.visualdigits.photosite.data.mapper.toPage
-import de.visualdigits.photosite.data.mapper.toPageEntity
-import de.visualdigits.photosite.data.model.PageEntity
+import de.visualdigits.photosite.data.database.dao.SqlitePageDao
+import de.visualdigits.photosite.data.database.mapper.toPage
+import de.visualdigits.photosite.data.database.mapper.toPageEntity
+import de.visualdigits.photosite.data.database.model.PageEntity
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.repository.PageRepository
 import jakarta.transaction.Transactional

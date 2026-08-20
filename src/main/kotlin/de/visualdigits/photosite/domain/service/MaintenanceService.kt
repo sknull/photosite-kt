@@ -64,7 +64,7 @@ class MaintenanceService(
         rootFolder.listFiles { file: File ->
             file.isFile() && file.getName().lowercase(Locale.getDefault()).endsWith(".jpg")
         }?.forEach { imageFile ->
-            imageService.getThumbnail(ImageFile(imageFile))
+            imageService.getThumbnail(ImageFile(file = imageFile))
         }
 
         // recurse into sub folders

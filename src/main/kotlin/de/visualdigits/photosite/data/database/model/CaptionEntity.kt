@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.data.model
+package de.visualdigits.photosite.data.database.model
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity

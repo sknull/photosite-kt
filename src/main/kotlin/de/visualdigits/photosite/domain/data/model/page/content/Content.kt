@@ -20,12 +20,10 @@ data class Content(
     var keywords: List<String> = listOf(),
     val paragraphs: List<Paragraph> = listOf(),
     var mdContent: String? = null,
-    var htmlContent: String? = null
+    var htmlContent: String? = null,
+
+    @Transient var images: MutableList<ImageFile> = mutableListOf()
 ) {
-
-    @Transient
-    var images: MutableList<ImageFile> = mutableListOf()
-
     @Transient
     var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
 
@@ -55,7 +53,11 @@ data class Content(
     fun loadImages(files: Array<File>) {
         images = files
             .filter { f -> f.isFile && f.extension == "jpg" }
-            .map { f -> ImageFile(f) }
+            .map { f ->
+                val image = ImageFile(file = f)
+                image.initiaslizeMetadata()
+                image
+            }
             .toMutableList()
         calculateLastModified()
         sortImages()
@@ -63,7 +65,7 @@ data class Content(
 
     fun calculateLastModified() {
         lastModified = images
-            .maxOfOrNull { i -> i.lastModified() }
+            .maxOfOrNull { i -> i.lastModified }
             ?: KmpOffsetDateTime.MIN
     }
 
@@ -88,7 +90,7 @@ data class Content(
                 "name" ->
                     images.sortBy { it.name }
                 "mtime" ->
-                    images.sortBy { it.lastModified() }
+                    images.sortBy { it.lastModified }
             }
             if (sort.dir == SortDir.desc) {
                 images.reverse()

@@ -1,6 +1,6 @@
-package de.visualdigits.photosite.data.dao
+package de.visualdigits.photosite.data.database.dao
 
-import de.visualdigits.photosite.data.model.PageEntity
+import de.visualdigits.photosite.data.database.model.PageEntity
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository

@@ -1,10 +1,12 @@
-package de.visualdigits.photosite.data.mapper
+package de.visualdigits.photosite.data.database.mapper
 
-import de.visualdigits.photosite.data.model.CaptionEntity
-import de.visualdigits.photosite.data.model.PageEntity
-import de.visualdigits.photosite.data.model.ParagraphEntity
-import de.visualdigits.photosite.data.model.TextEntity
-import de.visualdigits.photosite.data.model.TranslationEntity
+import de.visualdigits.photosite.data.database.model.CaptionEntity
+import de.visualdigits.photosite.data.database.model.ImageFileEntity
+import de.visualdigits.photosite.data.database.model.PageEntity
+import de.visualdigits.photosite.data.database.model.ParagraphEntity
+import de.visualdigits.photosite.data.database.model.TextEntity
+import de.visualdigits.photosite.data.database.model.TranslationEntity
+import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.common.Translation
 import de.visualdigits.photosite.domain.data.model.page.Page
@@ -19,10 +21,15 @@ import de.visualdigits.photosite.domain.data.model.page.content.Sort
 import de.visualdigits.photosite.domain.data.model.page.content.SortDir
 import de.visualdigits.photosite.domain.data.model.page.content.Teaser
 import de.visualdigits.photosite.domain.data.model.page.content.Text
+import kotlinx.datetime.toJavaZoneOffset
+import kotlinx.datetime.toKotlinUtcOffset
 import java.io.File
+import java.time.OffsetDateTime
+import kotlin.time.toJavaInstant
 
 fun Page.toPageEntity(): PageEntity {
     return PageEntity(
+        id = id,
         icon = icon,
         tocName = tocName,
         directory = directory?.canonicalPath,
@@ -43,7 +50,7 @@ fun Page.toPageEntity(): PageEntity {
         teaserGoogleMapsLat = content.teaser?.googleMaps?.lat,
         teaserGoogleMapsLng = content.teaser?.googleMaps?.lng,
         teaserGoogleMapsZoom = content.teaser?.googleMaps?.zoom,
-        images = content.images.map { it.file.canonicalPath }.toMutableList(),
+        images = content.images.map { it.toImageFileEntity() }.toMutableList(),
         teaserTexts = content.teaser?.texts?.map { it.toTextEntity() }?.toMutableList(),
         captions = content.captions.map { it.toCaptionEntity() }.toMutableList(),
         keywords = content.keywords.toMutableList(),
@@ -56,6 +63,7 @@ fun Page.toPageEntity(): PageEntity {
 
 fun PageEntity.toPage(): Page {
     val page = Page(
+        id = id,
         icon = icon,
         tocName = tocName,
         content = Content(
@@ -88,19 +96,20 @@ fun PageEntity.toPage(): Page {
             paragraphs = paragraphs.map { it.toParagraph() },
             mdContent = mdContent,
             htmlContent = htmlContent,
+            images = images.map { it.toImageFile() }.toMutableList()
         ),
-        translations = translations.map { it.toTranslation() }
+        translations = translations.map { it.toTranslation() },
+        directory = directory?.let { d -> File(d) },
+        path = path,
+        ariaName = ariaName
     )
-    page.content.images = images.map { ImageFile(File(it)) }.toMutableList()
-    page.directory = File(directory)
-    page.path = path
-    page.ariaName = ariaName
 
     return page
 }
 
 fun Caption.toCaptionEntity(): CaptionEntity {
     return CaptionEntity(
+        id = id,
         name = name,
         alt = alt,
         caption = caption,
@@ -110,6 +119,7 @@ fun Caption.toCaptionEntity(): CaptionEntity {
 
 fun CaptionEntity.toCaption(): Caption {
     return Caption(
+        id = id,
         name = name,
         alt = alt,
         caption = caption,
@@ -119,6 +129,7 @@ fun CaptionEntity.toCaption(): Caption {
 
 fun Translation.toTranslationEntity(): TranslationEntity {
     return TranslationEntity(
+        id = id,
         lang = lang?.language,
         alt = alt,
         name = name,
@@ -128,6 +139,7 @@ fun Translation.toTranslationEntity(): TranslationEntity {
 
 fun TranslationEntity.toTranslation(): Translation {
     return Translation(
+        id = id,
         lang = lang?.let { Language(it) },
         alt = alt,
         name = name,
@@ -137,6 +149,7 @@ fun TranslationEntity.toTranslation(): Translation {
 
 fun Paragraph.toParagraphEntity(): ParagraphEntity {
     return ParagraphEntity(
+        id = id,
         imageName = image?.name,
         imageAlign = image?.align,
         imageAlt = image?.alt,
@@ -153,6 +166,7 @@ fun Paragraph.toParagraphEntity(): ParagraphEntity {
 
 fun ParagraphEntity.toParagraph(): Paragraph {
     return Paragraph(
+        id = id,
         image = Image(
             name = imageName,
             align = imageAlign,
@@ -173,6 +187,7 @@ fun ParagraphEntity.toParagraph(): Paragraph {
 
 fun Text.toTextEntity(): TextEntity {
     return TextEntity(
+        id = id,
         lang = lang?.language,
         value = value
     )
@@ -180,7 +195,45 @@ fun Text.toTextEntity(): TextEntity {
 
 fun TextEntity.toText(): Text {
     return Text(
+        id = id,
         lang = lang?.let { Language(it) },
         value = value
+    )
+}
+
+fun ImageFile.toImageFileEntity(): ImageFileEntity {
+    return ImageFileEntity(
+        id = id,
+        file = file.canonicalPath,
+        name = name,
+        apertureValue = apertureValue,
+        exposureTime = exposureTime,
+        exposureBias = exposureBias,
+        isoEquivalent = isoEquivalent,
+        focalLength = focalLength,
+        make = make,
+        model = model,
+        lensModel = lensModel,
+        lastModified = OffsetDateTime.ofInstant(
+            lastModified.toInstant().toJavaInstant(),
+            lastModified.offset.toJavaZoneOffset()
+        )
+    )
+}
+
+fun ImageFileEntity.toImageFile(): ImageFile {
+    return ImageFile(
+        id = id,
+        file = File(file),
+        name = name,
+        apertureValue = apertureValue,
+        exposureTime = exposureTime,
+        exposureBias = exposureBias,
+        isoEquivalent = isoEquivalent,
+        focalLength = focalLength,
+        make = make,
+        model = model,
+        lensModel = lensModel,
+        lastModified = KmpOffsetDateTime(lastModified.toInstant().toEpochMilli(), lastModified.offset.toKotlinUtcOffset())
     )
 }

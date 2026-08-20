@@ -15,41 +15,32 @@ import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
+import java.util.UUID
 
 @Serializable
 data class Page(
+    @Transient val id: UUID? = null,
     @SerialName("icon") var icon: String? = null,
     @SerialName("tocName") val tocName: String? = null,
     @SerialName("content") var content: Content = Content(),
-    @SerialName("translations" )val translations: List<Translation> = listOf()
+    @SerialName("translations" )val translations: List<Translation> = listOf(),
+
+    @Transient var directory: File? = null,
+    @Transient var path: String = "/",
+    @Transient var ariaName: String = "",
 ) {
 
-    @Transient
-    var directory: File? = null
+    @Transient var level: Int = 0
 
-    @Transient
-    var level: Int = 0
+    @Transient var parentPath: String = ""
 
-    @Transient
-    var parentPath: String = ""
+    @Transient var parent: Page? = null
 
-    @Transient
-    var path: String = "/"
+    @Transient var children: MutableList<Page> = mutableListOf()
 
-    @Transient
-    var ariaName: String = ""
+    @Transient var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
 
-    @Transient
-    var parent: Page? = null
-
-    @Transient
-    var children: MutableList<Page> = mutableListOf()
-
-    @Transient
-    var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
-
-    @Transient
-    val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang!! }
+    @Transient val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang!! }
 
     companion object {
 
