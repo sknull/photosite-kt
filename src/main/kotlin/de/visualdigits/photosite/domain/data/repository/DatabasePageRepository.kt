@@ -1,6 +1,7 @@
 package de.visualdigits.photosite.domain.data.repository
 
 import de.visualdigits.photosite.domain.data.model.page.Page
+import de.visualdigits.photosite.presentation.model.PageDto
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -8,6 +9,8 @@ import java.util.UUID
 interface DatabasePageRepository {
 
     fun getPageTree(): Page?
+
+    fun getPageDtoTree(): PageDto?
 
     fun getPages(): List<Page>
 

@@ -21,6 +21,17 @@ import de.visualdigits.photosite.domain.data.model.page.content.Sort
 import de.visualdigits.photosite.domain.data.model.page.content.SortDir
 import de.visualdigits.photosite.domain.data.model.page.content.Teaser
 import de.visualdigits.photosite.domain.data.model.page.content.Text
+import de.visualdigits.photosite.presentation.model.CaptionDto
+import de.visualdigits.photosite.presentation.model.ContentDto
+import de.visualdigits.photosite.presentation.model.GoogleMapsDto
+import de.visualdigits.photosite.presentation.model.ImageDto
+import de.visualdigits.photosite.presentation.model.ImageFileDto
+import de.visualdigits.photosite.presentation.model.PageDto
+import de.visualdigits.photosite.presentation.model.ParagraphDto
+import de.visualdigits.photosite.presentation.model.SortDto
+import de.visualdigits.photosite.presentation.model.TeaserDto
+import de.visualdigits.photosite.presentation.model.TextDto
+import de.visualdigits.photosite.presentation.model.TranslationDto
 import kotlinx.datetime.toJavaZoneOffset
 import kotlinx.datetime.toKotlinUtcOffset
 import java.io.File
@@ -58,6 +69,66 @@ fun Page.toPageEntity(): PageEntity {
         mdContent = content.mdContent,
         htmlContent = content.htmlContent,
         translations = translations.map { it.toTranslationEntity() }.toMutableList()
+    )
+}
+
+fun Page.toPageDto(): PageDto {
+    return PageDto(
+        icon = icon,
+        tocName = tocName,
+        path = path(),
+        ariaName = ariaName,
+        content = ContentDto(
+            contentType = content.contentType,
+            mode = content.mode,
+            speed = content.speed,
+            pause = content.pause,
+            download = content.download,
+            sort = SortDto(
+                by = content.sort?.by,
+                dir = content.sort?.dir,
+                order = content.sort?.order,
+            ),
+            teaser = content.teaser?.toTeaserDto(),
+            captions = content.captions.map { it.toCaptionDto() },
+            keywords = content.keywords.toMutableList(),
+            paragraphs = content.paragraphs.map { it.toParagraphDto() },
+            mdContent = content.mdContent,
+            htmlContent = content.htmlContent,
+            images = content.images.map { it.toImageFileDto() },
+        ),
+        translations = translations.map { it.toTranslationDto() },
+        children  = children.map { child -> child.toPageDto() },
+        lastModified = OffsetDateTime.ofInstant(
+            lastModified.toInstant().toJavaInstant(),
+            lastModified.offset.toJavaZoneOffset()
+        )
+    )
+}
+
+fun Teaser.toTeaserDto(): TeaserDto {
+    return TeaserDto(
+        googleMaps = googleMaps?.toGoogleMapsDto(),
+        texts = texts.map { it.toTextDto() }
+    )
+}
+
+fun GoogleMaps.toGoogleMapsDto(): GoogleMapsDto {
+    return GoogleMapsDto(
+        name = name,
+        width = width,
+        height = height,
+        align = align,
+        lat = lat,
+        lng = lng,
+        zoom = zoom
+    )
+}
+
+fun Text.toTextDto(): TextDto {
+    return TextDto(
+        lang = lang,
+        value = value
     )
 }
 
@@ -117,6 +188,15 @@ fun Caption.toCaptionEntity(): CaptionEntity {
     )
 }
 
+fun Caption.toCaptionDto(): CaptionDto {
+    return CaptionDto(
+        name = name,
+        alt = alt,
+        caption = caption,
+        translations = translations.map { it.toTranslationDto() }.toMutableList()
+    )
+}
+
 fun CaptionEntity.toCaption(): Caption {
     return Caption(
         id = id,
@@ -131,6 +211,15 @@ fun Translation.toTranslationEntity(): TranslationEntity {
     return TranslationEntity(
         id = id,
         lang = lang?.language,
+        alt = alt,
+        name = name,
+        title = title
+    )
+}
+
+fun Translation.toTranslationDto(): TranslationDto {
+    return TranslationDto(
+        lang = lang,
         alt = alt,
         name = name,
         title = title
@@ -161,6 +250,22 @@ fun Paragraph.toParagraphEntity(): ParagraphEntity {
         googleMapsLng = googleMaps?.lng,
         googleMapsZoom = googleMaps?.zoom,
         texts = texts?.map { it.toTextEntity() }?.toMutableList()
+    )
+}
+
+fun Paragraph.toParagraphDto(): ParagraphDto {
+    return ParagraphDto(
+        image = image?.toImageDto(),
+        googleMaps = googleMaps?.toGoogleMapsDto(),
+        texts = texts?.map { it.toTextDto() }?.toMutableList()
+    )
+}
+
+fun Image.toImageDto(): ImageDto {
+    return ImageDto(
+        name = name,
+        align = align,
+        alt = alt
     )
 }
 
@@ -205,6 +310,24 @@ fun ImageFile.toImageFileEntity(): ImageFileEntity {
     return ImageFileEntity(
         id = id,
         file = file.canonicalPath,
+        name = name,
+        apertureValue = apertureValue,
+        exposureTime = exposureTime,
+        exposureBias = exposureBias,
+        isoEquivalent = isoEquivalent,
+        focalLength = focalLength,
+        make = make,
+        model = model,
+        lensModel = lensModel,
+        lastModified = OffsetDateTime.ofInstant(
+            lastModified.toInstant().toJavaInstant(),
+            lastModified.offset.toJavaZoneOffset()
+        )
+    )
+}
+
+fun ImageFile.toImageFileDto(): ImageFileDto {
+    return ImageFileDto(
         name = name,
         apertureValue = apertureValue,
         exposureTime = exposureTime,

@@ -16,7 +16,6 @@ import kotlinx.serialization.encoding.Encoder
 
 object KmpOffsetDateTimeHeuristicDeserializer : KSerializer<KmpOffsetDateTime> {
 
-    // Für einen einzelnen String-Wert reicht ein PrimitiveSerialDescriptor
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
         "KmpOffsetDateTime",
         PrimitiveKind.STRING

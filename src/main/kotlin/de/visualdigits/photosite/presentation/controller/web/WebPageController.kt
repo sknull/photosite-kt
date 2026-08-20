@@ -11,8 +11,8 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 
-@Controller("PageController")
-class PageController(
+@Controller
+class WebPageController(
     private val pageService: PageService,
     private val resourceService: ResourceService,
 ) {

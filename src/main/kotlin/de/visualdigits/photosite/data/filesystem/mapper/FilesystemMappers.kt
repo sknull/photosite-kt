@@ -6,6 +6,7 @@ import de.visualdigits.photosite.data.filesystem.model.GoogleMapsDescriptor
 import de.visualdigits.photosite.data.filesystem.model.ImageDescriptor
 import de.visualdigits.photosite.data.filesystem.model.PageDescriptor
 import de.visualdigits.photosite.data.filesystem.model.ParagraphDescriptor
+import de.visualdigits.photosite.data.filesystem.model.SortDescriptor
 import de.visualdigits.photosite.data.filesystem.model.TeaserDescriptor
 import de.visualdigits.photosite.data.filesystem.model.TextDescriptor
 import de.visualdigits.photosite.data.filesystem.model.TranslationDescriptor
@@ -16,6 +17,7 @@ import de.visualdigits.photosite.domain.data.model.page.content.Content
 import de.visualdigits.photosite.domain.data.model.page.content.GoogleMaps
 import de.visualdigits.photosite.domain.data.model.page.content.Image
 import de.visualdigits.photosite.domain.data.model.page.content.Paragraph
+import de.visualdigits.photosite.domain.data.model.page.content.Sort
 import de.visualdigits.photosite.domain.data.model.page.content.Teaser
 import de.visualdigits.photosite.domain.data.model.page.content.Text
 
@@ -36,13 +38,21 @@ fun ContentDescriptor.toContent(): Content {
         speed = speed,
         pause = pause,
         download = download,
-        sort = sort,
+        sort = sort?.toSort(),
         teaser = teaser?.toTeaser(),
         captions = captions.map { it.toCaption() },
         keywords = keywords,
         paragraphs = paragraphs.map { it.toParagraph() },
         mdContent = mdContent,
         htmlContent = htmlContent
+    )
+}
+
+fun SortDescriptor.toSort(): Sort {
+    return Sort(
+        by = by,
+        dir = dir,
+        order = order
     )
 }
 

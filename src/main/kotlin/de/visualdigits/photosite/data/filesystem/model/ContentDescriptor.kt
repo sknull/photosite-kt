@@ -13,7 +13,7 @@ data class ContentDescriptor(
     val speed: Int? = null,
     val pause: Int? = null,
     val download: Boolean? = null,
-    val sort: Sort? = null,
+    val sort: SortDescriptor? = null,
     val teaser: TeaserDescriptor? = null,
     val captions: List<CaptionDescriptor> = listOf(),
     val keywords: List<String> = listOf(),

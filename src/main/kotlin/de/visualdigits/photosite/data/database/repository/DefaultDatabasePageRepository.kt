@@ -2,10 +2,12 @@ package de.visualdigits.photosite.data.database.repository
 
 import de.visualdigits.photosite.data.database.dao.SqlitePageDao
 import de.visualdigits.photosite.data.database.mapper.toPage
+import de.visualdigits.photosite.data.database.mapper.toPageDto
 import de.visualdigits.photosite.data.database.mapper.toPageEntity
 import de.visualdigits.photosite.data.database.model.PageEntity
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
+import de.visualdigits.photosite.presentation.model.PageDto
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -48,6 +50,10 @@ class DefaultDatabasePageRepository(
         }
 
         return pages.values.firstOrNull()?.rootPage()
+    }
+
+    override fun getPageDtoTree(): PageDto? {
+        return getPageTree()?.toPageDto()
     }
 
     override fun getPages(): List<Page> {
