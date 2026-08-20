@@ -1,9 +1,7 @@
 package de.visualdigits.photosite.domain.data.model.page.content
 
-import kotlinx.serialization.Serializable
 import org.apache.commons.text.StringEscapeUtils
 
-@Serializable
 data class GoogleMaps(
     val name: String? = null,
     val width: String? = null,

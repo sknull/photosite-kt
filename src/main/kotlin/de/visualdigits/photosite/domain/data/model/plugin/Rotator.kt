@@ -4,8 +4,8 @@ import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
 import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.service.ImageService
+import de.visualdigits.photosite.domain.util.getRelativeResourcePath
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
@@ -19,7 +19,7 @@ class Rotator : Plugin(
         val images: List<ImageFile> = page.content.images
         val n = (images.size * Math.random()).toInt()
         if (images.size > n) {
-            Photosite.getRelativeResourcePath(images[n].file)
+            getRelativeResourcePath(images[n].file)
                 ?.let { image ->
                     sb
                         .append("<img src=\"/")

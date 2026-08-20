@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.presentation.controller
+package de.visualdigits.photosite.presentation.controller.web
 
 import de.visualdigits.photosite.domain.service.RssService
 import org.springframework.stereotype.Controller
@@ -20,4 +20,3 @@ class RssController(
         return rssService.renderRssFeed(lang)
     }
 }
-

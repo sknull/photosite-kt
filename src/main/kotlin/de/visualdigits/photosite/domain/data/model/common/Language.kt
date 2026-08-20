@@ -8,6 +8,10 @@ import java.util.Locale
 data class Language(
     val language: String
 ) {
+    companion object {
+        val DE = Language("de")
+        val EN = Language("en")
+    }
 
     val locale: Locale
         get() = Locale.forLanguageTag(language)

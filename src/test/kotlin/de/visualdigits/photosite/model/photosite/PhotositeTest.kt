@@ -1,6 +1,6 @@
 package de.visualdigits.photosite.model.photosite
 
-import de.visualdigits.photosite.domain.data.model.page.Page
+import de.visualdigits.photosite.data.filesystem.repository.DefaultFilesystemPageRepository
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite.Companion.rootDirectory
 import org.junit.jupiter.api.Test
 import java.nio.file.Paths
@@ -9,7 +9,7 @@ class PhotositeTest {
 
     @Test
     fun pageTreeTest() {
-        val pageTree = Page.readValue(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
+        val pageTree = DefaultFilesystemPageRepository.readPageTree(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
 
         println(pageTree)
     }

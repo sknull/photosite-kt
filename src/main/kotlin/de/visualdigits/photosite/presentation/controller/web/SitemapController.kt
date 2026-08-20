@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.presentation.controller
+package de.visualdigits.photosite.presentation.controller.web
 
 import de.visualdigits.photosite.domain.service.SitemapService
 import jakarta.servlet.http.HttpServletResponse
@@ -43,4 +43,3 @@ class SitemapController(
         return "/xsltemplate"
     }
 }
-

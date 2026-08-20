@@ -2,6 +2,7 @@ package de.visualdigits.photosite.domain.service
 
 import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
+import de.visualdigits.photosite.domain.util.getRelativeResourcePath
 import net.coobird.thumbnailator.Thumbnails
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -33,6 +34,6 @@ class ImageService {
                 log.error("Could note create thumbnail for image '" + imageFile.absolutePath + "'", e)
             }
         }
-        return Photosite.getRelativeResourcePath(thumbnailFile)
+        return getRelativeResourcePath(thumbnailFile)
     }
 }

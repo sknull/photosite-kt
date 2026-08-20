@@ -1,6 +1,7 @@
 package de.visualdigits.photosite.presentation.configuration
 
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
+import de.visualdigits.photosite.domain.service.PhotositeService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Description
@@ -15,7 +16,7 @@ import java.nio.file.Paths
 
 @Configuration
 class WebConfig(
-    private val photosite: Photosite
+    private val photositeService: PhotositeService
 ) : WebMvcConfigurer {
 
     //    @Bean
@@ -33,6 +34,7 @@ class WebConfig(
     @Bean
     @Description("Thymeleaf file system template resolver serving HTML 5")
     fun templateResolver(): ITemplateResolver {
+        val photosite = photositeService.photosite
         val templateResolver = FileTemplateResolver()
         templateResolver.prefix = Paths.get(
             Photosite.rootDirectory.canonicalPath,

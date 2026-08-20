@@ -2,8 +2,6 @@ security:
   require-ssl: false
 
 spring:
-  config:
-    import: "file:///${user.home}/.photosite/secrets/secrets.yml"
   http:
     converters:
       preferred-json-mapper: kotlinx_serialization

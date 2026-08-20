@@ -1,6 +1,7 @@
 package de.visualdigits.photosite.presentation.configuration
 
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
+import de.visualdigits.photosite.domain.service.PhotositeService
 import org.apache.catalina.Context
 import org.apache.catalina.connector.Connector
 import org.apache.tomcat.util.descriptor.web.SecurityCollection
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("ssl")
 class HttpsConfiguration(
-    private val photosite: Photosite
+    private val photositeService: PhotositeService
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -24,6 +25,7 @@ class HttpsConfiguration(
     @Bean
     fun servletContainer(): ServletWebServerFactory? {
         log.info("rootDirectory: ${Photosite.rootDirectory}")
+        val photosite = photositeService.photosite
 
         val factory: TomcatServletWebServerFactory = object : TomcatServletWebServerFactory() {
             override fun postProcessContext(context: Context) {

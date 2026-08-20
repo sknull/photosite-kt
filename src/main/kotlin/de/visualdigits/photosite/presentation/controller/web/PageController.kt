@@ -1,16 +1,15 @@
-package de.visualdigits.photosite.presentation.controller
+package de.visualdigits.photosite.presentation.controller.web
 
-import de.visualdigits.photosite.presentation.util.HtmlUtil.getRequestUri
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.service.PageService
 import de.visualdigits.photosite.domain.service.ResourceService
+import de.visualdigits.photosite.presentation.util.HtmlUtil.getRequestUri
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
-
 
 @Controller("PageController")
 class PageController(
@@ -36,4 +35,3 @@ class PageController(
         }
     }
 }
-

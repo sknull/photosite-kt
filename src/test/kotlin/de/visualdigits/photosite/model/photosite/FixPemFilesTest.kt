@@ -1,7 +1,7 @@
 package de.visualdigits.photosite.model.photosite
 
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.service.DomainCertificatesService
+import de.visualdigits.photosite.domain.service.PhotositeService
 import org.hibernate.validator.internal.util.Contracts.assertNotNull
 import org.hibernate.validator.internal.util.Contracts.assertTrue
 import org.junit.jupiter.api.Test
@@ -20,12 +20,13 @@ import java.security.cert.X509Certificate
 @ActiveProfiles("ssl")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class FixPemFilesTest @Autowired constructor(
-    private val photosite: Photosite,
+    private val photositeService: PhotositeService,
     private val domainCertificatesService: DomainCertificatesService,
 ) {
 
     @Test
     fun testPEMwithFullChain() {
+        val photosite = photositeService.photosite
         // Pfade zu deinen existierenden Geheimnissen
         val secretsDir = File("C:\\Users\\sknull\\.photosite\\secrets")
         val keyFile = File(secretsDir, "domain.key")

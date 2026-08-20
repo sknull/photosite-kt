@@ -1,13 +1,10 @@
 package de.visualdigits.photosite.domain.data.model.page.content
 
 import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import java.io.File
 import java.util.function.Consumer
 
 
-@Serializable
 data class Content(
     var contentType: ContentType? = null,
     val mode: String? = null,
@@ -22,45 +19,15 @@ data class Content(
     var mdContent: String? = null,
     var htmlContent: String? = null,
 
-    @Transient var images: MutableList<ImageFile> = mutableListOf()
+    var images: MutableList<ImageFile> = mutableListOf()
 ) {
-    @Transient
     var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
-
-    @Transient
     var captionsMap: Map<String, Caption> = mapOf()
 
     init {
         captions = captions.filter { c -> c.name?.isNotBlank() == true }
         captionsMap = captions.associate { c -> Pair(c.name!!, c) }
         keywords = keywords.firstOrNull()?.split(",")?.map { e -> e.trim() } ?: listOf()
-    }
-
-    fun loadContent(directory: File) {
-        val mdFile = File(directory, "page.md")
-        if (mdFile.exists()) {
-            contentType = ContentType.Markdown
-            mdContent = mdFile.readText()
-        }
-
-        val htmlFile = File(directory, "page.html")
-        if (htmlFile.exists()) {
-            contentType = ContentType.Html
-            htmlContent = htmlFile.readText()
-        }
-    }
-
-    fun loadImages(files: Array<File>) {
-        images = files
-            .filter { f -> f.isFile && f.extension == "jpg" }
-            .map { f ->
-                val image = ImageFile(file = f)
-                image.initiaslizeMetadata()
-                image
-            }
-            .toMutableList()
-        calculateLastModified()
-        sortImages()
     }
 
     fun calculateLastModified() {

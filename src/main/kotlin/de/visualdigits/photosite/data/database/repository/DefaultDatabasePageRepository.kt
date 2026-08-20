@@ -5,15 +5,50 @@ import de.visualdigits.photosite.data.database.mapper.toPage
 import de.visualdigits.photosite.data.database.mapper.toPageEntity
 import de.visualdigits.photosite.data.database.model.PageEntity
 import de.visualdigits.photosite.domain.data.model.page.Page
-import de.visualdigits.photosite.domain.data.repository.PageRepository
+import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class DefaultPageRepository(
+class DefaultDatabasePageRepository(
     private val dao: SqlitePageDao
-) : PageRepository {
+) : DatabasePageRepository {
+
+    override fun getPageTree(): Page? {
+        // read all pages from database
+        val pages = getPagesEager()
+            .map { page ->
+                val parentPath = page.path.substringBeforeLast("/")
+                val finalParentPath = if (page.path == parentPath) {
+                    ""
+                } else {
+                    parentPath
+                }
+                page.parentPath = finalParentPath
+                page.level = page.path.split("/").size - 1
+
+                page.content.calculateLastModified()
+                page.content.sortImages()
+
+                page
+            }
+            .sortedBy { it.path }
+            .associateBy { it.path }
+
+        // reconstruct tree
+        pages.values.forEach { child ->
+            pages[child.parentPath]?.also { parent ->
+                child.path = child.path.substringAfterLast("/")
+                if (parent != child) {
+                    child.parent = parent
+                    parent.children.add(child)
+                }
+            }
+        }
+
+        return pages.values.firstOrNull()?.rootPage()
+    }
 
     override fun getPages(): List<Page> {
         return dao.findAll().map { it.toPage() }

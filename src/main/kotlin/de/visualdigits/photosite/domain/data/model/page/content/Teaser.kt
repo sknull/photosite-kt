@@ -1,18 +1,14 @@
 package de.visualdigits.photosite.domain.data.model.page.content
 
 import de.visualdigits.photosite.domain.data.model.common.Language
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import java.util.UUID
 
 
-@Serializable
 data class Teaser(
-    @Transient val id: UUID? = null,
-   val googleMaps: GoogleMaps? = null,
-   val texts: List<Text> = listOf()
+    val id: UUID? = null,
+    val googleMaps: GoogleMaps? = null,
+    val texts: List<Text> = listOf()
 ) {
-    @Transient
     var translationsMap: Map<Language, Text> = texts.associateBy { t -> t.lang!! }
 
     fun getHtml(language: Language): String {

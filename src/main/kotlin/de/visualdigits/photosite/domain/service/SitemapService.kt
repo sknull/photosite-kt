@@ -1,7 +1,8 @@
 package de.visualdigits.photosite.domain.service
 
-import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
+import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
+import de.visualdigits.photosite.domain.util.getRelativeResourcePath
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.io.IOUtils
 import org.apache.commons.text.StringEscapeUtils
@@ -18,8 +19,8 @@ import java.nio.file.Paths
 
 @Service
 class SitemapService(
-    photosite: Photosite
-) : AbstractXmlBaseService(photosite) {
+    photositeService: PhotositeService
+) : AbstractXmlBaseService(photositeService) {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -28,6 +29,7 @@ class SitemapService(
     }
 
     fun renderSitemapIndex(response: HttpServletResponse) {
+        val photosite = photositeService.photosite
         var body = "  <sitemap>\n"
         body += "    <loc>${photosite.protocol + photosite.domain}/sitemap-site.xml</loc>\n"
         body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
@@ -49,6 +51,7 @@ class SitemapService(
         )
     }
     fun renderSitemapSite(response: HttpServletResponse) {
+        val photosite = photositeService.photosite
         var body = "  <url>\n"
         body += "    <loc>${photosite.protocol + photosite.domain}</loc>\n"
         body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
@@ -66,6 +69,7 @@ class SitemapService(
 
     fun renderSitemapPage(response: HttpServletResponse) {
         log.info("Rendering page site map...")
+        val photosite = photositeService.photosite
         val sb = StringBuilder()
         val determinePages = determinePages { p ->
             p.children.isNotEmpty() && p.lastModified > KmpOffsetDateTime.MIN
@@ -96,6 +100,7 @@ class SitemapService(
 
     fun renderSitemapPost(response: HttpServletResponse) {
         log.info("Rendering post site map...")
+        val photosite = photositeService.photosite
         val sb = StringBuilder()
         determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified > KmpOffsetDateTime.MIN }.forEach { page ->
             sb
@@ -107,7 +112,7 @@ class SitemapService(
                 .append(isoDate(page.lastModified))
                 .append("</lastmod>\n")
             for (imageFile in page.content.images) {
-                val imagePath = Photosite.getRelativeResourcePath(imageFile.file)
+                val imagePath = getRelativeResourcePath(imageFile.file)
                 sb
                     .append("    <image:image>\n")
                     .append("      <image:loc>")
@@ -139,6 +144,7 @@ class SitemapService(
     }
 
     fun renderSitemapXsl(page: String, model: Model) {
+        val photosite = photositeService.photosite
         model.addAttribute("theme", photosite.theme)
         model.addAttribute("siteUrl", photosite.protocol + photosite.domain)
         model.addAttribute("language", photosite.languageDefault)

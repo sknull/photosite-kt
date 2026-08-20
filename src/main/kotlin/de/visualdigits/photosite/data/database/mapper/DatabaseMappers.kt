@@ -140,7 +140,7 @@ fun Translation.toTranslationEntity(): TranslationEntity {
 fun TranslationEntity.toTranslation(): Translation {
     return Translation(
         id = id,
-        lang = lang?.let { Language(it) },
+        lang = lang?.let { Language(it) } ?: Language.DE,
         alt = alt,
         name = name,
         title = title

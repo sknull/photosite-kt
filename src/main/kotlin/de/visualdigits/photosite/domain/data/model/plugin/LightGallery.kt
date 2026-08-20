@@ -3,8 +3,8 @@ package de.visualdigits.photosite.domain.data.model.plugin
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.service.ImageService
+import de.visualdigits.photosite.domain.util.getRelativeResourcePath
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import java.io.File
@@ -45,7 +45,7 @@ class LightGallery(
         page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file
-                val imagePath = Photosite.getRelativeResourcePath(image)
+                val imagePath = getRelativeResourcePath(image)
                 val thumbPath = imageService.getThumbnail(imageFile)
                 var imageName = image.getName()
                 imageName = imageName.substring(0, imageName.indexOf('.'))

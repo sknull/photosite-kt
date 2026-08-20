@@ -2,11 +2,10 @@ package de.visualdigits.photosite.domain.service
 
 import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
 import de.visualdigits.photosite.domain.data.model.page.Page
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import java.util.Locale
 
 abstract class AbstractXmlBaseService(
-    protected val photosite: Photosite
+    protected val photositeService: PhotositeService
 ) {
 
     protected fun isoDate(timestamp: KmpOffsetDateTime): String {
@@ -20,6 +19,6 @@ abstract class AbstractXmlBaseService(
     }
 
     protected fun determinePages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
-        return photosite.pageTree.lastModifiedPages(count, filter)
+        return photositeService.photosite.pageTree.lastModifiedPages(count, filter)
     }
 }

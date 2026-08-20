@@ -1,10 +1,10 @@
 package de.visualdigits.photosite.domain.service
 
 import de.visualdigits.photosite.Application
-import de.visualdigits.photosite.domain.data.model.page.Page
-import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
-import de.visualdigits.photosite.domain.data.repository.PageRepository
+import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
+import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
+import de.visualdigits.photosite.domain.data.repository.FilesystemPageRepository
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,10 +17,11 @@ import java.util.Locale
 
 @Service
 class MaintenanceService(
-    private val photosite: Photosite,
+    private val photositeService: PhotositeService,
     private val domainCertificatesService: DomainCertificatesService,
     private val imageService: ImageService,
-    private val pageRepository: PageRepository
+    private val filesystemPageRepository: FilesystemPageRepository,
+    private val databasePageRepository: DatabasePageRepository
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -34,10 +35,10 @@ class MaintenanceService(
     ) {
         if (environment.activeProfiles.contains("prod")) {
             val newExpiryDate = domainCertificatesService.maintainServerCertificate(
-                domain = photosite.domain!!,
-                certbotUri = photosite.ssl!!.certbotUri!!,
-                certbotAlias = photosite.ssl!!.keyAlias!!,
-                certbotPassword = photosite.ssl!!.keyStorePassword!!,
+                domain = photositeService.photosite.domain!!,
+                certbotUri = photositeService.photosite.ssl!!.certbotUri!!,
+                certbotAlias = photositeService.photosite.ssl!!.keyAlias!!,
+                certbotPassword = photositeService.photosite.ssl!!.keyStorePassword!!,
                 forceUpdate = forceUpdate,
                 gracePeriod = 1
             )
@@ -55,7 +56,7 @@ class MaintenanceService(
     }
 
     fun reloadPageTree(response: HttpServletResponse) {
-        Page.readPagetreeFromFilesystem(pageRepository)
+        filesystemPageRepository.getPageTree()
         response.sendRedirect("/")
     }
 

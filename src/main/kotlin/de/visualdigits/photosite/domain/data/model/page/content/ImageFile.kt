@@ -6,30 +6,26 @@ import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
-import de.visualdigits.photosite.domain.data.serializer.FileSerializer
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.ZoneOffset
 import java.util.TimeZone
 import java.util.UUID
 
-@Serializable
 class ImageFile(
-    @Transient val id: UUID? = null,
-    @Serializable(with = FileSerializer::class) val file: File,
+    val id: UUID? = null,
+    val file: File,
 
-    @Transient var name: String = file.name,
-    @Transient var apertureValue: String? = null,
-    @Transient var exposureTime: String? = null,
-    @Transient var exposureBias: String? = null,
-    @Transient var isoEquivalent: String? = null,
-    @Transient var focalLength: String? = null,
-    @Transient var make: String? = null,
-    @Transient var model: String? = null,
-    @Transient var lensModel: String? = null,
-    @Transient var lastModified: KmpOffsetDateTime = KmpOffsetDateTime(file.lastModified())
+    var name: String = file.name,
+    var apertureValue: String? = null,
+    var exposureTime: String? = null,
+    var exposureBias: String? = null,
+    var isoEquivalent: String? = null,
+    var focalLength: String? = null,
+    var make: String? = null,
+    var model: String? = null,
+    var lensModel: String? = null,
+    var lastModified: KmpOffsetDateTime = KmpOffsetDateTime(file.lastModified())
 ) {
 
     private val log = LoggerFactory.getLogger(ImageFile::class.java)

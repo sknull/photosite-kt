@@ -1,24 +1,16 @@
 package de.visualdigits.photosite.domain.data.model.photosite
 
 import de.visualdigits.photosite.domain.data.model.common.Language
-import de.visualdigits.photosite.domain.data.model.navi.NaviName
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
 import de.visualdigits.photosite.domain.data.model.plugin.Plugin
-import de.visualdigits.photosite.domain.data.model.plugin.Plugins
-import de.visualdigits.photosite.domain.data.repository.PageRepository
+import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
+import de.visualdigits.photosite.domain.data.repository.FilesystemPageRepository
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 import java.io.File
 import java.nio.file.Paths
 
-@Configuration
-@ConfigurationProperties(prefix = "photosite")
-@ConfigurationPropertiesScan
 data class Photosite(
     var serverPort: Int? = null,
     var internalPort: Int? = null,
@@ -31,9 +23,9 @@ data class Photosite(
     var domain: String? = null,
     var languages: List<Language> = listOf(),
     var languageDefault: Language = Language("de"),
-    var naviMain: NaviName? = null,
-    var naviSub: List<NaviName>? = null,
-    var naviStatic: NaviName? = null,
+    var naviMain: NavigationEntry? = null,
+    var naviSub: List<NavigationEntry> = listOf(),
+    var naviStatic: NavigationEntry? = null,
     var plugins: Plugins? = null
 ) {
 
@@ -44,37 +36,27 @@ data class Photosite(
         val rootDirectory: File = File(System.getProperty("user.home"), ".photosite")
         var thumbnailCacheFolder: File = Paths.get(rootDirectory.canonicalPath, "resources", "thumbnails").toFile()
 
-        fun getRelativeResourcePath(resource: File): String? {
-            return try {
-                rootDirectory.toPath()
-                    .relativize(Paths.get(resource.canonicalPath))
-                    .toString()
-                    .replace("\\", "/")
-            } catch (e: Exception) {
-                log.error("Could not determine relative path for resource '$resource'", e)
-                null
-            }
-        }
     }
 
     val pluginsMap: MutableMap<ContentType, Plugin> = mutableMapOf()
 
-    @Autowired
-    private lateinit var environment: Environment
-
     var siteUrl: String? = null
     var pageTree: Page = Page()
     var mainTree: Page = Page()
-    var subTrees: List<Pair<NaviName, List<Page>>> = listOf()
+    var subTrees: List<Pair<NavigationEntry, List<Page>>> = listOf()
     var staticTree: Page = Page()
 
-    fun initialize(pageRepository: PageRepository) {
+    fun initialize(
+        environment: Environment,
+        databasePageRepository: DatabasePageRepository,
+        filesystemPageRepository: FilesystemPageRepository
+    ) {
         plugins?.plugins()?.forEach { p -> pluginsMap[p.contentType] = p }
         siteUrl = protocol + domain
         if (!environment.activeProfiles.contains("checkCerts")) {
             log.info("initializing page tree...")
-            val readPageTreeFromDatabase = Page.readPageTreeFromDatabase(pageRepository)
-            pageTree = readPageTreeFromDatabase ?: Page.readPagetreeFromFilesystem(pageRepository)
+            val readPageTreeFromDatabase = databasePageRepository.getPageTree()
+            pageTree = readPageTreeFromDatabase ?: filesystemPageRepository.getPageTree()
             mainTree = pageTree.clone { p -> !(p.path.startsWith("#") || p.path.startsWith("-")) }
             subTrees = naviSub?.mapNotNull { n ->
                 n.rootFolder?.let { rf ->
@@ -88,4 +70,3 @@ data class Photosite(
         }
     }
 }
-

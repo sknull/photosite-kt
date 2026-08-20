@@ -3,27 +3,26 @@ package de.visualdigits.photosite.domain.service
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.data.model.rss.Channel
 import de.visualdigits.photosite.domain.data.model.rss.Item
 import de.visualdigits.photosite.domain.data.model.rss.Rss
-import de.visualdigits.photosite.domain.data.util.writeValueAsXmlString
+import de.visualdigits.photosite.domain.util.writeValueAsXmlString
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.Locale
 
 @Service
 class RssService(
-    photosite: Photosite,
+    photositeService: PhotositeService,
     private val imageService: ImageService
-) : AbstractXmlBaseService(photosite) {
+) : AbstractXmlBaseService(photositeService) {
 
     fun renderRssFeed(
         lang: Locale
     ): String {
         val language = Language(lang.language)
         val items = listOf<Item>()
-        val pageTree = photosite.pageTree
+        val pageTree = photositeService.photosite.pageTree
         val lastModified = pageTree.content.lastModified
         val pages = determinePages(10)
         val mutableItems = items.toMutableList()
@@ -36,13 +35,13 @@ class RssService(
         }
         val feed = Rss(
             channel = Channel(
-                title = photosite.siteTitle,
-                description = photosite.siteSubTitle,
+                title = photositeService.photosite.siteTitle,
+                description = photositeService.photosite.siteSubTitle,
                 language = "de",
                 copyright = "Stephan Knull",
                 publisher = "Stephan Knull",
                 lastBuildDate = lastModified,
-                link = photosite.protocol + photosite.domain,
+                link = photositeService.photosite.protocol + photositeService.photosite.domain,
                 items = fixedItems
             )
         )
@@ -67,7 +66,7 @@ class RssService(
                         imageName = image.name
                     }
                     val thumbUrl =
-                        photosite.protocol + photosite.domain + "/" + imageService.getThumbnail(
+                        photositeService.photosite.protocol + photositeService.photosite.domain + "/" + imageService.getThumbnail(
                             image
                         )
                     val teaser = page.content.teaser
@@ -87,7 +86,7 @@ class RssService(
                 items.add(
                     Item(
                         title = page.path,
-                        link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
+                        link = "${photositeService.photosite.protocol + photositeService.photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
                         subject = (page.content.keywords + pagePath.split("/").distinct().sorted()).joinToString(","),
                         creator = "Stephan Knull",
                         identifier = pagePath,

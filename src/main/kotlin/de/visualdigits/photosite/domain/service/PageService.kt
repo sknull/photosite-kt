@@ -3,23 +3,18 @@ package de.visualdigits.photosite.domain.service
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.Page.Companion.mainNaviHtml
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite
-import de.visualdigits.photosite.domain.data.repository.PageRepository
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import org.springframework.ui.Model
-import kotlin.collections.get
 
 @Service
 class PageService(
-    private val photosite: Photosite,
+    private val photositeService: PhotositeService,
     private val imageService: ImageService,
-    private val pageRepository: PageRepository
 ) {
 
     @PostConstruct
     fun initialize() {
-        photosite.initialize(pageRepository)
     }
 
     fun renderPage(
@@ -27,6 +22,7 @@ class PageService(
         requestUri: String,
         model: Model
     ): String? {
+        val photosite = photositeService.photosite
         val locale = Language(lang.language)
         val currentPage = photosite.pageTree.page(requestUri, photosite.pageTree, locale)
         val currentPagePath = currentPage.path(locale)
@@ -38,7 +34,7 @@ class PageService(
             "naviMain",
             mainNaviHtml(
                 page = photosite.mainTree,
-                naviName = photosite.naviMain ?: error("No main navi"),
+                navigationEntry = photosite.naviMain ?: error("No main navi"),
                 locale = locale,
                 currentPage = currentPage,
                 theme = photosite.theme

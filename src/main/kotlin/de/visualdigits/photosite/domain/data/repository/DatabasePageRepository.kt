@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-interface PageRepository {
+interface DatabasePageRepository {
+
+    fun getPageTree(): Page?
 
     fun getPages(): List<Page>
 

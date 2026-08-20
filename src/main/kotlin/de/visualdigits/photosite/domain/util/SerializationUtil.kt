@@ -1,6 +1,7 @@
-package de.visualdigits.photosite.domain.data.util
+package de.visualdigits.photosite.domain.util
 
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.XML
@@ -39,4 +40,10 @@ inline fun <reified T> T.writeValueAsXmlFile(
     expandSelfClosingTags: Boolean = false
 ) {
     file.writeText(writeValueAsXmlString(indent, writeXmlDeclaration, expandSelfClosingTags))
+}
+
+val jsonMapper = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+    encodeDefaults = true
 }

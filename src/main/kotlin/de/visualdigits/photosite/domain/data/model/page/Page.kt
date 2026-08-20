@@ -1,147 +1,42 @@
 package de.visualdigits.photosite.domain.data.model.page
 
+import de.visualdigits.photosite.domain.data.model.photosite.NavigationEntry
 import de.visualdigits.photosite.domain.data.model.common.KmpOffsetDateTime
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.common.Translation
-import de.visualdigits.photosite.domain.data.model.navi.NaviName
 import de.visualdigits.photosite.domain.data.model.page.content.Content
-import de.visualdigits.photosite.domain.data.model.photosite.Photosite.Companion.rootDirectory
-import de.visualdigits.photosite.domain.data.repository.PageRepository
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import kotlinx.serialization.json.Json
 import org.apache.commons.text.StringEscapeUtils
-import org.slf4j.LoggerFactory
 import java.io.File
-import java.nio.file.Paths
 import java.util.UUID
 
-@Serializable
 data class Page(
-    @Transient val id: UUID? = null,
-    @SerialName("icon") var icon: String? = null,
-    @SerialName("tocName") val tocName: String? = null,
-    @SerialName("content") var content: Content = Content(),
-    @SerialName("translations" )val translations: List<Translation> = listOf(),
-
-    @Transient var directory: File? = null,
-    @Transient var path: String = "/",
-    @Transient var ariaName: String = "",
+    val id: UUID? = null,
+    var icon: String? = null,
+    val tocName: String? = null,
+    val content: Content = Content(),
+    val translations: List<Translation> = listOf(),
+    var level: Int = 0,
+    var directory: File? = null,
+    var path: String = "/",
+    var ariaName: String = "",
 ) {
+    var parentPath: String = ""
+    var parent: Page? = null
+    var children: MutableList<Page> = mutableListOf()
+    var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
 
-    @Transient var level: Int = 0
-
-    @Transient var parentPath: String = ""
-
-    @Transient var parent: Page? = null
-
-    @Transient var children: MutableList<Page> = mutableListOf()
-
-    @Transient var lastModified: KmpOffsetDateTime = KmpOffsetDateTime.MIN
-
-    @Transient val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang!! }
+    val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang!! }
 
     companion object {
 
-        private val log = LoggerFactory.getLogger(Page::class.java)
-
-        private val jsonMapper = Json {
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-            encodeDefaults = true
-        }
-
-        fun readPagetreeFromFilesystem(pageRepository: PageRepository): Page {
-            val rootPage = readValue(Paths.get(rootDirectory.canonicalPath, "resources", "pagetree").toFile())
-            pageRepository.addPageTree(rootPage)
-
-            return rootPage
-        }
-
-        fun readValue(directory: File, level: Int = 0, ariaName: String = "navigation"): Page {
-            log.info("Initializing page '${"  ".repeat(level)}${directory.canonicalPath}'")
-
-            val descriptorFile = File(directory, "page.json")
-            val page = if (descriptorFile.exists()) {
-                val json = descriptorFile.readText()
-                jsonMapper.decodeFromString<Page>(json)
-            } else {
-                Page()
-            }
-
-            page.directory = directory
-            page.level = level
-            page.ariaName = ariaName
-            page.path = directory.name
-            val pageFiles = directory.listFiles()?:arrayOf()
-
-            page.content.loadContent(directory)
-            page.content.loadImages(pageFiles)
-
-            page.children = pageFiles
-                .filter { f -> f.isDirectory }
-                .mapIndexed { index, d ->
-                    val child = readValue(d, level + 1, "${ariaName}_${index + 1}")
-                    child.parent = page
-                    child
-                }
-                .sortedBy { c -> c.path() }
-                .toMutableList()
-            if (page.children.isNotEmpty()) {
-                page.icon = "folder"
-            }
-
-            page.calculateLastModified()
-
-            return page
-        }
-
-        fun readPageTreeFromDatabase(pageRepository: PageRepository): Page? {
-            // read all pages from database
-            val pages = pageRepository
-                .getPagesEager()
-                .map { page ->
-                    val parentPath = page.path.substringBeforeLast("/")
-                    val finalParentPath = if (page.path == parentPath) {
-                        ""
-                    } else {
-                        parentPath
-                    }
-                    page.parentPath = finalParentPath
-                    page.level = page.path.split("/").size - 1
-
-                    page.directory?.also { directory -> page.content.loadContent(directory) }
-                    page.content.calculateLastModified()
-                    page.content.sortImages()
-
-                    page
-                }
-                .sortedBy { it.path }
-                .associateBy { it.path }
-
-            // reconstruct tree
-            pages.values.forEach { child ->
-                pages[child.parentPath]?.also { parent ->
-                    child.path = child.path.substringAfterLast("/")
-                    if (parent != child) {
-                        child.parent = parent
-                        parent.children.add(child)
-                    }
-                }
-            }
-
-            return pages.values.firstOrNull()?.rootPage()
-        }
-
         fun mainNaviHtml(
             page: Page,
-            naviName: NaviName,
+            navigationEntry: NavigationEntry,
             locale: Language,
             currentPage: Page,
             theme: String
         ): String {
-            val name = naviName.label?.translationsMap[locale]?.name
+            val name = navigationEntry.translationsMap[locale]?.name
             val html = StringBuilder()
             val childAriaName = if (page.children.isNotEmpty()) " aria-activedescendant=\"${page.children.firstOrNull()?.ariaName}-item\"" else ""
 
@@ -164,7 +59,7 @@ data class Page(
         }
 
         fun subNaviHtml(
-            naviName: NaviName,
+            navigationEntry: NavigationEntry,
             locale: Language,
             currentPage: Page,
             pages: List<Page>,
@@ -172,7 +67,7 @@ data class Page(
             level: Int? = null,
             rolePrefix: String
         ): String {
-            val name = naviName.label?.translationsMap[locale]?.name
+            val name = navigationEntry.translationsMap[locale]?.name
             val html = StringBuilder()
 
             html
@@ -275,20 +170,20 @@ data class Page(
     }
 
     override fun toString(): String {
-//        return "path=$path, parentPath=$parentPath"
         return "${"  ".repeat(level)}$ariaName:$path [${path()}]\n${children.joinToString("") { it.toString() }}"
     }
 
     fun clone(childrenFilter: ((p: Page) -> Boolean)? = null ): Page {
         val clone = Page(
+            id = id,
+            level = level,
             icon = icon,
             tocName = tocName,
             content = content,
             translations = translations,
+            ariaName = ariaName,
+            path = path
         )
-        clone.level = level
-        clone.ariaName = ariaName
-        clone.path = path
         val clonedChildren = children
             .map { c ->
                 val cc = c.clone()
@@ -320,11 +215,6 @@ data class Page(
         }
 
         return pageMap
-    }
-
-    fun calculateLastModified() {
-        val allPages = allPages()
-        lastModified = allPages.maxOf { p -> p.content.lastModified }
     }
 
     fun lastModifiedPages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
