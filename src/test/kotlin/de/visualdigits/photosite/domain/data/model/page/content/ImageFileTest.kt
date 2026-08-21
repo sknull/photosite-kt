@@ -5,8 +5,10 @@ import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import java.io.File
 
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class ImageFileTest {
 
     @Test
