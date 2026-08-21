@@ -1,0 +1,27 @@
+--
+-- SETTINGS
+--
+CREATE TABLE SettingsEntity (
+    id INTEGER NOT NULL DEFAULT 0,
+    language TEXT NOT NULL,
+    hostUrl TEXT
+);
+insertSettings:
+INSERT INTO SettingsEntity (
+    language, hostUrl
+)
+VALUES (?, ?);
+
+getSettingsById:
+SELECT * FROM SettingsEntity WHERE id = :id;
+
+updateSettingsEntity:
+UPDATE SettingsEntity
+SET language = :language,
+    hostUrl = :hostUrl
+WHERE id IS :id;
+
+deleteSettings:
+DELETE FROM SettingsEntity
+WHERE id IS :id;
+
