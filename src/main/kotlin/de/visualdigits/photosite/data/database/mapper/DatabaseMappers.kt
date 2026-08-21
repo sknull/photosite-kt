@@ -21,6 +21,8 @@ import de.visualdigits.photosite.domain.data.model.page.content.Sort
 import de.visualdigits.photosite.domain.data.model.page.content.SortDir
 import de.visualdigits.photosite.domain.data.model.page.content.Teaser
 import de.visualdigits.photosite.domain.data.model.page.content.Text
+import de.visualdigits.photosite.domain.util.getRelativeResourcePath
+import de.visualdigits.photosite.domain.util.getThumbnailPath
 import de.visualdigits.photosite.presentation.model.CaptionDto
 import de.visualdigits.photosite.presentation.model.ContentDto
 import de.visualdigits.photosite.presentation.model.GoogleMapsDto
@@ -329,6 +331,8 @@ fun ImageFile.toImageFileEntity(): ImageFileEntity {
 fun ImageFile.toImageFileDto(): ImageFileDto {
     return ImageFileDto(
         name = name,
+        imagePath = getRelativeResourcePath(file),
+        thumbnailPath = getThumbnailPath(file),
         apertureValue = apertureValue,
         exposureTime = exposureTime,
         exposureBias = exposureBias,

@@ -3,6 +3,7 @@ package de.visualdigits.photosite.domain.service
 import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
 import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.util.getRelativeResourcePath
+import de.visualdigits.photosite.domain.util.getThumbnailPath
 import net.coobird.thumbnailator.Thumbnails
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -15,25 +16,6 @@ class ImageService {
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun getThumbnail(image: ImageFile): String? {
-        val pagetreePath = Paths.get(Photosite.rootDirectory.canonicalPath, "resources", "pagetree")
-        val imageFile: File = image.file
-        val sourceImageFilePath = Paths.get(imageFile.absolutePath)
-        val relativePath = pagetreePath.relativize(sourceImageFilePath).toString()
-        val thumbnailFile = Paths.get(Photosite.thumbnailCacheFolder.canonicalPath, relativePath).toFile()
-        val thumbnailFolder = thumbnailFile.parentFile
-        if (thumbnailFolder?.exists() != true && thumbnailFolder?.mkdirs() != true) {
-            log.error("Could not create thumbnail folder '$thumbnailFolder'")
-        }
-        if (!thumbnailFile.exists()) {
-            runCatching {
-                Thumbnails.of(imageFile)
-                    .size(128, 128)
-                    .keepAspectRatio(true)
-                    .toFile(thumbnailFile)
-            }.onFailure { e ->
-                log.error("Could note create thumbnail for image '" + imageFile.absolutePath + "'", e)
-            }
-        }
-        return getRelativeResourcePath(thumbnailFile)
+        return getThumbnailPath(image.file)
     }
 }

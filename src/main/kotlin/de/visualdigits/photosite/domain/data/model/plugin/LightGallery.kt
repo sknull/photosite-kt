@@ -45,14 +45,13 @@ class LightGallery(
         page.content.images
             .forEach { imageFile ->
                 val image: File = imageFile.file
-                val imagePath = getRelativeResourcePath(image)
                 val thumbPath = imageService.getThumbnail(imageFile)
                 var imageName = image.getName()
                 imageName = imageName.substring(0, imageName.indexOf('.'))
                 sb.append("            <a class=\"item\" href=\"/")
-                    .append(imagePath)
+                    .append(getRelativeResourcePath(image))
                     .append("\"")
-                imageName += "&nbsp;(" + (imageFile.lastModified?.format("yyy-MM-dd HH:mm:ss")?:"") + ")"
+                imageName += "&nbsp;(" + (imageFile.lastModified.format("yyy-MM-dd HH:mm:ss")) + ")"
                 sb.append(" data-sub-html=\"")
                     .append("<div class='camera-infos camera-infos-grid'>")
                     .append("<div id='camera-infos-caption' class='info-box'>")

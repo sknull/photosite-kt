@@ -7,6 +7,8 @@ import java.time.OffsetDateTime
 @Serializable
 data class ImageFileDto(
     val name: String,
+    val imagePath: String?,
+    val thumbnailPath: String?,
     val apertureValue: String? = null,
     val exposureTime: String? = null,
     val exposureBias: String? = null,
