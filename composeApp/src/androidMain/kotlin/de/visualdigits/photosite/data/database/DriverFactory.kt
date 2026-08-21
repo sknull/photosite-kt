@@ -12,9 +12,6 @@ actual class DriverFactory(
     private val dbName = "settings.db"
 
     actual fun createDriver(basePath: String): SqlDriver {
-        // todo - remember to remove this later
-//        context.deleteDatabase(dbName)
-
         return AndroidSqliteDriver(
             schema = SettingsDatabase.Schema,
             context = context,
