@@ -4,11 +4,9 @@ import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
 import de.visualdigits.photosite.domain.data.repository.FilesystemPageRepository
 import de.visualdigits.photosite.domain.data.repository.PhotositeRepository
-import de.visualdigits.photosite.domain.util.jsonMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
-import java.io.File
 
 @Service
 class PhotositeService(

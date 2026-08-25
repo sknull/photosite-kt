@@ -6,11 +6,7 @@ import de.visualdigits.photosite.domain.data.model.page.content.ContentType
 import de.visualdigits.photosite.domain.data.model.page.content.ImageFile
 import de.visualdigits.photosite.domain.service.ImageService
 import de.visualdigits.photosite.domain.util.getRelativeResourcePath
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
 
-@Component
-@ConfigurationProperties(prefix = "photosite.plugins.rotator")
 class Rotator : Plugin(
     contentType = ContentType.Rotator
 ) {

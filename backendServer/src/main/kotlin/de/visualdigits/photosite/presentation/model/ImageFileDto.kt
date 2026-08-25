@@ -9,6 +9,8 @@ data class ImageFileDto(
     val name: String,
     val imagePath: String?,
     val thumbnailPath: String?,
+    val width: Int = 0,
+    val height: Int = 0,
     val apertureValue: String? = null,
     val exposureTime: String? = null,
     val exposureBias: String? = null,

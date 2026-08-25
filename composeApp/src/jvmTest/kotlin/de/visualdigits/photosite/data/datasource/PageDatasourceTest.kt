@@ -1,4 +1,4 @@
-package de.visualdigits.photosite.data.database
+package de.visualdigits.photosite.data.datasource
 
 import de.visualdigits.common.domain.model.errorhandling.Result
 import de.visualdigits.photosite.di.platformModule
@@ -14,7 +14,7 @@ import org.koin.test.junit5.KoinTestExtension
 
 class PageDatasourceTest : KoinTest {
 
-    private val pogeDatasource: PageDatasource by inject()
+    private val pageDatasource: PageDatasource by inject()
     private val settingsRepository: SettingsRepository by inject()
 
     @JvmField
@@ -29,8 +29,11 @@ class PageDatasourceTest : KoinTest {
         if (settingsResult is Result.Success) {
             val settings = settingsResult.data
             settings?.get<String>(SK.hostUrl)?.also { hostUrl ->
-                val pages = pogeDatasource.getPageTree(hostUrl)
-                println(pages)
+                val pageResult = pageDatasource.getPageTree(hostUrl)
+                if (pageResult is Result.Success) {
+                    val pageMap = pageResult.data
+                    println(pageMap.keys.joinToString("\n"))
+                }
             }
         }
     }

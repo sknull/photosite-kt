@@ -15,7 +15,6 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
-import java.time.OffsetDateTime
 
 @Service
 class SitemapService(
@@ -72,7 +71,7 @@ class SitemapService(
         val photosite = photositeService.photosite
         val sb = StringBuilder()
         val determinePages = determinePages { p ->
-            p.children.isNotEmpty() && p.lastModified > OffsetDateTime.MIN
+            p.children.isNotEmpty() && p.lastModified != null
         }
         determinePages.forEach { page ->
             sb
@@ -80,7 +79,7 @@ class SitemapService(
                 .append("    <loc>")
                 .append(photosite.protocol + photosite.domain)
                 .append("/")
-                .append(StringEscapeUtils.escapeXml11(page.path()))
+                .append(StringEscapeUtils.escapeXml11(page.path))
                 .append("</loc>\n")
                 .append("    <lastmod>")
                 .append(isoDate(page.lastModified))
@@ -102,11 +101,11 @@ class SitemapService(
         log.info("Rendering post site map...")
         val photosite = photositeService.photosite
         val sb = StringBuilder()
-        determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified > OffsetDateTime.MIN }.forEach { page ->
+        determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified != null }.forEach { page ->
             sb
                 .append("  <url>\n").append("    <loc>")
                 .append(photosite.protocol + photosite.domain).append("/")
-                .append(StringEscapeUtils.escapeXml11(page.path()))
+                .append(StringEscapeUtils.escapeXml11(page.path))
                 .append("</loc>\n")
                 .append("    <lastmod>")
                 .append(isoDate(page.lastModified))

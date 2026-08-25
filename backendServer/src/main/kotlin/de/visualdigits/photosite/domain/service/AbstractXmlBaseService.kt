@@ -14,7 +14,9 @@ abstract class AbstractXmlBaseService(
         val FORMAT_DATE_TIME = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss ZZZ", Locale.US)
     }
 
-    protected fun isoDate(timestamp: OffsetDateTime): String {
+    protected fun isoDate(timestamp: OffsetDateTime?): String {
+        if (timestamp == null) return ""
+
         return timestamp.format(FORMAT_DATE) +
                 "T" +
                 timestamp.format(FORMAT_TIME)
@@ -25,6 +27,6 @@ abstract class AbstractXmlBaseService(
     }
 
     protected fun determinePages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
-        return photositeService.photosite.pageTree.lastModifiedPages(count, filter)
+        return photositeService.photosite.lastModifiedPages(count = count, filter = filter)
     }
 }

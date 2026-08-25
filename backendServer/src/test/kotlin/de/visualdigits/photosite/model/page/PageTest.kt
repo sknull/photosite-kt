@@ -1,11 +1,8 @@
 package de.visualdigits.photosite.model.page
 
-import de.visualdigits.photosite.data.filesystem.repository.DefaultFilesystemPageRepository
-import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.nio.file.Paths
 import java.util.Locale
 
@@ -19,15 +16,15 @@ class PageTest {
 
     @Test
     fun testTeaserHtml() {
-        val page = DefaultFilesystemPageRepository.readPageTree(File("C:\\Users\\sknull\\.photosite\\resources\\pagetree\\Fotos\\Unterwegs\\Deutschland\\Hamburg\\Stadtteile\\Baakenhöft\\Zeitreise"))
-        println(page.content.teaser?.getHtml(Language("de")))
+//        val page = DefaultFilesystemPageRepository.readPageTree(File("C:\\Users\\sknull\\.photosite\\resources\\pagetree\\Fotos\\Unterwegs\\Deutschland\\Hamburg\\Stadtteile\\Baakenhöft\\Zeitreise"))
+//        println(page.content.teaser?.getHtml(Language("de")))
     }
 
     @Test
     fun testConvertDescriptor() {
-        val rootDirectory = "C:\\Users\\sknull\\.photosite\\resources\\pagetree"
-        val page = DefaultFilesystemPageRepository.readPageTree(File(rootDirectory))
-        visitPage(rootDirectory.substringBeforeLast("\\"), page)
+//        val rootDirectory = "C:\\Users\\sknull\\.photosite\\resources\\pagetree"
+//        val page = DefaultFilesystemPageRepository.readPageTree(File(rootDirectory))
+//        visitPage(rootDirectory.substringBeforeLast("\\"), page)
     }
 
     private fun visitPage(rootDirectory: String, page: Page, indent: String = "") {

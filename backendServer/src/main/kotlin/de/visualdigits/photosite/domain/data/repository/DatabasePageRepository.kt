@@ -10,13 +10,11 @@ interface DatabasePageRepository {
 
     fun getPageTree(): Page?
 
-    fun getPageDtoTree(): PageDto?
-
-    fun getPages(): List<Page>
-
-    fun getPagesEager(): List<Page>
-
     fun getPage(id: UUID): Page?
+
+    fun getPage(path: String): Page?
+
+    fun getPageDto(path: String): PageDto?
 
     fun addPageTree(page: Page)
 

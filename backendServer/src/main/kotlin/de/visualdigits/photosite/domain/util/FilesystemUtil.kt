@@ -37,7 +37,7 @@ fun getThumbnailPath(imageFile: File?): String? {
     if (!thumbnailFile.exists()) {
         runCatching {
             Thumbnails.of(imageFile)
-                .size(128, 128)
+                .size(256, 256)
                 .keepAspectRatio(true)
                 .toFile(thumbnailFile)
         }.onFailure { e ->

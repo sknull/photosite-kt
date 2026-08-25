@@ -19,8 +19,9 @@ class DefaultDatabasePageRepository(
 
     override fun getPageTree(): Page? {
         // read all pages from database
-        val pages = getPagesEager()
-            .map { page ->
+        val pages1 = dao.findAll().map { it.toPage() }
+        val pages = if (pages1.isNotEmpty()) {
+            pages1.map { page ->
                 val parentPath = page.path.substringBeforeLast("/")
                 val finalParentPath = if (page.path == parentPath) {
                     ""
@@ -35,13 +36,13 @@ class DefaultDatabasePageRepository(
 
                 page
             }
-            .sortedBy { it.path }
-            .associateBy { it.path }
+                .sortedBy { it.path }
+                .associateBy { it.path }
+        } else null
 
         // reconstruct tree
-        pages.values.forEach { child ->
+        pages?.values?.forEach { child ->
             pages[child.parentPath]?.also { parent ->
-                child.path = child.path.substringAfterLast("/")
                 if (parent != child) {
                     child.parent = parent
                     parent.children.add(child)
@@ -49,23 +50,19 @@ class DefaultDatabasePageRepository(
             }
         }
 
-        return pages.values.firstOrNull()?.rootPage()
-    }
-
-    override fun getPageDtoTree(): PageDto? {
-        return getPageTree()?.toPageDto()
-    }
-
-    override fun getPages(): List<Page> {
-        return dao.findAll().map { it.toPage() }
-    }
-
-    override fun getPagesEager(): List<Page> {
-        return dao.findAllWithCollections().map { it.toPage() }
+        return pages?.values?.firstOrNull()?.rootPage()
     }
 
     override fun getPage(id: UUID): Page? {
         return dao.findById(id).orElse(null)?.toPage()
+    }
+
+    override fun getPage(path: String): Page? {
+        return dao.findByPath(path)?.toPage()
+    }
+
+    override fun getPageDto(path: String): PageDto? {
+        return dao.findByPath(path)?.toPageDto()
     }
 
     @Transactional

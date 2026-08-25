@@ -3,7 +3,7 @@ package de.visualdigits.photosite.di
 import de.visualdigits.photosite.PhotositeQueries
 import de.visualdigits.photosite.SettingsDatabase
 import de.visualdigits.photosite.data.database.DriverFactory
-import de.visualdigits.photosite.data.database.PageDatasource
+import de.visualdigits.photosite.data.datasource.PageDatasource
 import de.visualdigits.photosite.data.http.HttpClientFactory
 import de.visualdigits.photosite.data.repository.DefaultSettingsRepository
 import de.visualdigits.photosite.domain.repository.SettingsRepository

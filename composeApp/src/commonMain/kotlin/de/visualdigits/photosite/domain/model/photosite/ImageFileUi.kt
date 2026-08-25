@@ -8,6 +8,8 @@ data class ImageFileUi(
     val name: String,
     val imagePath: String?,
     val thumbnailPath: String?,
+    var width: Int = 0,
+    var height: Int = 0,
     val apertureValue: String? = null,
     val exposureTime: String? = null,
     val exposureBias: String? = null,

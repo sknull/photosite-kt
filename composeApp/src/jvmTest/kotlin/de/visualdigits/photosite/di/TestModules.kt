@@ -3,12 +3,11 @@ package de.visualdigits.photosite.di
 import de.visualdigits.photosite.PhotositeQueries
 import de.visualdigits.photosite.SettingsDatabase
 import de.visualdigits.photosite.data.database.DriverFactory
-import de.visualdigits.photosite.data.database.PageDatasource
+import de.visualdigits.photosite.data.datasource.PageDatasource
 import de.visualdigits.photosite.data.http.HttpClientFactory
 import de.visualdigits.photosite.data.repository.TestSettingsRepository
 import de.visualdigits.photosite.domain.repository.SettingsRepository
 import de.visualdigits.photosite.presentation.model.PhotositeViewModel
-import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind

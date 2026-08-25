@@ -4,6 +4,7 @@ import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDescriptor
 import com.drew.metadata.exif.ExifSubIFDDirectory
+import com.drew.metadata.jpeg.JpegDirectory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import java.io.File
@@ -12,16 +13,28 @@ import java.io.File
 class ImageFileTest {
 
     @Test
+    fun testIterateMetadata() {
+        val file = File("C:\\Users\\sknull\\.photosite\\resources\\pagetree\\Arts\\Cinema 4D\\Audi_TT.jpg")
+        val metadata = ImageMetadataReader.readMetadata(file)
+        metadata.directories.forEach { directory ->
+            println("${directory.name}")
+            directory.tags.forEach { tag ->
+                println("- $tag")
+            }
+        }
+    }
+
+    @Test
     fun testMetadata() {
         val file = File("C:\\Users\\sknull\\.photosite\\resources\\pagetree\\Fotos\\Unterwegs\\Deutschland\\Hamburg\\Architektur\\U2 Station Horner Rennbahn\\_1034818.jpg")
-
         val metadata = ImageMetadataReader.readMetadata(file)
-        val exifDir =
-            metadata?.getFirstDirectoryOfType(ExifIFD0Directory::class.java)
-        val exifSubDir =
-            metadata?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
+        val jpgDir = metadata?.getFirstDirectoryOfType(JpegDirectory::class.java)
+        val exifDir = metadata?.getFirstDirectoryOfType(ExifIFD0Directory::class.java)
+        val exifSubDir = metadata?.getFirstDirectoryOfType(ExifSubIFDDirectory::class.java)
         val exifSub = ExifSubIFDDescriptor(exifSubDir)
-        if (exifDir != null && exifSubDir != null) {
+        if (jpgDir != null && exifDir != null && exifSubDir != null) {
+            val width = jpgDir.imageWidth
+            val height = jpgDir.imageHeight
             val apertureValue = exifSub.getApertureValueDescription()
             val exposureTime = exifSub.getExposureTimeDescription()
             val exposureBias = exifSub.getExposureBiasDescription()
@@ -31,6 +44,8 @@ class ImageFileTest {
             val model = exifDir.getString(ExifIFD0Directory.TAG_MODEL)
             val lensModel = exifSubDir.getString(ExifSubIFDDirectory.TAG_LENS_MODEL)
 
+            println(width)
+            println(height)
             println(apertureValue)
             println(exposureTime)
             println(exposureBias)

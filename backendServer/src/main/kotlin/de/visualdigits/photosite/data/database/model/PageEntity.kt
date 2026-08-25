@@ -21,10 +21,10 @@ import java.util.UUID
 data class PageEntity(
     @Id @GeneratedValue(strategy = GenerationType.UUID) val id: UUID? = null,
     val directory: String? = null,
+    val name: String = "",
     @Column(unique = true) val path: String,
     val ariaName: String,
     val icon: String? = null,
-    val tocName: String? = null,
     val contentType: String? = null,
     val mode: String? = null,
     val speed: Int? = null,
@@ -40,6 +40,7 @@ data class PageEntity(
     val teaserGoogleMapsLat: Double? = null,
     val teaserGoogleMapsLng: Double? = null,
     val teaserGoogleMapsZoom: Int? = null,
+    val lastModified: String? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "page_id")

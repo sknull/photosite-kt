@@ -1,10 +1,12 @@
 package de.visualdigits.photosite.presentation.page
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,20 +21,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.visualdigits.common.domain.model.platform.PlatformType
+import de.visualdigits.common.presentation.components.PlatformVerticalScrollbarBox
 import de.visualdigits.common.presentation.components.button.IndicatorButton
 import de.visualdigits.common.presentation.components.button.TabButtonRow
 import de.visualdigits.compose.resources.Res
 import de.visualdigits.compose.resources.icon_hourglass_top_24px
+import de.visualdigits.photosite.domain.model.type.Language
 import de.visualdigits.photosite.presentation.components.ErrorCard
 import de.visualdigits.photosite.presentation.components.form.SettingsForm
+import de.visualdigits.photosite.presentation.components.navigation.NavigationNode
+import de.visualdigits.photosite.presentation.components.photo.PhotoCard
+import de.visualdigits.photosite.presentation.components.photo.PhotoTab
 import de.visualdigits.photosite.presentation.model.PhotositeAction
 import de.visualdigits.photosite.presentation.model.PhotositeViewModel
+import de.visualdigits.photosite.presentation.model.settings.SK
 import de.visualdigits.photosite.presentation.style.AppCompositionProvider
 import de.visualdigits.photosite.presentation.style.BackgroundColor
 import de.visualdigits.photosite.presentation.style.FlyerAlarmRed
@@ -49,13 +58,65 @@ fun MainPage(
     platformType: PlatformType
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val editedSettings by viewModel.editedSettings.collectAsStateWithLifecycle()
     val onAction = viewModel::onAction
 
+    val hostUrl = settings?.get<String>(SK.hostUrl)
+    val language = settings?.get<Language>(SK.language)
+
     val items = remember(state) {
         linkedMapOf<String, @Composable (() -> Unit)>(
             "tab_photos" to {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(300.dp),
+                    ) {
+                        PlatformVerticalScrollbarBox(
+                            platformType = platformType,
+                            backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+                            scrollbarModifier = Modifier
+                                .clip(MaterialTheme.shapes.small)
+                                .width(10.dp)
+                                .background(MaterialTheme.colorScheme.background)
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)),
+                            scrollbarId = "pages",
+                            scrollPosition = viewModel.scrollPosition,
+                            onCommonAction = viewModel::onCommonAction,
+                            verticalArrangementGap = 0.dp
+                        ) {
+                            listOf(Pair("pages", @Composable {
+                                NavigationNode(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    state = state,
+                                    language = language,
+                                    page = state.rootPage,
+                                    onAction = viewModel::onAction,
+                                    colorFolder = Color(0xFF07538B),
+                                    colorLeaf = Color(0xFF4693CA),
+                                    textColorFolder = Color.White,
+                                    textColorLeaf = Color.Black,
+                                )
+                            }))
+                        }
+                    }
+
+                    PhotoTab(
+                        modifier = Modifier
+                            .weight(1f),
+                        page = state.page,
+                        hostUrl = hostUrl,
+                        onAction = viewModel::onAction,
+                        platformType = platformType,
+                        viewModel = viewModel
+                    )
+                }
             },
             "tab_settings" to {
                 SettingsForm(
@@ -99,8 +160,7 @@ fun MainPage(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(MaterialTheme.shapes.gap),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.shapes.gap)
+                            .padding(MaterialTheme.shapes.gap)
                     ) {
 //                        Image(
 //                            modifier = Modifier
@@ -117,46 +177,53 @@ fun MainPage(
                             )
                         }
 
-                        TabButtonRow(
-                            modifier = Modifier
-                                .padding(bottom = 10.dp)
-                                .fillMaxWidth()
-                                .drawBehind {
-                                    val strokeWidth = 2.dp.toPx()
-                                    drawLine(
-                                        color = Color(0xaa111111),
-                                        start = Offset(0f, size.height - strokeWidth / 2),
-                                        end = Offset(size.width, size.height - strokeWidth / 2),
-                                        strokeWidth = strokeWidth
-                                    )
-                                },
-                            horizontalArrangement = Arrangement.spacedBy(0.dp),
-                            selectedTab = { state.selectedTabIndex },
-                            loadingContent = if (isLoading) {
-                                {
-                                    Icon(
-                                        modifier = Modifier
-                                            .width(200.dp)
-                                            .height(200.dp),
-                                        painter = painterResource(Res.drawable.icon_hourglass_top_24px),
-                                        contentDescription = null,
-                                        tint = FlyerAlarmRed,
+                        if (state.imageFile != null) {
+                            PhotoCard(
+                                image = state.imageFile,
+                                hostUrl = hostUrl,
+                                onAction = viewModel::onAction
+                            )
+                        } else {
+                            TabButtonRow(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .drawBehind {
+                                        val strokeWidth = 2.dp.toPx()
+                                        drawLine(
+                                            color = Color(0xaa111111),
+                                            start = Offset(0f, size.height - strokeWidth / 2),
+                                            end = Offset(size.width, size.height - strokeWidth / 2),
+                                            strokeWidth = strokeWidth
+                                        )
+                                    },
+                                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                                selectedTab = { state.selectedTabIndex },
+                                loadingContent = if (isLoading) {
+                                    {
+                                        Icon(
+                                            modifier = Modifier
+                                                .width(200.dp)
+                                                .height(200.dp),
+                                            painter = painterResource(Res.drawable.icon_hourglass_top_24px),
+                                            contentDescription = null,
+                                            tint = FlyerAlarmRed,
+                                        )
+                                    }
+                                } else null,
+                                items = items
+                            ) { index ->
+                                IndicatorButton(
+                                    text = state.tabLabels[index].second.asString(),
+                                    buttonColor = Color.Gray,
+                                    indicatorPosition = Alignment.BottomCenter,
+                                    indicatorColor = FlyerAlarmRed,
+                                    shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+                                    selected = state.selectedTabIndex == index,
+                                ) {
+                                    onAction(
+                                        PhotositeAction.OnTabSelected(index)
                                     )
                                 }
-                            } else null,
-                            items = items
-                        ) { index ->
-                            IndicatorButton(
-                                text = state.tabLabels[index].second.asString(),
-                                buttonColor = Color.Black,
-                                indicatorPosition = Alignment.BottomCenter,
-                                indicatorColor = FlyerAlarmRed,
-                                shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
-                                selected = state.selectedTabIndex == index,
-                            ) {
-                                onAction(
-                                    PhotositeAction.OnTabSelected(index)
-                                )
                             }
                         }
                     }

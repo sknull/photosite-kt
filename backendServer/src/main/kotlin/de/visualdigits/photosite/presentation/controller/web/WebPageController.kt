@@ -6,6 +6,7 @@ import de.visualdigits.photosite.domain.service.ResourceService
 import de.visualdigits.photosite.presentation.util.HtmlUtil.getRequestUri
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.apache.commons.text.StringEscapeUtils
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,21 +18,29 @@ class WebPageController(
     private val resourceService: ResourceService,
 ) {
 
-    @GetMapping(value = ["/**"], produces = ["application/xhtml+xml"])
+    @GetMapping("/")
+    fun redirectRoot(
+        response: HttpServletResponse
+    ) {
+        response.sendRedirect("/pagetree/")
+    }
+
+    @GetMapping(value = ["/pagetree/**"], produces = ["application/xhtml+xml"])
     fun dispatch(
         @RequestParam(name = "lang", required = false, defaultValue = "de") lang: Language,
         request: HttpServletRequest,
-        response: HttpServletResponse,
         model: Model,
     ): String? {
         val requestUri = request.getRequestUri()
-        return if (requestUri.startsWith("/resources") || requestUri.startsWith("/.well-known")) {
-            resourceService.getResource(request, response)
-            null
-        } else if (requestUri.startsWith("/pagetree/")) {
-            pageService.renderPage(lang, requestUri.removePrefix("/pagetree/"), model)
-        } else {
-            pageService.renderPage(lang, requestUri.removePrefix("/"), model)
-        }
+        return pageService.renderPage(lang, StringEscapeUtils.unescapeHtml4(requestUri.removePrefix("/pagetree/")), model)
+    }
+
+    @GetMapping(value = ["/resources/**"], produces = ["application/xhtml+xml"])
+    fun getResource(
+        @RequestParam(name = "lang", required = false, defaultValue = "de") lang: Language,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ) {
+        resourceService.getResource(request, response)
     }
 }

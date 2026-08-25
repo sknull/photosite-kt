@@ -15,13 +15,13 @@ suspend inline fun <reified T> safeCall(
 ): Result<T, DataError.Remote> {
     val response = try {
         execute()
-    } catch(_: SocketTimeoutException) {
-        return Result.Error(DataError.Remote.REQUEST_TIMEOUT)
-    } catch(_: UnresolvedAddressException) {
-        return Result.Error(DataError.Remote.NO_INTERNET)
-    } catch (_: Exception) {
+    } catch(e: SocketTimeoutException) {
+        return Result.Error(DataError.Remote.REQUEST_TIMEOUT, e)
+    } catch(e: UnresolvedAddressException) {
+        return Result.Error(DataError.Remote.NO_INTERNET, e)
+    } catch (e: Exception) {
         coroutineContext.ensureActive()
-        return Result.Error(DataError.Remote.UNKNOWN)
+        return Result.Error(DataError.Remote.UNKNOWN, e)
     }
 
     return responseToResult(response)
@@ -34,8 +34,8 @@ suspend inline fun <reified T> responseToResult(
         in 200..299 -> {
             try {
                 Result.Success(response.body<T>())
-            } catch(_: NoTransformationFoundException) {
-                Result.Error(DataError.Remote.SERIALIZATION)
+            } catch(e: NoTransformationFoundException) {
+                Result.Error(DataError.Remote.SERIALIZATION, e)
             }
         }
         408 -> Result.Error(DataError.Remote.REQUEST_TIMEOUT)

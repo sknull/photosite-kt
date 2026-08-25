@@ -20,7 +20,7 @@ data class Content(
 
     var images: MutableList<ImageFile> = mutableListOf()
 ) {
-    var lastModified: OffsetDateTime = OffsetDateTime.MIN
+    var lastModified: OffsetDateTime? = null
     var captionsMap: Map<String, Caption> = mapOf()
 
     init {
@@ -32,7 +32,6 @@ data class Content(
     fun calculateLastModified() {
         lastModified = images
             .maxOfOrNull { i -> i.lastModified }
-            ?: OffsetDateTime.MIN
     }
 
     fun sortImages() {

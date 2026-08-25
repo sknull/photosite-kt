@@ -23,9 +23,9 @@ fun main() {
         modules(sharedModule, platformModule)
     }
     val homeDirectoryPath = koinApp.koin.get<String>(named("homeDirectory"))
-    val writers = getPlatformLogWriters(homeDirectoryPath, "FlyerAlarmChallenge.log")
+    val writers = getPlatformLogWriters(homeDirectoryPath, "PhotositeClient.log")
     Logger.setLogWriters(writers)
-    Logger.setTag("FAC")
+    Logger.setTag("PSC")
 
     application {
         val ioScope = rememberCoroutineScope()

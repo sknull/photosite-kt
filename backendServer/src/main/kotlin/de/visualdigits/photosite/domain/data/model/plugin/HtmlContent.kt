@@ -4,13 +4,8 @@ import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
 import de.visualdigits.photosite.domain.service.ImageService
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
 import java.util.regex.Pattern
-import kotlin.text.iterator
 
-@Component
-@ConfigurationProperties(prefix = "photosite.plugins.html")
 open class HtmlContent(
     contentType: ContentType = ContentType.Html
 ) : Plugin(

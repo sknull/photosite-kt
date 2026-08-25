@@ -1,15 +1,18 @@
 package de.visualdigits.photosite.domain.data.model.photosite
 
+import de.visualdigits.photosite.data.database.mapper.toPageDto
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.page.Page
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
 import de.visualdigits.photosite.domain.data.model.plugin.Plugin
 import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
 import de.visualdigits.photosite.domain.data.repository.FilesystemPageRepository
+import de.visualdigits.photosite.presentation.model.PageDto
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
 import java.io.File
 import java.nio.file.Paths
+import java.time.OffsetDateTime
 
 data class Photosite(
     val serverPort: Int? = null,
@@ -41,10 +44,20 @@ data class Photosite(
     val pluginsMap: MutableMap<ContentType, Plugin> = mutableMapOf()
 
     var siteUrl: String? = null
+    var pageMap: Map<String, Page> = mapOf()
     var pageTree: Page = Page()
     var mainTree: Page = Page()
-    var subTrees: List<Pair<NavigationEntry, List<Page>>> = listOf()
+    var subTrees: List<Page> = listOf()
     var staticTree: Page = Page()
+
+    val mainTreeDto: PageDto
+        get() = mainTree.toPageDto()
+
+    val staticTreeDto: PageDto
+        get() = staticTree.toPageDto()
+
+    val subTreeDtos: PageDto
+        get() = mainTree.toPageDto()
 
     fun initialize(
         environment: Environment,
@@ -55,18 +68,55 @@ data class Photosite(
         siteUrl = protocol + domain
         if (!environment.activeProfiles.contains("checkCerts")) {
             log.info("initializing page tree...")
-            val readPageTreeFromDatabase = databasePageRepository.getPageTree()
-            pageTree = readPageTreeFromDatabase ?: filesystemPageRepository.getPageTree()
-            mainTree = pageTree.clone { p -> !(p.path.startsWith("#") || p.path.startsWith("-")) }
-            subTrees = naviSub?.mapNotNull { n ->
-                n.rootFolder?.let { rf ->
-                    Pair(n, pageTree.page(rf, pageTree).lastModifiedPages(n.numberOfEntries) { p -> p.children.isEmpty() })
+
+            val databasePageTree = databasePageRepository.getPageTree()
+            pageTree = if (databasePageTree != null){
+                databasePageTree
+            } else {
+                val filesystemPageTree = filesystemPageRepository.getPageTree()
+                databasePageRepository.addPageTree(filesystemPageTree)
+                filesystemPageTree
+            }
+            pageMap = calculatePageMap(pageTree)
+
+            mainTree = pageTree.copy(children = pageTree.children.filter { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }.toMutableList())
+            subTrees = naviSub.mapNotNull { navigationEntry ->
+                navigationEntry.rootFolder?.let { rf ->
+                    val page = pageMap[rf]
+                    page?.copy(
+                        translations = navigationEntry.translations,
+                        children = lastModifiedPages(
+                            page = page,
+                            count = navigationEntry.numberOfEntries,
+                            filter = { p -> p.children.isEmpty() }
+                        ).toMutableList())
                 }
-            } ?: listOf()
-            staticTree = pageTree.clone { p -> p.path.startsWith("-") }
+            }
+            staticTree = Page(
+                translations = naviStatic?.translations ?: listOf(),
+                children = pageTree.children.filter { p -> p.name.startsWith("-") }.toMutableList()
+            )
             log.info("initialized page tree")
         } else {
             log.info("checkCerts profile is active - omitting pagetree initialization")
+        }
+    }
+
+    private fun calculatePageMap(page: Page, pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
+        pageMap[page.path] = page
+        page.children.forEach { child -> calculatePageMap(child, pageMap) }
+
+        return pageMap
+    }
+
+    fun lastModifiedPages(page: Page = pageTree, count: Int? = null, filter: ((Page) -> Boolean)? = null): List<Page> {
+        val pages = pageMap.values
+            .filter { it.path.startsWith(page.path) && (filter == null || filter(it)) }
+            .sortedByDescending { it.lastModified ?: OffsetDateTime.MIN }
+        return if (count != null) {
+            pages.take(count)
+        } else {
+            pages
         }
     }
 }

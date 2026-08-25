@@ -25,7 +25,6 @@ import de.visualdigits.photosite.domain.data.model.page.content.Text
 fun PageDescriptor.toPage(): Page {
     return Page(
         icon = icon,
-        tocName = tocName,
         content = content.toContent(),
         translations = translations.map { it.toTranslation() }
     )

@@ -6,13 +6,10 @@ import java.time.OffsetDateTime
 
 @Serializable
 data class PageDto(
-    val icon: String? = null,
-    val tocName: String? = null,
-    val content: ContentDto,
+    val content: ContentDto? = null,
     val translations: List<TranslationDto> = listOf(),
-    val level: Int = 0,
+    val name: String = "",
     val path: String = "/",
-    val ariaName: String = "",
     val children: List<PageDto> = listOf(),
-    @Serializable(with = OffsetDateTimeDeserializer::class) val lastModified: OffsetDateTime = OffsetDateTime.MIN
+    @Serializable(with = OffsetDateTimeDeserializer::class) val lastModified: OffsetDateTime? = null
 )

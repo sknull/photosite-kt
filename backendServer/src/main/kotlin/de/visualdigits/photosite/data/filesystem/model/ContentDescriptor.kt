@@ -1,9 +1,6 @@
 package de.visualdigits.photosite.data.filesystem.model
 
 import de.visualdigits.photosite.domain.data.model.page.content.ContentType
-import de.visualdigits.photosite.domain.data.model.page.content.Paragraph
-import de.visualdigits.photosite.domain.data.model.page.content.Sort
-import de.visualdigits.photosite.domain.data.model.page.content.Teaser
 import kotlinx.serialization.Serializable
 
 @Serializable

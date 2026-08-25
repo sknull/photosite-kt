@@ -9,11 +9,16 @@ spring:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        show_sql: true
+#    properties:
+#      hibernate:
+#        show_sql: true
   datasource:
     url: jdbc:sqlite:photosite.db
     driver-class-name: org.sqlite.JDBC
     username: sa
     password: ""
+
+#logging:
+#  level:
+#    org.hibernate.SQL: debug
+#    org.hibernate.orm.jdbc.bind: trace

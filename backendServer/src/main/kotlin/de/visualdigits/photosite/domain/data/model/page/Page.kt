@@ -12,20 +12,19 @@ import java.util.UUID
 data class Page(
     val id: UUID? = null,
     var icon: String? = null,
-    val tocName: String? = null,
     val content: Content = Content(),
     val translations: List<Translation> = listOf(),
     var level: Int = 0,
     var directory: File? = null,
+    var name: String = "",
     var path: String = "/",
     var ariaName: String = "",
+    var parentPath: String = "",
+    var parent: Page? = null,
+    var children: MutableList<Page> = mutableListOf(),
+    var lastModified: OffsetDateTime? = null
 ) {
-    var parentPath: String = ""
-    var parent: Page? = null
-    var children: MutableList<Page> = mutableListOf()
-    var lastModified: OffsetDateTime = OffsetDateTime.MIN
-
-    val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang!! }
+    val translationsMap: Map<Language, Translation> = translations.associateBy { t -> t.lang }
 
     companion object {
 
@@ -59,15 +58,14 @@ data class Page(
         }
 
         fun subNaviHtml(
-            navigationEntry: NavigationEntry,
+            page: Page,
             locale: Language,
             currentPage: Page,
-            pages: List<Page>,
             theme: String,
             level: Int? = null,
             rolePrefix: String
         ): String {
-            val name = navigationEntry.translationsMap[locale]?.name
+            val name = page.translationsMap[locale]?.name
             val html = StringBuilder()
 
             html
@@ -75,8 +73,8 @@ data class Page(
                 .append("              <span class=\"sidebar-title\">$name</span>\n")
                 .append("              <ul id=\"$rolePrefix-box\" role=\"navigation\" itemscope itemtype=\"https://schema.org/BreadcrumbList\" class=\"toplevel\" aria-activedescendant=\"$rolePrefix-1-item\">\n")
 
-            val numberOfPages = pages.size
-            pages.forEachIndexed { index, page ->
+            val numberOfPages = page.children.size
+            page.children.forEachIndexed { index, page ->
                 val clazz = determineStyleClass(page, currentPage)
                 val html1 = StringBuilder()
                     .append("                  <li id=\"$rolePrefix-${index + 1}-item\" class=\"$clazz\" itemprop=\"itemListElement\" itemscope itemtype=\"https://schema.org/ListItem\" aria-posinset=\"${index + 1}\" aria-setsize=\"$numberOfPages\">\n")
@@ -101,12 +99,12 @@ data class Page(
             level: Int? = null,
         ): String {
             val html = StringBuilder()
-            val href = StringEscapeUtils.escapeHtml4("/pagetree/${page.path(locale)}")
+            val href = StringEscapeUtils.escapeHtml4("/pagetree/${page.path}")
             val id = "$naviName${href.replace("/", "-")}"
             html.append("$indent<a itemscope itemtype=\"https://schema.org/WebPage\" itemprop=\"item\" id=\"$id\" itemid=\"$id\" href=\"$href?lang=$locale&\" style=\"padding-left: ${10 + (level?:page.level) * 10}px;\">")
                 .append("<div class=\"nav-item\">")
             page.icon?.let { i -> html.append("<div class=\"nav-icon\" itemprop=\"image\"><img src=\"/resources/themes/$theme/images/icons/$i.png\" alt=\"\"/></div>") }
-            html.append("<div class=\"nav-text\" itemprop=\"name\">${page.translationsMap[locale]?.name?:page.path}</div>")
+            html.append("<div class=\"nav-text\" itemprop=\"name\">${page.translationsMap[locale]?.name?:page.name}</div>")
                 .append("</div>")
                 .append("</a>\n")
 
@@ -151,8 +149,8 @@ data class Page(
         }
 
         private fun determineStyleClass(page: Page, currentPage: Page): String {
-            val pagePath: String = page.path()
-            val currentPagePath = currentPage.path()
+            val pagePath: String = page.path
+            val currentPagePath = currentPage.path
             val isFolder: Boolean = page.children.isNotEmpty()
             val isCurrent = pagePath == currentPagePath
             val inCurrentPath = currentPagePath.contains(pagePath)
@@ -170,65 +168,11 @@ data class Page(
     }
 
     override fun toString(): String {
-        return "${"  ".repeat(level)}$ariaName:$path [${path()}]\n${children.joinToString("") { it.toString() }}"
-    }
-
-    fun clone(childrenFilter: ((p: Page) -> Boolean)? = null ): Page {
-        val clone = Page(
-            id = id,
-            level = level,
-            icon = icon,
-            tocName = tocName,
-            content = content,
-            translations = translations,
-            ariaName = ariaName,
-            path = path
-        )
-        val clonedChildren = children
-            .map { c ->
-                val cc = c.clone()
-                cc.parent = clone
-                cc
-            }
-        clone.children = (childrenFilter
-            ?.let { cf -> clonedChildren.filter(cf) }
-            ?: clonedChildren).toMutableList()
-
-        return clone
-    }
-
-    fun page(path: String, pageTree: Page, locale: Language? = null): Page {
-        return createPageMap(locale)[path] ?: pageTree
-    }
-
-    fun allPages(pages: MutableList<Page> = mutableListOf(), filter: ((p: Page) -> Boolean)? = null): List<Page> {
-        if (filter == null || filter(this)) pages.add(this)
-        children.forEach { c -> c.allPages(pages, filter) }
-
-        return pages
-    }
-
-    private fun createPageMap(locale: Language? = null, pageMap: MutableMap<String, Page> = mutableMapOf()): Map<String, Page> {
-        pageMap[path(locale)] = this
-        children.forEach { c ->
-            c.createPageMap(locale, pageMap)
-        }
-
-        return pageMap
-    }
-
-    fun lastModifiedPages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
-        return allPages(filter = filter)
-            .sortedByDescending { p -> p.content.lastModified }
-            .let { l ->
-                count
-                    ?.let { c -> l.take(c) }
-                    ?: l
-            }
+        return "${"  ".repeat(level)}$ariaName:$name [${path}]\n${children.joinToString("") { it.toString() }}"
     }
 
     fun path(locale: Language? = null): String = rootLine().drop(1).joinToString("/") { p ->
-        locale?.let { l -> p.translationsMap[l]?.name }?:p.path
+        locale?.let { l -> p.translationsMap[l]?.name }?:p.name
     }
 
     fun rootPage(): Page? {

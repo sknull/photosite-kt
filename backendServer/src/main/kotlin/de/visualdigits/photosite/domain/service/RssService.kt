@@ -54,7 +54,7 @@ class RssService(
         lang: Language,
         items: MutableList<Item>
     ) {
-        val pagePath = page.path()
+        val pagePath = page.path
         when {
             pagePath.isNotEmpty() -> {
                 val images: List<ImageFile> = page.content.images

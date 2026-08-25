@@ -1,6 +1,7 @@
 package de.visualdigits.photosite.di
 
 import de.visualdigits.photosite.data.database.DriverFactory
+import de.visualdigits.photosite.data.repository.ImageCache
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.android.ext.koin.androidApplication
@@ -14,4 +15,6 @@ actual val platformModule: Module
     get() = module {
         single<HttpClientEngine> { OkHttp.create() }
         single { DriverFactory(androidApplication()) }
-}
+
+        single { ImageCache(context = get()) }
+    }
