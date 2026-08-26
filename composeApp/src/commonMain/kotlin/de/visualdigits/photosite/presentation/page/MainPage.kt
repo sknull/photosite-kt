@@ -33,6 +33,7 @@ import de.visualdigits.common.presentation.components.button.IndicatorButton
 import de.visualdigits.common.presentation.components.button.TabButtonRow
 import de.visualdigits.compose.resources.Res
 import de.visualdigits.compose.resources.icon_hourglass_top_24px
+import de.visualdigits.photosite.domain.model.photosite.ContentType
 import de.visualdigits.photosite.domain.model.type.Language
 import de.visualdigits.photosite.presentation.components.ErrorCard
 import de.visualdigits.photosite.presentation.components.form.SettingsForm
@@ -44,7 +45,10 @@ import de.visualdigits.photosite.presentation.model.PhotositeViewModel
 import de.visualdigits.photosite.presentation.model.settings.SK
 import de.visualdigits.photosite.presentation.style.AppCompositionProvider
 import de.visualdigits.photosite.presentation.style.BackgroundColor
-import de.visualdigits.photosite.presentation.style.FlyerAlarmRed
+import de.visualdigits.photosite.presentation.style.BlueDark
+import de.visualdigits.photosite.presentation.style.BlueLight
+import de.visualdigits.photosite.presentation.style.BlueLighter
+import de.visualdigits.photosite.presentation.style.BlueMedium
 import de.visualdigits.photosite.presentation.style.MyShapes
 import de.visualdigits.photosite.presentation.style.TextColor
 import de.visualdigits.photosite.presentation.style.gap
@@ -98,8 +102,10 @@ fun MainPage(
                                     language = language,
                                     page = state.rootPage,
                                     onAction = viewModel::onAction,
-                                    colorFolder = Color(0xFF07538B),
-                                    colorLeaf = Color(0xFF4693CA),
+                                    colorRoot = BlueLighter,
+                                    colorFolder = BlueDark,
+                                    colorLeaf = BlueMedium,
+                                    textColorRoot = BlueDark,
                                     textColorFolder = Color.White,
                                     textColorLeaf = Color.Black,
                                 )
@@ -107,15 +113,17 @@ fun MainPage(
                         }
                     }
 
-                    PhotoTab(
-                        modifier = Modifier
-                            .weight(1f),
-                        page = state.page,
-                        hostUrl = hostUrl,
-                        onAction = viewModel::onAction,
-                        platformType = platformType,
-                        viewModel = viewModel
-                    )
+                    if (state.page?.content?.contentType == ContentType.LightGallery) {
+                        PhotoTab(
+                            modifier = Modifier
+                                .weight(1f),
+                            page = state.page,
+                            hostUrl = hostUrl,
+                            onAction = viewModel::onAction,
+                            platformType = platformType,
+                            viewModel = viewModel
+                        )
+                    }
                 }
             },
             "tab_settings" to {
@@ -142,7 +150,7 @@ fun MainPage(
             colorScheme = theme(
                 backgroundColor = BackgroundColor,
                 textColor = TextColor,
-                spotColor = FlyerAlarmRed
+                spotColor = BlueLight
             ),
             typography = typography(
                 textColor = TextColor,
@@ -206,7 +214,7 @@ fun MainPage(
                                                 .height(200.dp),
                                             painter = painterResource(Res.drawable.icon_hourglass_top_24px),
                                             contentDescription = null,
-                                            tint = FlyerAlarmRed,
+                                            tint = BlueLight,
                                         )
                                     }
                                 } else null,
@@ -216,7 +224,7 @@ fun MainPage(
                                     text = state.tabLabels[index].second.asString(),
                                     buttonColor = Color.Gray,
                                     indicatorPosition = Alignment.BottomCenter,
-                                    indicatorColor = FlyerAlarmRed,
+                                    indicatorColor = BlueLight,
                                     shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
                                     selected = state.selectedTabIndex == index,
                                 ) {

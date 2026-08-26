@@ -3,7 +3,7 @@ package de.visualdigits.photosite.domain.data.model.photosite
 import de.visualdigits.photosite.domain.data.model.common.Language
 import de.visualdigits.photosite.domain.data.model.common.Translation
 
-class NavigationEntry(
+data class NavigationEntry(
     val rootFolder: String? = null,
     val numberOfEntries: Int = 0,
     val translations: List<Translation> = listOf()

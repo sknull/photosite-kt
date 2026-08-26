@@ -23,7 +23,6 @@ enum class Language(
 
     DE(UiText.StringResourceId(Res.string.language_de), Res.drawable.flag_de, "de"),
     EN(UiText.StringResourceId(Res.string.language_en), Res.drawable.flag_us, "en"),
-    BN(UiText.StringResourceId(Res.string.language_bn), Res.drawable.flag_bd, "bn"),
     ;
 
     companion object : KeyFactory<Language> {

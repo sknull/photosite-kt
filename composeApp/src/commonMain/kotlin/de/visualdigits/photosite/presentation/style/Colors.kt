@@ -4,7 +4,10 @@ import androidx.compose.ui.graphics.Color
 
 val TextColor = Color(0xFFFFFFFF)
 
-val FlyerAlarmRed = Color(0xFFE4001E)
+val BlueLighter = Color(0xFF96CDFD)
+val BlueLight = Color(0xFF66B3EA)
+val BlueMedium = Color(0xFF4693CA)
+val BlueDark = Color(0xFF07538B)
 
 val OnFlyerAlarmRed = Color(0xFFFFFFFF)
 

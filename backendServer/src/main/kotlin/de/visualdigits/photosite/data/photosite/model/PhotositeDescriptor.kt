@@ -17,8 +17,8 @@ data class PhotositeDescriptor(
     val domain: String? = null,
     val languages: List<Language> = listOf(),
     val languageDefault: Language = Language("de"),
-    val naviMain: NavigationEntryDescriptor? = null,
-    val naviSub: List<NavigationEntryDescriptor> = listOf(),
-    val naviStatic: NavigationEntryDescriptor? = null,
+    val naviMain: NavigationEntryDescriptor,
+    val naviSub: List<NavigationEntryDescriptor>,
+    val naviStatic: NavigationEntryDescriptor,
     val plugins: PluginsDescriptor? = null
 )

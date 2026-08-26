@@ -14,8 +14,8 @@ import de.visualdigits.common.presentation.model.CommonAction
 import de.visualdigits.common.presentation.model.ScrollIntent
 import de.visualdigits.compose.resources.Res
 import de.visualdigits.compose.resources.error_local_wrong_filetype
-import de.visualdigits.compose.resources.tab_products
-import de.visualdigits.compose.resources.title_settings
+import de.visualdigits.compose.resources.tab_photos
+import de.visualdigits.compose.resources.tab_settings
 import de.visualdigits.generated.AppVersion
 import de.visualdigits.photosite.data.datasource.PageDatasource
 import de.visualdigits.photosite.domain.model.errorhandling.toUiText
@@ -61,8 +61,8 @@ class PhotositeViewModel(
 
         onAction(PhotositeAction.OnInitializeTabs(
             tabLabels = listOf(
-                "tab_photos" to UiText.StringResourceId(Res.string.tab_products),
-                "tab_settings" to UiText.StringResourceId(Res.string.title_settings)
+                "tab_photos" to UiText.StringResourceId(Res.string.tab_photos),
+                "tab_settings" to UiText.StringResourceId(Res.string.tab_settings)
             )
         ))
 

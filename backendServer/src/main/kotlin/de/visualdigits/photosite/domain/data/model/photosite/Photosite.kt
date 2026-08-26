@@ -24,11 +24,11 @@ data class Photosite(
     val siteSubTitle: String? = null,
     val protocol: String? = null,
     val domain: String? = null,
-    val languages: List<Language> = listOf(),
+    val languages: List<Language>,
     val languageDefault: Language = Language("de"),
-    val naviMain: NavigationEntry? = null,
-    val naviSub: List<NavigationEntry> = listOf(),
-    val naviStatic: NavigationEntry? = null,
+    val naviMain: NavigationEntry,
+    val naviSub: List<NavigationEntry>,
+    val naviStatic: NavigationEntry,
     val plugins: Plugins? = null
 ) {
 
@@ -79,7 +79,10 @@ data class Photosite(
             }
             pageMap = calculatePageMap(pageTree)
 
-            mainTree = pageTree.copy(children = pageTree.children.filter { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }.toMutableList())
+            mainTree = pageTree.copy(
+                translations = naviMain.translations,
+                children = pageTree.children.filter { p -> !(p.name.startsWith("#") || p.name.startsWith("-")) }.toMutableList()
+            )
             subTrees = naviSub.mapNotNull { navigationEntry ->
                 navigationEntry.rootFolder?.let { rf ->
                     val page = pageMap[rf]
@@ -93,7 +96,7 @@ data class Photosite(
                 }
             }
             staticTree = Page(
-                translations = naviStatic?.translations ?: listOf(),
+                translations = naviStatic.translations ?: listOf(),
                 children = pageTree.children.filter { p -> p.name.startsWith("-") }.toMutableList()
             )
             log.info("initialized page tree")

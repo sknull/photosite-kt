@@ -57,9 +57,8 @@
   <string name="show_details_hint">Details anzeigen...</string>
   <string name="stderr">Fehlerausgabe</string>
   <string name="stdout">Ausgabe</string>
-  <string name="tab_discountrules">Abschlagsregeln</string>
-  <string name="tab_discounts">Abschläge</string>
-  <string name="tab_products">Produkte</string>
+  <string name="tab_photos">Fotos</string>
+  <string name="tab_settings">Einstellungen</string>
   <string name="title_addDiscountRule">Neue Abschlagsregel</string>
   <string name="title_addProduct">Neues Produkt</string>
   <string name="title_delete">Element löschen</string>

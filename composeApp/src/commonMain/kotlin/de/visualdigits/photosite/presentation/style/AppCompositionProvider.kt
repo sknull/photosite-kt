@@ -68,7 +68,7 @@ fun AppCompositionProvider(
     val formFieldResources = FormFieldResources(
         fieldHeight = 50.dp,
         textStyle = MaterialTheme.typography.bodyMedium,
-        iconTint = FlyerAlarmRed,
+        iconTint = BlueLight,
         shape = MaterialTheme.shapes.extraSmall,
         focusedBorderColor = MaterialTheme.colorScheme.outline,
         unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,

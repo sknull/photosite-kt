@@ -37,9 +37,9 @@ fun PhotositeDescriptor.toPhotosite(): Photosite {
         domain = domain,
         languages = languages,
         languageDefault = languageDefault,
-        naviMain = naviMain?.toNavigationEntry(),
+        naviMain = naviMain.toNavigationEntry(),
         naviSub = naviSub.map { it.toNavigationEntry() },
-        naviStatic = naviStatic?.toNavigationEntry(),
+        naviStatic = naviStatic.toNavigationEntry(),
         plugins = plugins?.toPlugins()
     )
 }

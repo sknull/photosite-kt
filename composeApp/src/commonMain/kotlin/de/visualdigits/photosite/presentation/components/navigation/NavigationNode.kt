@@ -35,9 +35,11 @@ fun NavigationNode(
     language: Language?,
     page: PageUi?,
     level: Int = 0,
+    colorRoot: Color,
     colorFolder: Color,
     colorLeaf: Color,
     textColorFolder: Color,
+    textColorRoot: Color,
     textColorLeaf: Color,
     onAction: (PhotositeAction) -> Unit
 ) {
@@ -49,21 +51,21 @@ fun NavigationNode(
     val label = page.translationMap[language]?.title
         ?: page.translationMap[language]?.name
         ?: page.path.substringAfterLast("/")
-    val color = if (isLeaf) colorLeaf else colorFolder
-    val textColor = if (isLeaf) textColorLeaf else textColorFolder
+    val color = if (isRoot) colorRoot else if (isLeaf) colorLeaf else colorFolder
+    val textColor = if (isRoot) textColorRoot else if (isLeaf) textColorLeaf else textColorFolder
     VerticalCollapsibleBox(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(start = if (!isRoot) 20.dp else 0.dp), // indent
+            .fillMaxWidth(), // indent
         modifierHeader = Modifier
-            .background(color),
+            .background(color)
+            .padding(start = if (!isRoot) 20.dp else 0.dp),
         isTitleHoverable = true,
         titleHoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
         titleContent = {
             IndicatorButton(
                 isHoverable = false,
                 width = 180.dp - MaterialTheme.shapes.gap * 2,
-                height = 40.dp,
+                height = 30.dp,
                 indicatorPosition = Alignment.CenterStart,
                 indicatorColor = MaterialTheme.colorScheme.onSurface,
                 text = label,
@@ -79,7 +81,7 @@ fun NavigationNode(
         unfocusedBorderColor = Color.Transparent,
         backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.small,
-        space = 2.dp,
+        space = 1.dp,
         onStateChange = { state ->
             onAction(PhotositeAction.OnPageCollapsibleStateChange(page, state))
         },
@@ -90,7 +92,7 @@ fun NavigationNode(
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             page.children
                 .groupBy { it.children.isNotEmpty() }
@@ -106,8 +108,10 @@ fun NavigationNode(
                             page = page,
                             level = level + 1,
                             onAction = onAction,
+                            colorRoot = colorRoot,
                             colorFolder = colorFolder,
                             colorLeaf = colorLeaf,
+                            textColorRoot = textColorRoot,
                             textColorFolder = textColorFolder,
                             textColorLeaf = textColorLeaf
                         )
