@@ -1,0 +1,75 @@
+Add
+Add...
+BUSY...
+Cancel
+Close
+Delete
+Edit
+Edit...
+The hard drive is full.
+File not found.
+Result could not be analyzed.
+An unknown error occurred during a local operation.
+The filetype is not supported.
+Internet connection interrupted.
+The request has timed out.
+Result could not be analyzed.
+An unknown error occurred during a remote operation.
+Field unknown in configuration.
+Invalid.
+Applies To
+Type
+Time Frame
+All
+Applied Discount
+Applies To
+Base Price
+Category
+Configuration
+Created At
+Ends At
+Final Price
+Fixed Amount
+Host URL
+Is Active
+Language
+Percent
+Priority
+Product
+Product Name
+Rule Name
+SKU
+Starts At
+Target
+Type
+Updated At
+Value
+Bangladesh
+German
+English
+About
+Help
+OK
+Search
+Search...
+Show Details...
+Error Output
+Output
+Discount Rules
+Discounts
+Products
+Add Discount Rule
+Add Product
+Delete Element
+Edit Discount Rule
+Edit Product
+Info
+Settings
+Add scene...
+Delete Scene...
+The URL of the Photosite server
+UI Language
+True
+Do you really want to delete this entry?
+Your configuration has been migrated to the latest version. # It is not possible to revert to an older version with the new configuration. # A backup of the old configuration has been created.
+No projects.

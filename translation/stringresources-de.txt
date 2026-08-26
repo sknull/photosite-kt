@@ -1,0 +1,75 @@
+Hinzufügen
+Hinzufügen...
+BESCHÄFTIGT...
+Abbrechen
+Schließen
+Löschen
+Bearbeiten
+Bearbeiten...
+Die Festplatte ist voll.
+Datei nicht gefunden.
+Ergebnis konnte nicht analysiert werden.
+Bei einem lokalen Vorgang ist ein unbekannter Fehler aufgetreten.
+Der Dateityp wird nicht unterstützt.
+Internetverbindung unterbrochen.
+Die Anfrage ist abgelaufen.
+Ergebnis konnte nicht analysiert werden.
+Bei einem Remote-Vorgang ist ein unbekannter Fehler aufgetreten.
+Feld in der Konfiguration unbekannt.
+Falsch.
+Gültig für
+Typ
+Zeitraum
+Alles
+Angewendete Regel
+Gültig für
+Basispreis
+Kategorie
+Konfiguration
+Angelegt
+Endet
+Endpreis
+Festwert
+Host URL
+Aktiv
+Sprache
+Prozent
+Priorität
+Produkt
+Produktname
+Regelname
+SKU
+Beginnt
+Ziel
+Typ
+Aktualisiert
+Wert
+Bangladesch
+Deutsch
+Englisch
+Über
+Hilfe
+Ok
+Suchen
+Suchen...
+Details anzeigen...
+Fehlerausgabe
+Ausgabe
+Abschlagsregeln
+Abschläge
+Produkte
+Neue Abschlagsregel
+Neues Produkt
+Element löschen
+Abschlagsregel bearbeiten
+Produkt Bearbeiten
+Info
+Einstellungen
+Neue Szene...
+Szene löschen...
+Die URL des Photosite servers
+Oberflächensprache
+True
+Möchtest Du diesen Eintrag wirklich löschen?
+Deine Konfiguration wurde auf die neueste Version migriert. # Eine Rückkehr zu einer älteren Version ist mit der neuen Konfiguration nicht möglich. # Von der alten Konfiguration wurde ein Backup angelegt.
+Keine Projekte.
