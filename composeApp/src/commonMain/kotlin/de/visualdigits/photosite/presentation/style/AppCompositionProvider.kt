@@ -72,7 +72,9 @@ fun AppCompositionProvider(
         shape = MaterialTheme.shapes.extraSmall,
         focusedBorderColor = MaterialTheme.colorScheme.outline,
         unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
-        visibilityIcon = painterResource(Res.drawable.icon_visibility_24px)
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        visibilityIcon = painterResource(Res.drawable.icon_visibility_24px),
     )
     val fileChooserResources = FileChooserResources(
         iconFolder = painterResource(Res.drawable.icon_folder_open_24px),
