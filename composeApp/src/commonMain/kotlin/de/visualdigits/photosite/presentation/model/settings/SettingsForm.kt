@@ -12,9 +12,7 @@ import de.visualdigits.compose.resources.tooltip_hostUrl
 import de.visualdigits.compose.resources.tooltip_language
 import de.visualdigits.photosite.domain.model.type.Language
 
-class SettingsForm(
-    values: Map<SK, Any?> = mapOf(),
-): AbstractConfiguration<SettingsForm, SK>(values, DESCRIPTORS) {
+class SettingsForm: AbstractConfiguration<SettingsForm, SK>() {
 
     companion object {
         val DESCRIPTORS = listOf(
@@ -42,6 +40,6 @@ class SettingsForm(
     }
 
     override fun createInstance(newValues: Map<SK, Any?>): SettingsForm {
-        return SettingsForm(newValues)
+        return SettingsForm().initialize(DESCRIPTORS, newValues)
     }
 }

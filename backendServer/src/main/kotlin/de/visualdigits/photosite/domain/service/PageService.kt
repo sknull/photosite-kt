@@ -22,7 +22,7 @@ class PageService(
         requestUri: String,
         model: Model
     ): String? {
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         val locale = Language(lang.language)
         val currentPage = photosite.pageMap[requestUri] ?: return null
 

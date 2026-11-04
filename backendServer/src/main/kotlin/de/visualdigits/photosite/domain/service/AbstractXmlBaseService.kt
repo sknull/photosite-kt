@@ -27,6 +27,6 @@ abstract class AbstractXmlBaseService(
     }
 
     protected fun determinePages(count: Int? = null, filter: ((p: Page) -> Boolean)? = null): List<Page> {
-        return photositeService.photosite.lastModifiedPages(count = count, filter = filter)
+        return photositeService.getSecrets().lastModifiedPages(count = count, filter = filter)
     }
 }

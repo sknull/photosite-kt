@@ -28,7 +28,7 @@ class SitemapService(
     }
 
     fun renderSitemapIndex(response: HttpServletResponse) {
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         var body = "  <sitemap>\n"
         body += "    <loc>${photosite.protocol + photosite.domain}/sitemap-site.xml</loc>\n"
         body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
@@ -50,7 +50,7 @@ class SitemapService(
         )
     }
     fun renderSitemapSite(response: HttpServletResponse) {
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         var body = "  <url>\n"
         body += "    <loc>${photosite.protocol + photosite.domain}</loc>\n"
         body += "    <lastmod>${isoDate(photosite.pageTree.lastModified)}</lastmod>\n"
@@ -68,7 +68,7 @@ class SitemapService(
 
     fun renderSitemapPage(response: HttpServletResponse) {
         log.info("Rendering page site map...")
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         val sb = StringBuilder()
         val determinePages = determinePages { p ->
             p.children.isNotEmpty() && p.lastModified != null
@@ -99,7 +99,7 @@ class SitemapService(
 
     fun renderSitemapPost(response: HttpServletResponse) {
         log.info("Rendering post site map...")
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         val sb = StringBuilder()
         determinePages { p -> p.children.isEmpty() && p.content.images.isNotEmpty() && p.lastModified != null }.forEach { page ->
             sb
@@ -143,7 +143,7 @@ class SitemapService(
     }
 
     fun renderSitemapXsl(page: String, model: Model) {
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         model.addAttribute("theme", photosite.theme)
         model.addAttribute("siteUrl", photosite.protocol + photosite.domain)
         model.addAttribute("language", photosite.languageDefault)

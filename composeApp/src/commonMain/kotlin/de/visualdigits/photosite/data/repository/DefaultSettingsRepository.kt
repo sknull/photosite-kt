@@ -68,22 +68,21 @@ class DefaultSettingsRepository(
                 ins.readString()
             }
 
-            val settings = SettingsForm(
-                valueMap(
-                    fieldDescriptors = SettingsForm.DESCRIPTORS,
-                    values = jsonMapper
-                        .decodeFromString<Map<String, JsonElement>>(json)
-                        .mapNotNull { (key, value) ->
-                            val sk = SK.fromString(key)
-                            if (sk != null) {
-                                Pair(sk, value.jsonPrimitive.content)
-                            } else {
-                                null
-                            }
+            val newValues = valueMap(
+                fieldDescriptors = SettingsForm.DESCRIPTORS,
+                values = jsonMapper
+                    .decodeFromString<Map<String, JsonElement>>(json)
+                    .mapNotNull { (key, value) ->
+                        val sk = SK.fromString(key)
+                        if (sk != null) {
+                            Pair(sk, value.jsonPrimitive.content)
+                        } else {
+                            null
                         }
-                        .toMap()
-                )
+                    }
+                    .toMap()
             )
+            val settings = SettingsForm().initialize(SettingsForm.DESCRIPTORS, newValues)
             setSettings(settings)
             Result.Success(settings)
         } catch (e: Exception) {

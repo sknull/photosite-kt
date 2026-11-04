@@ -4,6 +4,7 @@ import de.visualdigits.photosite.domain.data.model.photosite.Photosite
 import de.visualdigits.photosite.domain.data.repository.DatabasePageRepository
 import de.visualdigits.photosite.domain.data.repository.FilesystemPageRepository
 import de.visualdigits.photosite.domain.data.repository.PhotositeRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
@@ -15,6 +16,8 @@ class PhotositeService(
     private val filesystemPageRepository: FilesystemPageRepository
 ) {
 
+    private val log = LoggerFactory.getLogger(javaClass)
+
     @Autowired
     private lateinit var environment: Environment
 
@@ -22,13 +25,12 @@ class PhotositeService(
         private var photosite: Photosite? = null
     }
 
-    val photosite: Photosite
-            get() {
-                if (PhotositeService.photosite == null) {
-                    PhotositeService.photosite = photositeRepository.getPhotosite()
-                    PhotositeService.photosite!!.initialize(environment, databasePageRepository, filesystemPageRepository)
+    fun getSecrets(): Photosite {
+                if (photosite == null) {
+                    photosite = photositeRepository.getPhotosite()
+                    photosite?.initialize(environment, databasePageRepository, filesystemPageRepository)
                 }
 
-                return PhotositeService.photosite!!
+                return photosite ?: error("Secrets have not been initialized")
             }
 }

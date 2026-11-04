@@ -34,7 +34,7 @@ class WebConfig(
     @Bean
     @Description("Thymeleaf file system template resolver serving HTML 5")
     fun templateResolver(): ITemplateResolver {
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         val templateResolver = FileTemplateResolver()
         templateResolver.prefix = Paths.get(
             Photosite.rootDirectory.canonicalPath,

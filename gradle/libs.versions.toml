@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2" # DO NOT UPGRADE FOR NOW - Massive changes in API
+agp = "8.12.0" # DO NOT UPGRADE FOR NOW - Massive changes in API
 android-compileSdk = "36"
 android-minSdk = "26"
 android-targetSdk = "35" # DO NOT UPGRADE FOR NOW
@@ -10,7 +10,7 @@ version-androidx-lifecycle = "2.10.0" # DO NOT UPGRADE FOR NOW - needs agp 9.1
 version-com-drewnoakes-metadata-extractor = "2.19.0"
 version-com-github-rjeschke-txtmark = "0.13"
 version-net-coobird-thumbnailator = "0.4.21"
-version-org-bouncycastle-bcpkix-jdk15to18 = "1.85"
+version-org-bouncycastle-bcpkix-jdk15to18 = "1.77" # DO NOT UPGRADE NOW _ leads to issues when refreshing certs
 version-org-shredzone-acme4j-acme4j-client = "2.16"
 version-org-shredzone-acme4j-acme4j-utils = "2.16"
 version-ksoup = "0.2.6"

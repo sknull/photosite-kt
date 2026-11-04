@@ -15,12 +15,12 @@ class RestPageController(
 
     @GetMapping(value = ["/api/v1/navigation/static"], produces = ["application/json"])
     fun getNavigationStatic(): PageDto {
-        return photositeService.photosite.staticTreeDto
+        return photositeService.getSecrets().staticTreeDto
     }
 
     @GetMapping(value = ["/api/v1/navigation/main"], produces = ["application/json"])
     fun getNavigationMain(): PageDto {
-        return photositeService.photosite.mainTreeDto
+        return photositeService.getSecrets().mainTreeDto
     }
 
     @GetMapping(value = ["/api/v1/page"], produces = ["application/json"])

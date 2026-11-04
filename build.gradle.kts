@@ -12,3 +12,20 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
 }
 
+
+configurations.all {
+    resolutionStrategy {
+        // Erzwingt eine neuere Version, die die gesuchte Methode enthält
+        force("org.apache.commons:commons-compress:1.27.1")
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // Zwingt das gesamte Gradle-Buildsystem (inkl. AGP), eine neuere Version zu nutzen
+        classpath("org.apache.commons:commons-compress:1.27.1")
+    }
+}

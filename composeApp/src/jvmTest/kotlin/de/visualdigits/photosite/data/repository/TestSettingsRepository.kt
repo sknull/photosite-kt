@@ -25,15 +25,14 @@ class TestSettingsRepository : SettingsRepository {
 
         private val credentials = jsonMapper.decodeFromString<Map<String, String>>(File("E:\\restoreworkstation\\_Serial\\opensky_credentials.json").readText())
 
-        private var settings = SettingsForm(
-            valueMap(
-                fieldDescriptors = SettingsForm.DESCRIPTORS,
-                values = mapOf(
-                    SK.language to Language.EN,
-                    SK.hostUrl to "http://localhost:8080"
-                )
+        val newValues = valueMap(
+            fieldDescriptors = SettingsForm.DESCRIPTORS,
+            values = mapOf(
+                SK.language to Language.EN,
+                SK.hostUrl to "http://localhost:8080"
             )
         )
+        private var settings = SettingsForm().initialize(SettingsForm.DESCRIPTORS, newValues)
     }
 
     override suspend fun getSettings(): Result<SettingsForm?, DataError.Local> {

@@ -20,9 +20,11 @@ class RssService(
     fun renderRssFeed(
         lang: Locale
     ): String {
+        val photosite = photositeService.getSecrets()
+
         val language = Language(lang.language)
         val items = listOf<Item>()
-        val pageTree = photositeService.photosite.pageTree
+        val pageTree = photosite.pageTree
         val lastModified = pageTree.content.lastModified
         val pages = determinePages(10)
         val mutableItems = items.toMutableList()
@@ -35,13 +37,13 @@ class RssService(
         }
         val feed = Rss(
             channel = Channel(
-                title = photositeService.photosite.siteTitle,
-                description = photositeService.photosite.siteSubTitle,
+                title = photosite.siteTitle,
+                description = photosite.siteSubTitle,
                 language = "de",
                 copyright = "Stephan Knull",
                 publisher = "Stephan Knull",
                 lastBuildDate = lastModified,
-                link = photositeService.photosite.protocol + photositeService.photosite.domain,
+                link = photosite.protocol + photosite.domain,
                 items = fixedItems
             )
         )
@@ -57,6 +59,8 @@ class RssService(
         val pagePath = page.path
         when {
             pagePath.isNotEmpty() -> {
+                val photosite = photositeService.getSecrets()
+
                 val images: List<ImageFile> = page.content.images
                 val description = if (images.isNotEmpty()) {
                     val image: ImageFile = images[0]
@@ -66,7 +70,7 @@ class RssService(
                         imageName = image.name
                     }
                     val thumbUrl =
-                        photositeService.photosite.protocol + photositeService.photosite.domain + "/" + imageService.getThumbnail(
+                        photosite.protocol + photosite.domain + "/" + imageService.getThumbnail(
                             image
                         )
                     val teaser = page.content.teaser
@@ -86,7 +90,7 @@ class RssService(
                 items.add(
                     Item(
                         title = page.path,
-                        link = "${photositeService.photosite.protocol + photositeService.photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
+                        link = "${photosite.protocol + photosite.domain}/$pagePath?mode=rss&amp;lang=$lang",
                         subject = (page.content.keywords + pagePath.split("/").distinct().sorted()).joinToString(","),
                         creator = "Stephan Knull",
                         identifier = pagePath,

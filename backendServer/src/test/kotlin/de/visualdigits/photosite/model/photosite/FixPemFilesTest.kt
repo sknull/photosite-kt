@@ -26,7 +26,7 @@ class FixPemFilesTest @Autowired constructor(
 
     @Test
     fun testPEMwithFullChain() {
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
         // Pfade zu deinen existierenden Geheimnissen
         val secretsDir = File("C:\\Users\\sknull\\.photosite\\secrets")
         val keyFile = File(secretsDir, "domain.key")

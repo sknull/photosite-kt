@@ -25,7 +25,7 @@ class HttpsConfiguration(
     @Bean
     fun servletContainer(): ServletWebServerFactory? {
         log.info("rootDirectory: ${Photosite.rootDirectory}")
-        val photosite = photositeService.photosite
+        val photosite = photositeService.getSecrets()
 
         val factory: TomcatServletWebServerFactory = object : TomcatServletWebServerFactory() {
             override fun postProcessContext(context: Context) {

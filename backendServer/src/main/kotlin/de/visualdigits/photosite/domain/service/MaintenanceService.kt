@@ -34,11 +34,12 @@ class MaintenanceService(
         response: HttpServletResponse
     ) {
         if (environment.activeProfiles.contains("prod")) {
+            val photosite = photositeService.getSecrets()
             val newExpiryDate = domainCertificatesService.maintainServerCertificate(
-                domain = photositeService.photosite.domain!!,
-                certbotUri = photositeService.photosite.ssl!!.certbotUri!!,
-                certbotAlias = photositeService.photosite.ssl!!.keyAlias!!,
-                certbotPassword = photositeService.photosite.ssl!!.keyStorePassword!!,
+                domain = photosite.domain!!,
+                certbotUri = photosite.ssl?.certbotUri ?: error("Certbot URI is not set!"),
+                certbotAlias = photosite.ssl.keyAlias ?: error("Key alias is not set!"),
+                certbotPassword = photosite.ssl.keyStorePassword ?: error("Keystore password is not set!"),
                 forceUpdate = forceUpdate,
                 gracePeriod = 1
             )

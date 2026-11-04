@@ -285,9 +285,10 @@ class PhotositeViewModel(
             val finalSettings = if (settings != null) {
                 settings
             } else {
-                val newSettings = SettingsForm(mapOf(
+                val newValues = mapOf(
                     SK.language to Language.EN
-                ))
+                )
+                val newSettings = SettingsForm().initialize(SettingsForm.DESCRIPTORS, newValues)
                 settingsRepository.setSettings(newSettings)
                     .onError { _, throwable ->
                         Logger.e("Could not safe initial settings", throwable)

@@ -7,15 +7,14 @@ import de.visualdigits.photosite.presentation.model.settings.SK
 import de.visualdigits.photosite.presentation.model.settings.SettingsForm
 
 fun SettingsEntity.toSettingsForm(): SettingsForm {
-    return SettingsForm(
-        valueMap(
-            fieldDescriptors = SettingsForm.DESCRIPTORS,
-            values = mapOf(
-                SK.language to Language.fromValue(language),
-                SK.hostUrl to hostUrl,
-            )
+    val newValues = valueMap(
+        fieldDescriptors = SettingsForm.DESCRIPTORS,
+        values = mapOf(
+            SK.language to Language.fromValue(language),
+            SK.hostUrl to hostUrl,
         )
     )
+    return SettingsForm().initialize(SettingsForm.DESCRIPTORS, newValues)
 }
 
 fun SettingsForm.toSettingsEntity(): SettingsEntity {
